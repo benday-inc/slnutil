@@ -14,7 +14,7 @@ namespace Benday.SolutionUtil.Api;
 
 
 [Command(Name = Constants.CommandArgumentNameCleanReferences, IsAsync = false)]
-public class CleanReferencesCommand : CommandBase, ISynchronousCommand
+public class CleanReferencesCommand : SynchronousCommand
 {
 
     public CleanReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -41,13 +41,8 @@ public class CleanReferencesCommand : CommandBase, ISynchronousCommand
     private string _SolutionPath;
     private string _SolutionFolder;
 
-    private void WriteLine(string text)
-    {
-        _OutputProvider.WriteLine(text);
-    }
-
-    public void Execute()
-    {
+    protected override void OnExecute()
+    {        
         if (Arguments.ContainsKey(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;

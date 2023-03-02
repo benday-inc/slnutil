@@ -12,5 +12,7 @@ public static class Constants
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNamePreview = "preview";
+    public const string CommandArgumentNameToBase64String = "base64";
 
+    public const string ArgumentNameValue = "value";
 }
