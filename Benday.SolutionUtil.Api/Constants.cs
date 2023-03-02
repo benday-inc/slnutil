@@ -1,10 +1,16 @@
-﻿namespace Benday.SolutionUtil.Api;
+﻿using Benday.CommandsFramework;
+using System.Diagnostics;
+using System.Text;
+using System.Xml.Linq;
+
+namespace Benday.SolutionUtil.Api;
 
 public static class Constants
 {
     public const string ExeName = "slnutil";
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
+    public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";

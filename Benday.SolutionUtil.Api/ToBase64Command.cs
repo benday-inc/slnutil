@@ -20,7 +20,7 @@ public class ToBase64Command : SynchronousCommand
 
     }
 
-    protected override ArgumentCollection GetAvailableArguments()
+    public override ArgumentCollection GetArguments()    
     {
         var args = new ArgumentCollection();
 
