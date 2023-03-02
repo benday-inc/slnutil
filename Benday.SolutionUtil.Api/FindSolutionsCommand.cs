@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Benday.CommandsFramework;
+using Benday.XmlUtilities;
 
 namespace Benday.SolutionUtil.Api;
 [Command(Name = Constants.CommandArgumentNameFindSolutions, Description = "Find solution files in a folder tree.")]

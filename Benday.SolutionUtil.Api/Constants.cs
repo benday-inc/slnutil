@@ -9,5 +9,8 @@ public static class Constants
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
     public const string ArgumentNameListProjects = "listprojects";
+    public const string CommandArgumentNameCleanReferences = "cleanreferences";
+    public const string ArgumentNameSolutionPath = "solutionpath";
+    public const string ArgumentNamePreview = "preview";
 
 }
