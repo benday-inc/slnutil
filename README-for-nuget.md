@@ -43,6 +43,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
 ## base64
 **Encodes a string value as a base 64 string.**
 ### Arguments

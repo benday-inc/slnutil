@@ -29,6 +29,7 @@
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
 ## <a name="base64"></a> base64
 **Encodes a string value as a base 64 string.**
 ### Arguments

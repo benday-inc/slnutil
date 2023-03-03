@@ -20,7 +20,8 @@ public class SolutionProjectListCommand : SynchronousCommand
     {
         var args = new ArgumentCollection();
 
-        // args.Add(Constants.ArgumentNameSolutionPath);
+        args.AddString(Constants.ArgumentNameSolutionPath).AsNotRequired()
+            .WithDescription("Solution to examine. If this value is not supplied, the tool searches for a sln file automatically.");
 
         return args;
     }
