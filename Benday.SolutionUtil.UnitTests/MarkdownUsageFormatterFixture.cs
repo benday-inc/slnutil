@@ -28,7 +28,7 @@ public class MarkdownUsageFormatterFixture
     }
 
     [TestMethod]
-    public void FormatUsagesAsMarkdown()
+    public void FormatUsagesAsMarkdown_GitHubReadme()
     {
         // arrange
         var assembly = typeof(StringUtility).Assembly;
@@ -52,7 +52,7 @@ public class MarkdownUsageFormatterFixture
     }
 
     [TestMethod]
-    public void FormatUsagesAsMarkdown_NoIntraDocumentAnchors()
+    public void FormatUsagesAsMarkdown_NuGetReadme_NoIntraDocumentAnchors()
     {
         // arrange
         var assembly = typeof(StringUtility).Assembly;

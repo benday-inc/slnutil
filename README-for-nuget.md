@@ -19,9 +19,15 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Command Name | Description |
 | --- | --- |
 | cleanreferences | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
+| devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files in a folder tree. |
+| getconnectionstring | Get database connection string in appsettings.json. |
+| replacetoken | Replace token in file. |
+| setconnectionstring | Set database connection string in appsettings.json. |
+| setjsonvalue | Set a string value in a json file. |
 | listsolutionprojects | Gets list of projects in a solution. |
 | base64 | Encodes a string value as a base 64 string. |
+| validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 ## cleanreferences
 **Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.**
 ### Arguments
@@ -29,6 +35,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution file to use |
 | preview | Optional | Boolean | Preview changes only |
+## devtreeclean
+**Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
 ## findsolutions
 **Find solution files in a folder tree.**
 ### Arguments
@@ -38,6 +50,40 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
 | skipreferences | Optional | Boolean | Output results as comma-separated values |
+## getconnectionstring
+**Get database connection string in appsettings.json.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to json config file |
+| name | Required | String | Name of the connection string to get |
+## replacetoken
+**Replace token in file.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Required | String | Path to file |
+| token | Required | String | Token to replace |
+| value | Required | String | String value to set |
+## setconnectionstring
+**Set database connection string in appsettings.json.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to json config file |
+| name | Required | String | Name of the connection string to set |
+| value | Required | String | Connection string value |
+## setjsonvalue
+**Set a string value in a json file.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to json config file |
+| level1 | Required | String | First level json property name to set |
+| level2 | Optional | String | Second level json property name to set |
+| level3 | Optional | String | Third level json property name to set |
+| level4 | Optional | String | Fourth level json property name to set |
+| value | Required | String | String value to set |
 ## listsolutionprojects
 **Gets list of projects in a solution.**
 ### Arguments
@@ -50,3 +96,10 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | value | Required | String | Value to encode as base64 |
+## validateconnectionstring
+**Validate that specified connection string can connect to SQL Server.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to json config file |
+| name | Required | String | Name of the connection string to validate |
