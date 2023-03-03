@@ -19,6 +19,8 @@ public static class Constants
     public const string CommandArgumentNameGetConnectionString = "getconnectionstring";
     public const string CommandArgumentNameSetJsonValue = "setjsonvalue";
 
+    public const string CommandArgumentNameReplaceToken = "replacetoken";
+    public const string ArgumentNameToken = "token";
 
 
     public const string ArgumentNameValue = "value";
