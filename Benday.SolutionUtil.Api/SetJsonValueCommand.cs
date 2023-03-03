@@ -16,7 +16,7 @@ public class SetJsonValueCommand : SynchronousCommand
         var args = new ArgumentCollection();
 
         args.AddString(Constants.ArgumentNameConfigFilename)
-            .AsRequired()
+            .AsNotRequired()
             .WithDescription("Path to json config file");
 
         args.AddString(Constants.ArgumentNameLevel1)
@@ -44,8 +44,27 @@ public class SetJsonValueCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        var configFilename = Arguments.GetStringValue(Constants.ArgumentNameConfigFilename);
-        Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
+        string? configFilename;
+
+        if (Arguments.HasValue(Constants.ArgumentNameConfigFilename) == true)
+        {
+            configFilename = Arguments.GetStringValue(Constants.ArgumentNameConfigFilename);
+        }
+        else
+        {
+            configFilename =
+                ProjectUtilities.FindFirstFileName(
+                    Environment.CurrentDirectory, "appsettings.json");
+        }
+
+        if (configFilename == null)
+        {
+            throw new KnownException("Could not find appsettings.json file");
+        }
+        else
+        {
+            Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
+        }
 
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);

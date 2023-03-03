@@ -3,7 +3,7 @@
 using Benday.CommandsFramework;
 namespace Benday.SolutionUtil.Api;
 
-[Command(Name = Constants.CommandArgumentNameSetJsonValue,
+[Command(Name = Constants.CommandArgumentNameReplaceToken,
     Description = "Replace token in file.")]
 public class ReplaceTokenCommand : SynchronousCommand
 {

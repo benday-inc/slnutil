@@ -13,6 +13,20 @@ public static class ProjectUtilities
         return FindSolution(currentDirectory);
     }
 
+    public static string? FindFirstFileName(string startingDirectory, string filename)
+    {
+        var solutionFile = Directory.GetFiles(startingDirectory, filename, SearchOption.AllDirectories).FirstOrDefault();
+
+        if (string.IsNullOrEmpty(solutionFile) == false)
+        {
+            return solutionFile;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public static string FindSolution(string startingDirectory)
     {
         var solutionFile = Directory.GetFiles(startingDirectory, "*.sln", SearchOption.AllDirectories).FirstOrDefault();

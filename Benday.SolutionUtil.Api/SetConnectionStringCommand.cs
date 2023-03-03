@@ -22,7 +22,7 @@ public class SetConnectionStringCommand : SynchronousCommand
         var args = new ArgumentCollection();
 
         args.AddString(Constants.ArgumentNameConfigFilename)
-            .AsRequired()
+            .AsNotRequired()
             .WithDescription("Path to json config file");
 
         args.AddString(Constants.ArgumentNameConnectionStringName)
@@ -38,14 +38,35 @@ public class SetConnectionStringCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        var configFilename = Arguments.GetStringValue(Constants.ArgumentNameConfigFilename);
+        string? configFilename;
+
+        if (Arguments.HasValue(Constants.ArgumentNameConfigFilename) == true)
+        {
+            configFilename = Arguments.GetStringValue(Constants.ArgumentNameConfigFilename);
+        }
+        else
+        {
+            configFilename = 
+                ProjectUtilities.FindFirstFileName(
+                    Environment.CurrentDirectory, "appsettings.json");
+        }
+
+        if (configFilename == null)
+        {
+            throw new KnownException("Could not find appsettings.json file");
+        }
+        else
+        {
+            Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
+        }
+
         var configKeyname = Arguments.GetStringValue(Constants.ArgumentNameConnectionStringName);
         var configValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
 
-        Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
+        var editor = new JsonEditor(configFilename);
 
-        DatabaseConfigurationUtility.SetConnectionString(
-            configFilename, configKeyname, configValue);
+        editor.SetValue(
+            "ConnectionStrings", configKeyname, configValue);
     }
 
     
