@@ -34,7 +34,7 @@ internal class DevTreeCleanCommand : SynchronousCommand
             rootDir = Arguments.GetStringValue(Constants.ArgumentNameRootDirectory);
         }
 
-        if (Directory.Exists(rootDir))
+        if (Directory.Exists(rootDir) == false)
         {
             throw new KnownException($"Starting directory '{rootDir}' does not exist.");
         }
