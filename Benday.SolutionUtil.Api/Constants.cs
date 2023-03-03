@@ -19,7 +19,11 @@ public static class Constants
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNamePreview = "preview";
     public const string CommandArgumentNameToBase64String = "base64";
-    public const string CommandArgumentNameDevTreeClean = "devtreeclean";   
+    public const string CommandArgumentNameDevTreeClean = "devtreeclean";
+    public const string CommandArgumentNameSetConnectionString = "setconnectionstring";
+
 
     public const string ArgumentNameValue = "value";
+    public const string ArgumentNameConfigFilename = "filename";
+    public const string ArgumentNameConnectionStringName = "name";
 }
