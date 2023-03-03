@@ -1,9 +1,4 @@
-﻿using Benday.CommandsFramework;
-using System.Diagnostics;
-using System.Text;
-using System.Xml.Linq;
-
-namespace Benday.SolutionUtil.Api;
+﻿namespace Benday.SolutionUtil.Api;
 
 public static class Constants
 {
@@ -21,6 +16,7 @@ public static class Constants
     public const string CommandArgumentNameToBase64String = "base64";
     public const string CommandArgumentNameDevTreeClean = "devtreeclean";
     public const string CommandArgumentNameSetConnectionString = "setconnectionstring";
+    public const string CommandArgumentNameGetConnectionString = "getconnectionstring";
 
 
     public const string ArgumentNameValue = "value";

@@ -42,23 +42,11 @@ public class SetConnectionStringCommand : SynchronousCommand
         var configKeyname = Arguments.GetStringValue(Constants.ArgumentNameConnectionStringName);
         var configValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
 
+        Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
+
         DatabaseConfigurationUtility.SetConnectionString(
             configFilename, configKeyname, configValue);
     }
 
-    protected void AssertFileExists(string path, string argumentName)
-    {
-        if (File.Exists(path) == false)
-        {
-            var info = new FileInfo(path);
-
-            string message = String.Format(
-                "File for argument '{0}' was not found at '{1}'.",
-                argumentName,
-                info.FullName);
-
-            throw new FileNotFoundException(
-                message, path);
-        }
-    }
+    
 }
