@@ -1,11 +1,14 @@
 ﻿using Benday.CommandsFramework;
+
+using Microsoft.Data.SqlClient;
+
 namespace Benday.SolutionUtil.Api;
 
-[Command(Name = Constants.CommandArgumentNameGetConnectionString,
-    Description = "Get database connection string in appsettings.json.")]
-public class GetConnectionStringCommand : SynchronousCommand
+[Command(Name = Constants.CommandArgumentNameValidateConnectionString,
+    Description = "Validate that specified connection string can connect to SQL Server.")]
+public class ValidateConnectionStringCommand : SynchronousCommand
 {
-    public GetConnectionStringCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
+    public ValidateConnectionStringCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
     {
 
@@ -21,7 +24,7 @@ public class GetConnectionStringCommand : SynchronousCommand
 
         args.AddString(Constants.ArgumentNameConnectionStringName)
             .AsRequired()
-            .WithDescription("Name of the connection string to get");
+            .WithDescription("Name of the connection string to validate");
 
         return args;
     }
@@ -63,6 +66,43 @@ public class GetConnectionStringCommand : SynchronousCommand
                 "ConnectionStrings", configKeyname);
 
         WriteLine(value);
+
+        ValidateConnection(value);
+    }
+
+    private void ValidateConnection(string value)
+    {
+        try
+        {
+            using var connection = new SqlConnection(value);
+
+            WriteLine("Opening connection...");
+
+            connection.Open();
+
+            WriteLine("Connected to database.");
+
+            using var command = new SqlCommand("SELECT @@VERSION", connection);
+
+            var result = command.ExecuteScalar();
+
+            if (result is string)
+            {
+                var resultAsString = result.ToString();
+
+                WriteLine($"Version: {resultAsString}");
+            }
+            else
+            {
+                WriteLine($"Could not retrieve version.");
+            }
+        }
+        catch(SqlException ex)
+        {
+            WriteLine("Connection failed.");
+            WriteLine(string.Empty);
+            WriteLine($"Error: {ex.Message}");
+        }
     }
 
     protected void AssertFileExists(string path, string argumentName)

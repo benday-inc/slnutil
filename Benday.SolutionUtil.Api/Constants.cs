@@ -6,6 +6,7 @@ public static class Constants
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
+    public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
@@ -21,8 +22,6 @@ public static class Constants
 
     public const string CommandArgumentNameReplaceToken = "replacetoken";
     public const string ArgumentNameToken = "token";
-
-
 
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";
