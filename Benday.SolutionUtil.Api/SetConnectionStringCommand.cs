@@ -54,13 +54,15 @@ public class SetConnectionStringCommand : SynchronousCommand
             Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
         }
 
+        WriteLine($"Using '{configFilename}'...");
+
         var configKeyname = Arguments.GetStringValue(Constants.ArgumentNameConnectionStringName);
         var configValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
 
         var editor = new JsonEditor(configFilename);
 
         editor.SetValue(
-            "ConnectionStrings", configKeyname, configValue);
+            configValue, "ConnectionStrings", configKeyname);
     }
 
 

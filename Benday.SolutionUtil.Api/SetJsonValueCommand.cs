@@ -66,6 +66,8 @@ public class SetJsonValueCommand : SynchronousCommand
             Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
         }
 
+        WriteLine($"Using '{configFilename}'...");
+
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);
         string? level2 = null;

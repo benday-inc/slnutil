@@ -50,6 +50,9 @@ public class GetConnectionStringCommand : SynchronousCommand
             Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
         }
 
+        WriteLine($"Using '{configFilename}'...");
+        WriteLine(string.Empty);
+
         var configKeyname = Arguments.GetStringValue(Constants.ArgumentNameConnectionStringName);
 
         Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
