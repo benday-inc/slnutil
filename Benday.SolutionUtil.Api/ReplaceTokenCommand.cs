@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-using Benday.CommandsFramework;
+﻿using Benday.CommandsFramework;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameReplaceToken,

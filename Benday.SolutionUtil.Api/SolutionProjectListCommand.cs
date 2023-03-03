@@ -1,7 +1,7 @@
-﻿using Benday.CommandsFramework;
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
+
+using Benday.CommandsFramework;
 
 namespace Benday.SolutionUtil.Api;
 
@@ -28,7 +28,7 @@ public class SolutionProjectListCommand : SynchronousCommand
     private string _SolutionPath;
 
     protected override void OnExecute()
-    {        
+    {
         if (Arguments.ContainsKey(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;

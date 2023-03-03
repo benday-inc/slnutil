@@ -1,19 +1,16 @@
 ﻿
-using Benday.CommandsFramework;
-using Benday.XmlUtilities;
-
-using System;
 using System.Diagnostics;
-using System.Linq;
-
 using System.Text;
 using System.Xml.Linq;
+
+using Benday.CommandsFramework;
+using Benday.XmlUtilities;
 
 namespace Benday.SolutionUtil.Api;
 
 
 
-[Command(Name = Constants.CommandArgumentNameCleanReferences, 
+[Command(Name = Constants.CommandArgumentNameCleanReferences,
     IsAsync = false,
     Description = "Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.")]
 public class CleanReferencesCommand : SynchronousCommand
@@ -44,7 +41,7 @@ public class CleanReferencesCommand : SynchronousCommand
     private string _SolutionFolder;
 
     protected override void OnExecute()
-    {        
+    {
         if (Arguments.ContainsKey(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;

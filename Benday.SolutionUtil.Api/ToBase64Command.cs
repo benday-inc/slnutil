@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Text;
 
 using Benday.CommandsFramework;
 
@@ -20,7 +15,7 @@ public class ToBase64Command : SynchronousCommand
 
     }
 
-    public override ArgumentCollection GetArguments()    
+    public override ArgumentCollection GetArguments()
     {
         var args = new ArgumentCollection();
 
@@ -31,7 +26,7 @@ public class ToBase64Command : SynchronousCommand
     }
 
     protected override void OnExecute()
-    {    
+    {
         var token = Arguments[Constants.ArgumentNameValue].Value;
 
         var asBase64String = GetTokenAsBase64String(token);

@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Benday.SolutionUtil.Api;
+﻿namespace Benday.SolutionUtil.Api;
 
 public class ReferenceInfo
 {

@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
-using Benday.CommandsFramework;
+﻿using Benday.CommandsFramework;
 
 namespace Benday.SolutionUtil.Api;
 
-[Command(Name = Constants.CommandArgumentNameDevTreeClean, 
+[Command(Name = Constants.CommandArgumentNameDevTreeClean,
     Description = "Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.")]
 internal class DevTreeCleanCommand : SynchronousCommand
 {

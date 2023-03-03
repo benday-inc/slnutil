@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Benday.CommandsFramework;
+﻿using Benday.CommandsFramework;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetConnectionString,
@@ -46,7 +40,7 @@ public class SetConnectionStringCommand : SynchronousCommand
         }
         else
         {
-            configFilename = 
+            configFilename =
                 ProjectUtilities.FindFirstFileName(
                     Environment.CurrentDirectory, "appsettings.json");
         }
@@ -69,5 +63,5 @@ public class SetConnectionStringCommand : SynchronousCommand
             "ConnectionStrings", configKeyname, configValue);
     }
 
-    
+
 }
