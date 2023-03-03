@@ -13,7 +13,9 @@ namespace Benday.SolutionUtil.Api;
 
 
 
-[Command(Name = Constants.CommandArgumentNameCleanReferences, IsAsync = false)]
+[Command(Name = Constants.CommandArgumentNameCleanReferences, 
+    IsAsync = false,
+    Description = "Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.")]
 public class CleanReferencesCommand : SynchronousCommand
 {
 

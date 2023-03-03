@@ -21,7 +21,7 @@ public class MarkdownUsageFormatter
         }
 
         return builder.ToString();
-    }    
+    }
 
     private void AppendCommandList(List<CommandInfo> usages, StringBuilder builder, bool skipCommandAnchors)
     {
@@ -39,7 +39,7 @@ public class MarkdownUsageFormatter
             else
             {
                 builder.AppendLine($"| [{usage.Name}](#{usage.Name}) | {usage.Description} |");
-            }            
+            }
         }
     }
 
@@ -55,7 +55,7 @@ public class MarkdownUsageFormatter
         }
 
         builder.AppendLine($"**{usage.Description}**");
-        
+
         builder.AppendLine("### Arguments");
 
         builder.AppendLine("| Argument | Is Optional | Data Type | Description |");

@@ -75,4 +75,3 @@ public class MarkdownUsageFormatterFixture
         // Console.WriteLine($"{actual}");
     }
 }
-
