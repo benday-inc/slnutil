@@ -17,9 +17,17 @@ public static class Constants
     public const string CommandArgumentNameDevTreeClean = "devtreeclean";
     public const string CommandArgumentNameSetConnectionString = "setconnectionstring";
     public const string CommandArgumentNameGetConnectionString = "getconnectionstring";
+    public const string CommandArgumentNameSetJsonValue = "setjsonvalue";
+
 
 
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";
     public const string ArgumentNameConnectionStringName = "name";
+
+    public const string ArgumentNameLevel1 = "level1";
+    public const string ArgumentNameLevel2 = "level2";
+    public const string ArgumentNameLevel3 = "level3";
+    public const string ArgumentNameLevel4 = "level4";
+
 }
