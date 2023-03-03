@@ -7,6 +7,7 @@ public static class Constants
     public const string CommandArgumentNameFindSolutions = "findsolutions";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
+    public const string CommandArgumentNameRename = "rename";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
@@ -14,6 +15,9 @@ public static class Constants
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNamePreview = "preview";
+    public const string ArgumentNameRecursive = "recursive";
+    public const string ArgumentNameFromValue = "from";
+    public const string ArgumentNameToValue = "to";
     public const string CommandArgumentNameToBase64String = "base64";
     public const string CommandArgumentNameDevTreeClean = "devtreeclean";
     public const string CommandArgumentNameSetConnectionString = "setconnectionstring";

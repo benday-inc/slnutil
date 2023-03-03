@@ -18,6 +18,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ## Commands
 | Command Name | Description |
 | --- | --- |
+| [rename](#rename) | Bulk rename for files and folders. |
 | [cleanreferences](#cleanreferences) | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
 | [devtreeclean](#devtreeclean) | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | [findsolutions](#findsolutions) | Find solution files in a folder tree. |
@@ -28,6 +29,16 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [listsolutionprojects](#listsolutionprojects) | Gets list of projects in a solution. |
 | [base64](#base64) | Encodes a string value as a base 64 string. |
 | [validateconnectionstring](#validateconnectionstring) | Validate that specified connection string can connect to SQL Server. |
+## <a name="rename"></a> rename
+**Bulk rename for files and folders.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| rootdir | Optional | String | Starting directory for the rename operation |
+| from | Required | String | String to search for and replace |
+| to | Required | String | Replacement value |
+| preview | Optional | Boolean | Preview changes |
+| recursive | Optional | Boolean | Recurse the directory tree |
 ## <a name="cleanreferences"></a> cleanreferences
 **Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.**
 ### Arguments

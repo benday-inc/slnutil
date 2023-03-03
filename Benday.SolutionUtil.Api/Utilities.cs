@@ -25,4 +25,20 @@ public static class Utilities
                 message, path);
         }
     }
+
+    public static void AssertDirectoryExists(string path, string argumentName)
+    {
+        if (Directory.Exists(path) == false)
+        {
+            var info = new DirectoryInfo(path);
+
+            string message = String.Format(
+                "Directory for argument '{0}' was not found at '{1}'.",
+                argumentName,
+                info.FullName);
+
+            throw new DirectoryNotFoundException(
+                $"{message}");
+        }
+    }
 }
