@@ -23,10 +23,11 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files in a folder tree. |
 | getconnectionstring | Get database connection string in appsettings.json. |
+| listsolutionprojects | Gets list of projects in a solution. |
 | replacetoken | Replace token in file. |
 | setconnectionstring | Set database connection string in appsettings.json. |
+| setframework | Set the target framework version on all projects. |
 | setjsonvalue | Set a string value in a json file. |
-| listsolutionprojects | Gets list of projects in a solution. |
 | base64 | Encodes a string value as a base 64 string. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 ## rename
@@ -68,6 +69,13 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | filename | Optional | String | Path to json config file |
 | name | Required | String | Name of the connection string to get |
+## listsolutionprojects
+**Gets list of projects in a solution.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
+| pathonly | Optional | Boolean | Only show the project paths. Don't show the framework versions. |
 ## replacetoken
 **Replace token in file.**
 ### Arguments
@@ -84,6 +92,13 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | filename | Optional | String | Path to json config file |
 | name | Required | String | Name of the connection string to set |
 | value | Required | String | Connection string value |
+## setframework
+**Set the target framework version on all projects.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
+| version | Required | String | Framework version to set projects to. |
 ## setjsonvalue
 **Set a string value in a json file.**
 ### Arguments
@@ -95,12 +110,6 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | level3 | Optional | String | Third level json property name to set |
 | level4 | Optional | String | Fourth level json property name to set |
 | value | Required | String | String value to set |
-## listsolutionprojects
-**Gets list of projects in a solution.**
-### Arguments
-| Argument | Is Optional | Data Type | Description |
-| --- | --- | --- | --- |
-| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
 ## base64
 **Encodes a string value as a base 64 string.**
 ### Arguments
