@@ -139,7 +139,7 @@ public static class ProjectUtilities
         if (File.Exists(path) == false)
         {
             throw new FileNotFoundException(
-                $"Could not find file for {description}.", path);
+                $"Could not find file for {description} at '{path}'.", path);
         }
     }
 

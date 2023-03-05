@@ -1,8 +1,12 @@
-                {
+{
   "profiles": {
     "Benday.SolutionUtil.ConsoleUi": {
+      "commandName": "Project"
+    },
+    "setframework": {
       "commandName": "Project",
-      "commandLineArgs": ""
+      "commandLineArgs": "setframework /version:net7.0",
+      "workingDirectory": "C:\\code\\repos\\Commerce"
     }
   }
 }

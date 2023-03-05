@@ -29,7 +29,7 @@ public class SolutionProjectListCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        if (Arguments.ContainsKey(Constants.ArgumentNameSolutionPath) == true)
+        if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;
             ProjectUtilities.AssertFileExists(_SolutionPath, Constants.ArgumentNameSolutionPath);

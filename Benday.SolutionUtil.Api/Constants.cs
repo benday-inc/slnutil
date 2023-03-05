@@ -6,6 +6,7 @@ public static class Constants
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
+    public const string CommandArgumentNameSetFrameworkVersion = "setframework";
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentNameRootDirectory = "rootdir";
@@ -14,6 +15,7 @@ public static class Constants
     public const string ArgumentNameListProjects = "listprojects";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string ArgumentNameSolutionPath = "solutionpath";
+    public const string ArgumentNameFrameworkVersion = "version";
     public const string ArgumentNamePreview = "preview";
     public const string ArgumentNameRecursive = "recursive";
     public const string ArgumentNameFromValue = "from";
