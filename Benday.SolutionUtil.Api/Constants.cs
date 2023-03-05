@@ -15,6 +15,7 @@ public static class Constants
     public const string ArgumentNameListProjects = "listprojects";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string ArgumentNameSolutionPath = "solutionpath";
+    public const string ArgumentNamePathOnly = "pathonly";
     public const string ArgumentNameFrameworkVersion = "version";
     public const string ArgumentNamePreview = "preview";
     public const string ArgumentNameRecursive = "recursive";

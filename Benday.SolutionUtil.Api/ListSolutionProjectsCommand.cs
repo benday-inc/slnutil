@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using System.Xml.Linq;
+using System.Xml;
 
 using Benday.CommandsFramework;
 
@@ -7,10 +9,10 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameListSolutionProjects,
         Description = "Gets list of projects in a solution.")]
-public class SolutionProjectListCommand : SynchronousCommand
+public class ListSolutionProjectsCommand : SynchronousCommand
 {
 
-    public SolutionProjectListCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
+    public ListSolutionProjectsCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
     {
 
@@ -22,6 +24,11 @@ public class SolutionProjectListCommand : SynchronousCommand
 
         args.AddString(Constants.ArgumentNameSolutionPath).AsNotRequired()
             .WithDescription("Solution to examine. If this value is not supplied, the tool searches for a sln file automatically.");
+
+        args.AddBoolean(Constants.ArgumentNamePathOnly)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Only show the project paths. Don't show the framework versions.");
 
         return args;
     }
@@ -68,6 +75,8 @@ public class SolutionProjectListCommand : SynchronousCommand
 
     internal string GetResult()
     {
+        bool pathOnly = Arguments.GetBooleanValue(Constants.ArgumentNamePathOnly);
+
         var startInfo = new ProcessStartInfo();
         startInfo.FileName = "dotnet";
 
@@ -76,7 +85,7 @@ public class SolutionProjectListCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo);
+        var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Process start returned null");
 
         process.WaitForExit();
 
@@ -94,7 +103,29 @@ public class SolutionProjectListCommand : SynchronousCommand
             }
             else
             {
-                output.AppendLine(line);
+                if (pathOnly == true)
+                {
+                    output.AppendLine(line);
+                }
+                else
+                {
+                    var solutionDir = Path.GetDirectoryName(_SolutionPath);
+                    if (solutionDir == null)
+                    {
+                        output.AppendLine($"{line}");
+                        output.AppendLine($"\tFramework: (n/a)");
+                    }
+                    else
+                    {
+                        var frameworkVersion = ProjectUtilities.GetFrameworkVersion(
+                            solutionDir, line);
+
+                        output.AppendLine($"{line}");
+                        output.AppendLine($"\tFramework: {frameworkVersion}");
+                    }
+
+                }
+
             }
 
             lineNumber++;

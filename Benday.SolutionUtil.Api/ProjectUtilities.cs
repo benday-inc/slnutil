@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Xml;
+using System.Xml.Linq;
 
 using Benday.XmlUtilities;
 
@@ -149,6 +150,75 @@ public static class ProjectUtilities
         {
             throw new DirectoryNotFoundException(
                 $"Could not find directory for {description}. {path}");
+        }
+    }
+
+    public static XElement FindTargetFrameworkElement(string filename, XElement root)
+    {
+        var propertyGroups =
+            root.ElementsByLocalName("PropertyGroup");
+
+        if (propertyGroups == null || propertyGroups.Count() == 0)
+        {
+            throw new InvalidOperationException(
+                $"Could not locate PropertyGroup node in file '{filename}'.");
+        }
+        else
+        {
+            XElement? returnValue = null;
+
+            foreach (var propertyGroup in propertyGroups)
+            {
+                returnValue =
+                    propertyGroup.ElementByLocalName(
+                        "TargetFramework");
+
+                if (returnValue != null)
+                {
+                    return returnValue;
+                }
+            }
+
+            if (returnValue == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not find TargetFramework element in file '{filename}'.");
+            }
+            else
+            {
+                return returnValue;
+            }
+        }
+    }
+
+    public static string GetFrameworkVersion(string dir, string project)
+    {
+        var pathToProjectFile = Path.Combine(dir, project);
+
+        if (!File.Exists(pathToProjectFile))
+        {
+            return "(n/a)";
+        }
+
+        var doc = XDocument.Load(pathToProjectFile);
+
+        var root = doc.Root;
+
+        if (root == null || root.Name.LocalName != "Project")
+        {
+            return "(n/a)";
+        }
+
+        var targetFrameworkElement =
+            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root);
+
+        if (targetFrameworkElement == null || string.IsNullOrEmpty(targetFrameworkElement.Value) == true)
+        {
+            return "(n/a)";
+        }
+        else
+        {
+            return targetFrameworkElement.Value;
         }
     }
 }

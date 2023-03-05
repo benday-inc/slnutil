@@ -139,7 +139,7 @@ public class SetFrameworkVersionCommand : SynchronousCommand
         }
 
         var targetFrameworkElement =
-            FindTargetFrameworkElement(pathToProjectFile, root);
+            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root);
 
         targetFrameworkElement.Value = frameworkVersion;
 
@@ -155,44 +155,5 @@ public class SetFrameworkVersionCommand : SynchronousCommand
 
         WriteLine($"Updated project '{pathToProjectFile}' framework version to '{frameworkVersion}'.");
 
-    }
-
-    private XElement FindTargetFrameworkElement(string filename, XElement root)
-    {
-        var propertyGroups =
-            root.ElementsByLocalName("PropertyGroup");
-
-        if (propertyGroups == null || propertyGroups.Count() == 0)
-        {
-            throw new InvalidOperationException(
-                $"Could not locate PropertyGroup node in file '{filename}'.");
-        }
-        else
-        {
-            XElement? returnValue = null;
-
-            foreach (var propertyGroup in propertyGroups)
-            {
-                returnValue =
-                    propertyGroup.ElementByLocalName(
-                        "TargetFramework");
-
-                if (returnValue != null)
-                {
-                    return returnValue;
-                }
-            }
-
-            if (returnValue == null)
-            {
-                throw new InvalidOperationException(
-                    $"Could not find TargetFramework element in file '{filename}'.");
-            }
-            else
-            {
-                return returnValue;
-            }
-        }
-
-    }
+    }    
 }
