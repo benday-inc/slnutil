@@ -39,6 +39,12 @@ public class SetJsonValueCommand : SynchronousCommand
             .AsRequired()
             .WithDescription("String value to set");
 
+        args.AddBoolean(Constants.ArgumentNameIncrementInt32Value)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription(
+                $"Increment the existing value or use the '/{Constants.ArgumentNameValue}' as the initial value if it does not exist or isn't an integer.");
+
         return args;
     }
 
@@ -68,6 +74,7 @@ public class SetJsonValueCommand : SynchronousCommand
 
         WriteLine($"Using '{configFilename}'...");
 
+        var incrementValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementInt32Value);
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);
         string? level2 = null;
@@ -84,6 +91,19 @@ public class SetJsonValueCommand : SynchronousCommand
             level3 = Arguments.GetStringValue(Constants.ArgumentNameLevel3);
             level4 = Arguments.GetStringValue(Constants.ArgumentNameLevel4);
 
+            if (incrementValue == true)
+            {
+                var currentValue = editor.GetValue(level1, level2, level3, level4);
+
+                if (string.IsNullOrEmpty(currentValue) == false)
+                {
+                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
+                    {
+                        newValue = (++valueAsInt).ToString();
+                    }
+                }
+            }
+
             editor.SetValue(
                 newValue, level1, level2, level3, level4);
         }
@@ -93,6 +113,19 @@ public class SetJsonValueCommand : SynchronousCommand
             level2 = Arguments.GetStringValue(Constants.ArgumentNameLevel2);
             level3 = Arguments.GetStringValue(Constants.ArgumentNameLevel3);
 
+            if (incrementValue == true)
+            {
+                var currentValue = editor.GetValue(level1, level2, level3);
+
+                if (string.IsNullOrEmpty(currentValue) == false)
+                {
+                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
+                    {
+                        newValue = (++valueAsInt).ToString();
+                    }
+                }
+            }
+
             editor.SetValue(
                 newValue, level1, level2, level3);
         }
@@ -101,12 +134,38 @@ public class SetJsonValueCommand : SynchronousCommand
         {
             level2 = Arguments.GetStringValue(Constants.ArgumentNameLevel2);
 
+            if (incrementValue == true)
+            {
+                var currentValue = editor.GetValue(level1, level2);
+
+                if (string.IsNullOrEmpty(currentValue) == false)
+                {
+                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
+                    {
+                        newValue = (++valueAsInt).ToString();
+                    }
+                }
+            }
+
             editor.SetValue(
                 newValue,
                 level1, level2);
         }
         else
         {
+            if (incrementValue == true)
+            {
+                var currentValue = editor.GetValue(level1);
+
+                if (string.IsNullOrEmpty(currentValue) == false)
+                {
+                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
+                    {
+                        newValue = (++valueAsInt).ToString();
+                    }
+                }
+            }
+
             editor.SetValue(
                 newValue,
                 level1);

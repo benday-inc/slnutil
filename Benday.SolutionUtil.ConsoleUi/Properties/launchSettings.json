@@ -7,6 +7,11 @@
       "commandName": "Project",
       "commandLineArgs": "setframework /version:net7.0",
       "workingDirectory": "C:\\code\\repos\\Commerce"
+    },
+    "setjsonvalue-increment": {
+      "commandName": "Project",
+      "commandLineArgs": "setjsonvalue /level1:version /value:1 /increment /filename:vss-extension.json",
+      "workingDirectory": "C:\\code\\benday-inc\\flowutil"
     }
   }
 }
