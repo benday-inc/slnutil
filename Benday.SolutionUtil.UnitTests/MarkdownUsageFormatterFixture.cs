@@ -44,7 +44,7 @@ public class MarkdownUsageFormatterFixture
 
         var filename = Path.Combine(Path.GetTempPath(), $"markdown-{DateTime.Now.Ticks}.md");
 
-        Console.WriteLine($"Writing markdown file to {filename}");
+        Console.WriteLine($"Writing markdown file to {Environment.NewLine}{filename}");
 
         File.WriteAllText(filename, actual);
 
@@ -68,7 +68,7 @@ public class MarkdownUsageFormatterFixture
 
         var filename = Path.Combine(Path.GetTempPath(), $"markdown-{DateTime.Now.Ticks}.md");
 
-        Console.WriteLine($"Writing markdown file to {filename}");
+        Console.WriteLine($"Writing markdown file to {Environment.NewLine}{filename}");
 
         File.WriteAllText(filename, actual);
 

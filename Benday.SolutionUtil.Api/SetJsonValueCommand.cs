@@ -173,7 +173,7 @@ public class SetJsonValueCommand : SynchronousCommand
         {
             if (!string.IsNullOrEmpty(currentValue) && Int32.TryParse(currentValue, out var valueAsInt))
             {
-                return (++valueAsInt).ToString();
+                return (++valueAsInt).ToString(); 
             }
             else
             {

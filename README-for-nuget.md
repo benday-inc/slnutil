@@ -110,6 +110,8 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | level3 | Optional | String | Third level json property name to set |
 | level4 | Optional | String | Fourth level json property name to set |
 | value | Required | String | String value to set |
+| increment-int | Optional | Boolean | Increment the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
+| increment-minor-version | Optional | Boolean | Increment the minor version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 ## base64
 **Encodes a string value as a base 64 string.**
 ### Arguments
