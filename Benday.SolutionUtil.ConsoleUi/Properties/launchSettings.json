@@ -8,10 +8,16 @@
       "commandLineArgs": "setframework /version:net7.0",
       "workingDirectory": "C:\\code\\repos\\Commerce"
     },
-    "setjsonvalue-increment": {
+    "setjsonvalue-increment-int32": {
       "commandName": "Project",
-      "commandLineArgs": "setjsonvalue /level1:version /value:1 /increment /filename:vss-extension.json",
+      "commandLineArgs": "setjsonvalue /level1:version /value:1 /increment-int /filename:vss-extension.json",
+      "workingDirectory": "C:\\code\\benday-inc\\flowutil"
+    },
+    "setjsonvalue-increment-minor-version": {
+      "commandName": "Project",
+      "commandLineArgs": "setjsonvalue /level1:version /value:2.1.1 /increment-minor-version /filename:vss-extension.json",
       "workingDirectory": "C:\\code\\benday-inc\\flowutil"
     }
+
   }
 }

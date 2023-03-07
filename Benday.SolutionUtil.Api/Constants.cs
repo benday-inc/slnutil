@@ -30,7 +30,8 @@ public static class Constants
     public const string CommandArgumentNameReplaceToken = "replacetoken";
     public const string ArgumentNameToken = "token";
     public const string ArgumentNameIncrementInt32Value = "increment-int";
-
+    public const string ArgumentNameIncrementMinorVersionValue = "increment-minor-version";
+    
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";
     public const string ArgumentNameConnectionStringName = "name";

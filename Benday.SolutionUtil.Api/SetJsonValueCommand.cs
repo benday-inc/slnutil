@@ -43,7 +43,13 @@ public class SetJsonValueCommand : SynchronousCommand
             .AsNotRequired()
             .AllowEmptyValue()
             .WithDescription(
-                $"Increment the existing value or use the '/{Constants.ArgumentNameValue}' as the initial value if it does not exist or isn't an integer.");
+                $"Increment the existing value or use the '/{Constants.ArgumentNameValue}' as the value if it does not exist or isn't an integer.");
+
+        args.AddBoolean(Constants.ArgumentNameIncrementMinorVersionValue)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription(
+                $"Increment the minor version of the existing value or use the '/{Constants.ArgumentNameValue}' as the value if it does not exist or isn't an integer.");
 
         return args;
     }
@@ -74,7 +80,6 @@ public class SetJsonValueCommand : SynchronousCommand
 
         WriteLine($"Using '{configFilename}'...");
 
-        var incrementValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementInt32Value);
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);
         string? level2 = null;
@@ -91,20 +96,8 @@ public class SetJsonValueCommand : SynchronousCommand
             level3 = Arguments.GetStringValue(Constants.ArgumentNameLevel3);
             level4 = Arguments.GetStringValue(Constants.ArgumentNameLevel4);
 
-            if (incrementValue == true)
-            {
-                var currentValue = editor.GetValue(level1, level2, level3, level4);
-
-                if (string.IsNullOrEmpty(currentValue) == false)
-                {
-                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
-                    {
-                        newValue = (++valueAsInt).ToString();
-                    }
-                }
-            }
-
-            editor.SetValue(
+            SetValue(
+                editor,
                 newValue, level1, level2, level3, level4);
         }
         else if (Arguments.HasValue(Constants.ArgumentNameLevel2) == true &&
@@ -113,20 +106,8 @@ public class SetJsonValueCommand : SynchronousCommand
             level2 = Arguments.GetStringValue(Constants.ArgumentNameLevel2);
             level3 = Arguments.GetStringValue(Constants.ArgumentNameLevel3);
 
-            if (incrementValue == true)
-            {
-                var currentValue = editor.GetValue(level1, level2, level3);
-
-                if (string.IsNullOrEmpty(currentValue) == false)
-                {
-                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
-                    {
-                        newValue = (++valueAsInt).ToString();
-                    }
-                }
-            }
-
-            editor.SetValue(
+            SetValue(
+                editor,
                 newValue, level1, level2, level3);
         }
         else if (Arguments.HasValue(Constants.ArgumentNameLevel2) == true &&
@@ -134,42 +115,115 @@ public class SetJsonValueCommand : SynchronousCommand
         {
             level2 = Arguments.GetStringValue(Constants.ArgumentNameLevel2);
 
-            if (incrementValue == true)
-            {
-                var currentValue = editor.GetValue(level1, level2);
-
-                if (string.IsNullOrEmpty(currentValue) == false)
-                {
-                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
-                    {
-                        newValue = (++valueAsInt).ToString();
-                    }
-                }
-            }
-
-            editor.SetValue(
+            SetValue(
+                editor,
                 newValue,
                 level1, level2);
         }
         else
         {
-            if (incrementValue == true)
-            {
-                var currentValue = editor.GetValue(level1);
+            SetValue(editor, newValue, level1);
+        }
+    }
 
-                if (string.IsNullOrEmpty(currentValue) == false)
+    private void SetValue(JsonEditor editor,
+        string newValue, string level1, string level2,
+        string level3, string level4)
+    {
+        var currentValue = editor.GetValue(level1, level2, level3, level4);
+
+        newValue = ProcessIncrementIfExists(currentValue, newValue);
+
+        editor.SetValue(
+                newValue,
+                level1, level2, level3, level4);
+    }
+
+    private void SetValue(JsonEditor editor,
+        string newValue, string level1, string level2,
+        string level3)
+    {
+        var currentValue = editor.GetValue(level1, level2, level3);
+
+        newValue = ProcessIncrementIfExists(currentValue, newValue);
+
+        editor.SetValue(
+                newValue,
+                level1, level2, level3);
+    }
+
+    private void SetValue(JsonEditor editor,
+        string newValue, string level1, string level2)
+    {
+        var currentValue = editor.GetValue(level1, level2);
+        
+        newValue = ProcessIncrementIfExists(currentValue, newValue);
+
+        editor.SetValue(
+                newValue,
+                level1, level2);
+    }
+
+    private string ProcessIncrementIfExists(string currentValue, string newValue)
+    {
+        var incrementInt32Value = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementInt32Value);
+        var incrementMinorVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementMinorVersionValue);
+
+        if (incrementInt32Value == true)
+        {
+            if (!string.IsNullOrEmpty(currentValue) && Int32.TryParse(currentValue, out var valueAsInt))
+            {
+                return (++valueAsInt).ToString();
+            }
+            else
+            {
+                WriteLine($"Warning: Could not increment '{currentValue}' as an int. Setting value to '{newValue}'.");
+            }
+        }
+        else if (incrementMinorVersionValue == true)
+        {
+            if (string.IsNullOrEmpty(currentValue) == false)
+            {
+                var tokens = currentValue.Split('.');
+
+                if (tokens.Length < 2)
                 {
-                    if (Int32.TryParse(currentValue, out var valueAsInt) == true)
+                    WriteLine($"Warning: Could not find minor version value in '{currentValue}'. Setting value to '{newValue}'.");
+                }
+                else
+                {
+                    var minorVersionAsString = tokens[1];
+
+                    if (Int32.TryParse(minorVersionAsString, out var valueAsInt) == true)
                     {
-                        newValue = (++valueAsInt).ToString();
+                        valueAsInt++;
+
+                        tokens[1] = valueAsInt.ToString();
+
+                        var returnValue = string.Join(".", tokens);
+
+                        return returnValue;
+                    }
+                    else
+                    {
+                        WriteLine($"Warning: Could not increment minor version value in '{currentValue}' as int. Setting value to '{newValue}'.");
                     }
                 }
             }
+        }
 
-            editor.SetValue(
+        return newValue;
+    }
+
+    private void SetValue(JsonEditor editor, string newValue, string level1)
+    {
+        var currentValue = editor.GetValue(level1);
+
+        newValue = ProcessIncrementIfExists(currentValue, newValue);
+
+        editor.SetValue(
                 newValue,
                 level1);
-        }
     }
 
     protected void AssertFileExists(string path, string argumentName)

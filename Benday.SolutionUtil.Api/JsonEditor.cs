@@ -165,7 +165,7 @@ public class JsonEditor
         return match;
     }
 
-    private string GetValueUsingQuery(string query)
+    private string? GetValueUsingQuery(string query)
     {
         JToken match = GetJToken(
             _JsonFile, query);
