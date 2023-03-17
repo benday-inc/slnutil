@@ -17,7 +17,7 @@
         <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
         <PackageIcon>bdc_mark_128_128.png</PackageIcon>
         <AssemblyVersion>1.4.0.0</AssemblyVersion>
-        <Version>$(VersionPrefix)1.4.0</Version>
+        <Version>$(VersionPrefix)1.4.1</Version>
         <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     </PropertyGroup>
 

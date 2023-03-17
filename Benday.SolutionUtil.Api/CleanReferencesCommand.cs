@@ -42,7 +42,7 @@ public class CleanReferencesCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        if (Arguments.ContainsKey(Constants.ArgumentNameSolutionPath) == true)
+        if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;
             ProjectUtilities.AssertFileExists(_SolutionPath, Constants.ArgumentNameSolutionPath);
@@ -124,7 +124,7 @@ public class CleanReferencesCommand : SynchronousCommand
                 }
             }
 
-            if (foundJunk == true && Arguments.ContainsKey(Constants.ArgumentNamePreview) == false)
+            if (foundJunk == true && Arguments.GetBooleanValue(Constants.ArgumentNamePreview) == false)
             {
                 removeThese.ForEach(x => x.Remove());
                 var xml = doc.ToString();
