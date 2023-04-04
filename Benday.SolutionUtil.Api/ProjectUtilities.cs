@@ -92,35 +92,42 @@ public static class ProjectUtilities
     {
         List<ReferenceInfo> returnValues = new List<ReferenceInfo>();
 
-        var root = XElement.Parse(projectFileContents);
-
-        var projectReferences = GetElements(root, "ItemGroup", "ProjectReference");
-        var packageReferences = GetElements(root, "ItemGroup", "Reference");
-
-        List<XElement> nugetPackageRefs = new List<XElement>();
-        List<XElement> binaryRefs = new List<XElement>();
-
-        foreach (var packageRef in packageReferences)
+        try
         {
-            if (packageRef.HasElements == false)
+            var root = XElement.Parse(projectFileContents);
+
+            var projectReferences = GetElements(root, "ItemGroup", "ProjectReference");
+            var packageReferences = GetElements(root, "ItemGroup", "Reference");
+
+            List<XElement> nugetPackageRefs = new List<XElement>();
+            List<XElement> binaryRefs = new List<XElement>();
+
+            foreach (var packageRef in packageReferences)
             {
-                nugetPackageRefs.Add(packageRef);
+                if (packageRef.HasElements == false)
+                {
+                    nugetPackageRefs.Add(packageRef);
+                }
+                else if (packageRef.ElementByLocalName("HintPath") != null)
+                {
+                    binaryRefs.Add(packageRef);
+                }
+                else
+                {
+                    nugetPackageRefs.Add(packageRef);
+                }
             }
-            else if (packageRef.ElementByLocalName("HintPath") != null)
-            {
-                binaryRefs.Add(packageRef);
-            }
-            else
-            {
-                nugetPackageRefs.Add(packageRef);
-            }
+
+            AddReferenceInfos(returnValues, "project-ref", projectReferences);
+            AddReferenceInfos(returnValues, "package-ref", nugetPackageRefs);
+            AddReferenceInfos(returnValues, "binary-ref", binaryRefs);
+
+            return returnValues;
         }
-
-        AddReferenceInfos(returnValues, "project-ref", projectReferences);
-        AddReferenceInfos(returnValues, "package-ref", nugetPackageRefs);
-        AddReferenceInfos(returnValues, "binary-ref", binaryRefs);
-
-        return returnValues;
+        catch
+        {
+            return returnValues;
+        }        
     }
 
     private static void AddReferenceInfos(List<ReferenceInfo> returnValues, string referenceType,
