@@ -18,6 +18,14 @@ class Program
         {
             try
             {
+                var names = util.GetAvailableCommandNames(typeof(StringUtility).Assembly);
+
+                if (names.Contains(args[0]) == false)
+                {
+                    throw new KnownException(
+                            $"Invalid command name '{args[0]}'.");
+                }
+
                 var command = util.GetCommand(args, typeof(StringUtility).Assembly);
 
                 if (command == null)
@@ -31,8 +39,8 @@ class Program
 
                     if (attr == null)
                     {
-                        throw new InvalidOperationException(
-                            $"Could not get command attribute for command name '{command.ExecutionInfo.CommandName}'.");
+                        throw new KnownException(
+                            $"Invalid command name '{command.ExecutionInfo.CommandName}'.");
                     }
                     else
                     {
