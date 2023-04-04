@@ -20,7 +20,7 @@
     },
     "findsolutions-dotnetframework": {
       "commandName": "Project",
-      "commandLineArgs": "listsolutionprojects",
+      "commandLineArgs": "findsolutions /rootdir:. /listprojects",
       "workingDirectory": "C:\\code\\dotnetframeworkstuff"
     }
   }

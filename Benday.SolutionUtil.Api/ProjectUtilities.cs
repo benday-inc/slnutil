@@ -97,8 +97,28 @@ public static class ProjectUtilities
         var projectReferences = GetElements(root, "ItemGroup", "ProjectReference");
         var packageReferences = GetElements(root, "ItemGroup", "Reference");
 
+        List<XElement> nugetPackageRefs = new List<XElement>();
+        List<XElement> binaryRefs = new List<XElement>();
+
+        foreach (var packageRef in packageReferences)
+        {
+            if (packageRef.HasElements == false)
+            {
+                nugetPackageRefs.Add(packageRef);
+            }
+            else if (packageRef.ElementByLocalName("HintPath") != null)
+            {
+                binaryRefs.Add(packageRef);
+            }
+            else
+            {
+                nugetPackageRefs.Add(packageRef);
+            }
+        }
+
         AddReferenceInfos(returnValues, "project-ref", projectReferences);
-        AddReferenceInfos(returnValues, "package-ref", packageReferences);
+        AddReferenceInfos(returnValues, "package-ref", nugetPackageRefs);
+        AddReferenceInfos(returnValues, "binary-ref", binaryRefs);
 
         return returnValues;
     }
@@ -108,11 +128,22 @@ public static class ProjectUtilities
     {
         foreach (var item in referenceElements)
         {
-            returnValues.Add(new ReferenceInfo()
+            if (item.ElementByLocalName("HintPath") != null)
             {
-                ReferenceType = referenceType,
-                ReferenceTarget = item.AttributeValue("Include")
-            });
+                returnValues.Add(new ReferenceInfo()
+                {
+                    ReferenceType = referenceType,
+                    ReferenceTarget = item.ElementValue("HintPath")
+                });
+            }
+            else
+            {
+                returnValues.Add(new ReferenceInfo()
+                {
+                    ReferenceType = referenceType,
+                    ReferenceTarget = item.AttributeValue("Include")
+                });
+            }
         }
     }
 

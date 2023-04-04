@@ -272,6 +272,14 @@ public class FindSolutionsCommand : SynchronousCommand
                     projectFileInfo.Directory));
                 returnValue.Append(",");
             }
+            else if (reference.ReferenceType == "binary-ref")
+            {
+                returnValue.Append(IsReferenceOutsideOfSolutionRoot(
+                    reference.ReferenceTarget,
+                    solutionDir,
+                    projectFileInfo.Directory));
+                returnValue.Append(",");
+            }
             else
             {
                 returnValue.Append(false);
