@@ -17,7 +17,11 @@
       "commandName": "Project",
       "commandLineArgs": "setjsonvalue /level1:version /value:2.1.1 /increment-minor-version /filename:vss-extension.json",
       "workingDirectory": "C:\\code\\benday-inc\\flowutil"
+    },
+    "findsolutions-dotnetframework": {
+      "commandName": "Project",
+      "commandLineArgs": "listsolutionprojects",
+      "workingDirectory": "C:\\code\\dotnetframeworkstuff"
     }
-
   }
 }

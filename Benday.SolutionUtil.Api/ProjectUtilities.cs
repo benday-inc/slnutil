@@ -177,12 +177,21 @@ public static class ProjectUtilities
                 {
                     return returnValue;
                 }
+
+                returnValue =
+                    propertyGroup.ElementByLocalName(
+                        "TargetFrameworkVersion");
+
+                if (returnValue != null)
+                {
+                    return returnValue;
+                }
             }
 
             if (returnValue == null)
             {
-                throw new InvalidOperationException(
-                    $"Could not find TargetFramework element in file '{filename}'.");
+                throw new KnownException(
+                    $"Could not find TargetFramework or TargetFrameworkVersion element in file '{filename}'.");
             }
             else
             {
