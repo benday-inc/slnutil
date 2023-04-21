@@ -415,3 +415,4 @@ public class FindSolutionsCommand : SynchronousCommand
         return returnValues;
     }
 }
+
