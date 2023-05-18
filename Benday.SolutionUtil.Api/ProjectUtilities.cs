@@ -238,6 +238,52 @@ public static class ProjectUtilities
         }
     }
 
+    public static XElement SetProjectPropertyElement(string filename, XElement root, string propertyName, string propertyValue)
+    {
+        var propertyGroups =
+            root.ElementsByLocalName("PropertyGroup");
+
+        if (propertyGroups == null || propertyGroups.Count() == 0)
+        {
+            root.Add(new XElement("PropertyGroup"));
+            propertyGroups =
+                root.ElementsByLocalName("PropertyGroup");
+        }
+
+        if (propertyGroups == null || propertyGroups.Count() == 0)
+        {
+            throw new InvalidOperationException(
+                $"Could not locate PropertyGroup node in file '{filename}'.");
+        }
+        else
+        {
+            XElement? returnValue = null;
+
+            foreach (var propertyGroup in propertyGroups)
+            {
+                returnValue =
+                    propertyGroup.ElementByLocalName(
+                        propertyName);
+
+                if (returnValue != null)
+                {
+                    return returnValue;
+                }
+            }
+
+            if (returnValue == null)
+            {
+                var propertyGroup = propertyGroups.First();
+
+                returnValue = new XElement(propertyName, propertyValue);
+
+                propertyGroup.Add(returnValue);                
+            }
+
+            return returnValue;
+        }
+    }
+
     public static string GetFrameworkVersion(string dir, string project)
     {
         var pathToProjectFile = Path.Combine(dir, project);

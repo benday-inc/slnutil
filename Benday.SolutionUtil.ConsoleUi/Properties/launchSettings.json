@@ -22,6 +22,11 @@
       "commandName": "Project",
       "commandLineArgs": "findsolutions /rootdir:. /listprojects",
       "workingDirectory": "C:\\code\\dotnetframeworkstuff"
+    },
+    "setprojectproperty": {
+      "commandName": "Project",
+      "commandLineArgs": "setprojectproperty /propertyname:EnforceCodeStyleInBuild /propertyvalue:True",
+      "workingDirectory": "C:\\code\\repos\\code-generator-web"
     }
   }
 }
