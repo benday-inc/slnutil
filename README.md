@@ -29,6 +29,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [setconnectionstring](#setconnectionstring) | Set database connection string in appsettings.json. |
 | [setframework](#setframework) | Set the target framework version on all projects. |
 | [setjsonvalue](#setjsonvalue) | Set a string value in a json file. |
+| [setprojectproperty](#setprojectproperty) | Set a project property value on all projects. |
 | [base64](#base64) | Encodes a string value as a base 64 string. |
 | [validateconnectionstring](#validateconnectionstring) | Validate that specified connection string can connect to SQL Server. |
 ## <a name="rename"></a> rename
@@ -119,6 +120,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | value | Required | String | String value to set |
 | increment-int | Optional | Boolean | Increment the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | increment-minor-version | Optional | Boolean | Increment the minor version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
+## <a name="setprojectproperty"></a> setprojectproperty
+**Set a project property value on all projects.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
+| propertyname | Required | String | Name of the property to set. |
+| propertyvalue | Required | String | Value for the property. |
 ## <a name="base64"></a> base64
 **Encodes a string value as a base 64 string.**
 ### Arguments
