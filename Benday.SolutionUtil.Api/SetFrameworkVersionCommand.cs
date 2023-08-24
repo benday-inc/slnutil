@@ -139,21 +139,28 @@ public class SetFrameworkVersionCommand : SynchronousCommand
         }
 
         var targetFrameworkElement =
-            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root);
+            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root, false);
 
-        targetFrameworkElement.Value = frameworkVersion;
-
-        var settings = new XmlWriterSettings
+        if (targetFrameworkElement == null)
         {
-            OmitXmlDeclaration = true,
-            Indent = true
-        };
+            // no target framework element found
+            WriteLine($"Could not locate target framework for project '{pathToProjectFile}'. Skipping.");
+        }
+        else
+        {
+            targetFrameworkElement.Value = frameworkVersion;
 
-        using var writer = XmlWriter.Create(pathToProjectFile, settings);
+            var settings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                Indent = true
+            };
 
-        doc.Save(writer);
+            using var writer = XmlWriter.Create(pathToProjectFile, settings);
 
-        WriteLine($"Updated project '{pathToProjectFile}' framework version to '{frameworkVersion}'.");
+            doc.Save(writer);
 
+            WriteLine($"Updated project '{pathToProjectFile}' framework version to '{frameworkVersion}'.");
+        }
     }    
 }

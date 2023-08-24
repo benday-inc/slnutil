@@ -16,8 +16,8 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
         <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-        <AssemblyVersion>1.7.0.0</AssemblyVersion>
-        <Version>$(VersionPrefix)1.7.0</Version>
+        <AssemblyVersion>1.8.0.0</AssemblyVersion>
+        <Version>$(VersionPrefix)1.8.0</Version>
         <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     </PropertyGroup>
 
@@ -33,7 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Benday.CommandsFramework" Version="2.1.0" />
+        <PackageReference Include="Benday.CommandsFramework" Version="2.3.1" />
     </ItemGroup>
 
     <ItemGroup>

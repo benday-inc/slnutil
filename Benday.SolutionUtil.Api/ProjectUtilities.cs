@@ -191,7 +191,8 @@ public static class ProjectUtilities
         }
     }
 
-    public static XElement FindTargetFrameworkElement(string filename, XElement root)
+    public static XElement? FindTargetFrameworkElement(
+        string filename, XElement root, bool throwExceptionIfNotFound = true)
     {
         var propertyGroups =
             root.ElementsByLocalName("PropertyGroup");
@@ -228,8 +229,15 @@ public static class ProjectUtilities
 
             if (returnValue == null)
             {
-                throw new KnownException(
+                if (throwExceptionIfNotFound == true)
+                {
+                    throw new KnownException(
                     $"Could not find TargetFramework or TargetFrameworkVersion element in file '{filename}'.");
+                }
+                else
+                {
+                    return null;
+                }                
             }
             else
             {
@@ -303,7 +311,7 @@ public static class ProjectUtilities
         }
 
         var targetFrameworkElement =
-            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root);
+            ProjectUtilities.FindTargetFrameworkElement(pathToProjectFile, root, false);
 
         if (targetFrameworkElement == null || string.IsNullOrEmpty(targetFrameworkElement.Value) == true)
         {
