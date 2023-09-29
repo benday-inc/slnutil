@@ -4,7 +4,7 @@ using Benday.SolutionUtil.UnitTests.SampleClassesForSerialization;
 namespace Benday.SolutionUtil.UnitTests;
 
 [TestClass]
-public class JsonToClassesUtilityFixture
+public class JsonToClassesGeneratorFixture
 {
     [TestInitialize]
     public void OnTestInitialize()
@@ -12,15 +12,15 @@ public class JsonToClassesUtilityFixture
         _SystemUnderTest = null;
     }
 
-    private JsonToClassUtility? _SystemUnderTest;
+    private JsonToClassGenerator? _SystemUnderTest;
 
-    private JsonToClassUtility SystemUnderTest
+    private JsonToClassGenerator SystemUnderTest
     {
         get
         {
             if (_SystemUnderTest == null)
             {
-                _SystemUnderTest = new JsonToClassUtility();
+                _SystemUnderTest = new JsonToClassGenerator();
             }
 
             return _SystemUnderTest;
@@ -134,5 +134,27 @@ public class JsonToClassesUtilityFixture
         // act
         var actual = System.Text.Json.JsonSerializer.Serialize(items);
         return actual;
+    }
+
+    [TestMethod]
+    public void ParseSimple_Single()
+    {
+        // arrange
+        var fromJson = GetSimpleClassAsJson();
+
+        var expectedClassCount = 1;
+        var expectedClassNames = new List<string>()
+        {
+            "RootClass"
+        };
+
+        // act
+        SystemUnderTest.Parse(fromJson);
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+
+        expectedClassNames.ForEach(name =>
+            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
     }
 }
