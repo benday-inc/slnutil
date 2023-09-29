@@ -51,7 +51,7 @@ public class JsonToClassGenerator
 
     private void PopulateFromJsonObject(JsonObject fromValue, string className)
     {
-        AddClass(className);
+        var toClass = AddClass(className);
 
         foreach (var item in fromValue)
         {
@@ -64,6 +64,20 @@ public class JsonToClassGenerator
             else if (item.Value is JsonArray)
             {
                 PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
+            }
+            else
+            {
+                if (item.Value is null)
+                {
+                    toClass.AddProperty(item.Key);
+                }
+                else
+                {
+                    var temp = item.Value.GetValue<object>();
+
+                    toClass.AddProperty(item.Key, temp.GetType().Name);
+                }
+                
             }
         }
     }
