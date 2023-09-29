@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Benday.SolutionUtil.Api;
 
@@ -12,33 +13,50 @@ public class JsonToClassGenerator
     public void Parse(string json, string rootClass = "RootClass")
     {
         // deserialize json
-        var result = JsonSerializer.Deserialize<dynamic>(json);
+        var result = JsonObject.Parse(json);
 
         if (result is null)
         {
             return;
         }
-        else if (result is JsonElement)
+        else if (result is JsonArray)
         {
-            var element = (JsonElement)result;
+            var array = (JsonArray)result;
 
-            PopulateFromElement(element, rootClass);
+            PopulateFromArray(array, rootClass);
+        }
+        else if (result is JsonObject)
+        {
+            var element = (JsonObject)result;
+
+            PopulateFromJsonObject(element, rootClass);
         }        
     }
+    private void PopulateFromArray(JsonArray array, string className)
+    {
+        //foreach (var item in array)
+        //{
+        //    
+        //}
 
-    private void PopulateFromElement(JsonElement element, string className)
+        AddClass(className);
+    }
+
+    private void PopulateFromJsonObject(JsonObject fromValue, string className)
+    {
+        AddClass(className);
+
+        foreach (var item in fromValue)
+        {
+            Console.WriteLine($"{item}");
+        }
+    }
+
+    private void AddClass(string className)
     {
         if (Classes.Contains(className) == false)
         {
             Classes.Add(className);
-        }
-
-        if (element.ValueKind == JsonValueKind.Object)
-        {
-            foreach (JsonProperty prop in element.EnumerateObject())
-            {
-                Console.WriteLine($"{prop.Name}: {prop.Value}");
-            }
         }
     }
 

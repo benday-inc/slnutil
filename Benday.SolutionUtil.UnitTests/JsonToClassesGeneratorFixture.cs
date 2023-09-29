@@ -157,4 +157,26 @@ public class JsonToClassesGeneratorFixture
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
     }
+
+    [TestMethod]
+    public void ParseSimple_Array()
+    {
+        // arrange
+        var fromJson = GetSimpleClassArrayAsJson();
+
+        var expectedClassCount = 1;
+        var expectedClassNames = new List<string>()
+        {
+            "RootClass"
+        };
+
+        // act
+        SystemUnderTest.Parse(fromJson);
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+
+        expectedClassNames.ForEach(name =>
+            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
+    }
 }
