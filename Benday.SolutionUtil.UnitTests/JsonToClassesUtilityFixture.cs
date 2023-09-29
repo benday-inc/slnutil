@@ -74,4 +74,41 @@ public class JsonToClassesUtilityFixture
         Console.WriteLine(actual);
     }
 
+    [TestMethod]
+    public void Serialize_Complex()
+    {
+        // arrange
+        var item = new Person(1);
+
+        item.AddAddress(1);
+        item.AddAddress(2);
+
+        // act
+        var actual = System.Text.Json.JsonSerializer.Serialize(item);
+
+        // assert
+        Console.WriteLine(actual);
+    }
+
+    [TestMethod]
+    public void Serialize_Complex_Array()
+    {
+        // arrange
+        var items = new List<Person>
+        {
+            new Person(1),
+            new Person(2)
+        };
+
+        items[0].AddAddress(1);
+        items[0].AddAddress(2);
+        items[1].AddAddress(1);
+        items[1].AddAddress(2);
+
+        // act
+        var actual = System.Text.Json.JsonSerializer.Serialize(items);
+
+        // assert
+        Console.WriteLine(actual);
+    }
 }
