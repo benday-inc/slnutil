@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
+using Pluralize.NET;
+
 namespace Benday.SolutionUtil.Api;
 
 public class JsonToClassGenerator
@@ -48,8 +50,20 @@ public class JsonToClassGenerator
 
         foreach (var item in fromValue)
         {
-            Console.WriteLine($"{item}");
+            if (item.Value is JsonArray)
+            {
+                AddClass(Singularize(item.Key));
+            }            
         }
+    }
+
+    private string Singularize(string value)
+    {
+        IPluralize pluralizer = new Pluralizer();
+
+        var returnValue = pluralizer.Singularize(value);
+
+        return returnValue;
     }
 
     private void AddClass(string className)
