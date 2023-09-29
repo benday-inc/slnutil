@@ -155,7 +155,7 @@ public class JsonToClassesGeneratorFixture
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
+            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
     }
 
     [TestMethod]
@@ -177,7 +177,7 @@ public class JsonToClassesGeneratorFixture
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
+            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
     }
 
     [TestMethod]
@@ -201,7 +201,7 @@ public class JsonToClassesGeneratorFixture
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
+            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
     }
 
     [TestMethod]
@@ -225,6 +225,6 @@ public class JsonToClassesGeneratorFixture
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Contains(name), $"Class name '{name}' not found"));
+            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
     }
 }

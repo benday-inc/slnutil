@@ -77,16 +77,27 @@ public class JsonToClassGenerator
         return returnValue;
     }
 
-    private void AddClass(string className)
+    private ClassInfo AddClass(string className)
     {
-        if (Classes.Contains(className) == false)
+        if (Classes.ContainsKey(className) == false)
         {
-            Classes.Add(className);
+            var temp = new ClassInfo()
+            {
+                Name = className
+            };
+
+            Classes.Add(className, temp);
+
+            return temp;
+        }
+        else
+        {
+            return Classes[className];
         }
     }
 
-    private List<string> _classes = new List<string>();
-    public List<string> Classes
+    private Dictionary<string, ClassInfo> _classes = new();
+    public Dictionary<string, ClassInfo> Classes
     {
         get => _classes;
         set => _classes = value;
