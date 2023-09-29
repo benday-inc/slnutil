@@ -32,6 +32,14 @@ public class JsonToClassesUtilityFixture
     public void Serialize_Simple()
     {
         // arrange
+        string actual = GetSimpleClassAsJson();
+
+        // assert
+        Console.WriteLine(actual);
+    }
+
+    private static string GetSimpleClassAsJson()
+    {
         var item = new Thingy()
         {
             FavoriteNumber = 123,
@@ -41,13 +49,19 @@ public class JsonToClassesUtilityFixture
 
         // act
         var actual = System.Text.Json.JsonSerializer.Serialize(item);
+        return actual;
+    }
+
+    [TestMethod]
+    public void Serialize_Simple_Array()
+    {
+        string actual = GetSimpleClassArrayAsJson();
 
         // assert
         Console.WriteLine(actual);
     }
 
-    [TestMethod]
-    public void Serialize_Simple_Array()
+    private static string GetSimpleClassArrayAsJson()
     {
         // arrange
         var items = new List<Thingy>
@@ -69,13 +83,19 @@ public class JsonToClassesUtilityFixture
 
         // act
         var actual = System.Text.Json.JsonSerializer.Serialize(items);
+        return actual;
+    }
+
+    [TestMethod]
+    public void Serialize_Complex()
+    {
+        string actual = GetComplexClassAsJson();
 
         // assert
         Console.WriteLine(actual);
     }
 
-    [TestMethod]
-    public void Serialize_Complex()
+    private static string GetComplexClassAsJson()
     {
         // arrange
         var item = new Person(1);
@@ -85,13 +105,19 @@ public class JsonToClassesUtilityFixture
 
         // act
         var actual = System.Text.Json.JsonSerializer.Serialize(item);
+        return actual;
+    }
+
+    [TestMethod]
+    public void Serialize_Complex_Array()
+    {
+        string actual = GetComplexClassArrayAsJson();
 
         // assert
         Console.WriteLine(actual);
     }
 
-    [TestMethod]
-    public void Serialize_Complex_Array()
+    private static string GetComplexClassArrayAsJson()
     {
         // arrange
         var items = new List<Person>
@@ -107,8 +133,6 @@ public class JsonToClassesUtilityFixture
 
         // act
         var actual = System.Text.Json.JsonSerializer.Serialize(items);
-
-        // assert
-        Console.WriteLine(actual);
+        return actual;
     }
 }
