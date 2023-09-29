@@ -36,12 +36,19 @@ public class JsonToClassGenerator
     }
     private void PopulateFromArray(JsonArray array, string className)
     {
-        //foreach (var item in array)
-        //{
-        //    
-        //}
+        foreach (var item in array)
+        {
+            if (item is null)
+            {
+                continue;
+            }
+            else
+            {
+                PopulateFromJsonObject(item.AsObject(), className);
+            }
+        }
 
-        AddClass(className);
+
     }
 
     private void PopulateFromJsonObject(JsonObject fromValue, string className)
