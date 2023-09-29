@@ -63,9 +63,7 @@ public class JsonToClassGenerator
             }
             else if (item.Value is JsonArray)
             {
-                string singularized = Singularize(item.Key);
-                AddClass(singularized);
-                PopulateFromArray((JsonArray)item.Value, singularized);
+                PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
             }            
         }
     }
