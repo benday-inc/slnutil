@@ -3,19 +3,19 @@ using System.Text.Json.Nodes;
 
 using Pluralize.NET;
 
-namespace Benday.SolutionUtil.Api;
+namespace Benday.SolutionUtil.Api.JsonClasses;
 
 public class JsonToClassGenerator
 {
     public JsonToClassGenerator()
     {
-        
+
     }
 
     public void Parse(string json, string rootClass = "RootClass")
     {
         // deserialize json
-        var result = JsonObject.Parse(json);
+        var result = JsonNode.Parse(json);
 
         if (result is null)
         {
@@ -32,7 +32,7 @@ public class JsonToClassGenerator
             var element = (JsonObject)result;
 
             PopulateFromJsonObject(element, rootClass);
-        }        
+        }
     }
     private void PopulateFromArray(JsonArray array, string className)
     {
@@ -64,7 +64,7 @@ public class JsonToClassGenerator
             else if (item.Value is JsonArray)
             {
                 PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
-            }            
+            }
         }
     }
 
@@ -91,5 +91,5 @@ public class JsonToClassGenerator
         get => _classes;
         set => _classes = value;
     }
-    
+
 }

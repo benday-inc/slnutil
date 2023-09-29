@@ -1,4 +1,4 @@
-using Benday.SolutionUtil.Api;
+using Benday.SolutionUtil.Api.JsonClasses;
 using Benday.SolutionUtil.UnitTests.SampleClassesForSerialization;
 
 namespace Benday.SolutionUtil.UnitTests;
