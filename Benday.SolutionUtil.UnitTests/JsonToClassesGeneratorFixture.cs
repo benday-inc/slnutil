@@ -145,17 +145,52 @@ public class JsonToClassesGeneratorFixture
         var expectedClassCount = 1;
         var expectedClassNames = new List<string>()
         {
-            "RootClass"
+            "ThingyThing"
         };
 
         // act
-        SystemUnderTest.Parse(fromJson);
+        SystemUnderTest.Parse(fromJson, "ThingyThing");
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+
+        AssertAreEqual(GetClassInfoForThingy(),
+            SystemUnderTest.Classes["ThingyThing"]);
+    }
+    private void AssertAreEqual(ClassInfo expected, 
+        ClassInfo actual)
+    {
+        Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
+
+        Assert.AreEqual<int>(expected.Properties.Count, actual.Properties.Count, "Properties.Count");
+
+        AssertAreEqual(expected.Properties, actual.Properties);
+    }
+
+    private void AssertAreEqual(
+        Dictionary<string, PropertyInfo> expected, 
+        Dictionary<string, PropertyInfo> actual)
+    {
+        var expectedKeys = expected.Keys;
+        var actualKeys = actual.Keys;
+
+        CollectionAssert.AreEqual(expectedKeys, actualKeys,
+            "Key collections don't match.");
+
+        foreach (var key in expectedKeys)
+        {
+            AssertAreEqual(expected[key], actual[key]);
+        }
+
+    }
+    private void AssertAreEqual(PropertyInfo expected, 
+        PropertyInfo actual)
+    {
+        Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
+        Assert.AreEqual<string>(expected.DataType, actual.DataType, "DataType");
     }
 
     [TestMethod]
@@ -226,5 +261,18 @@ public class JsonToClassesGeneratorFixture
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+    }
+
+    private ClassInfo GetClassInfoForThingy()
+    {
+        var returnValue = new ClassInfo();
+
+        returnValue.Name = "ThingyThing";
+
+        returnValue.AddProperty("Title");
+        returnValue.AddProperty("IsAwesome", "bool");
+        returnValue.AddProperty("FavoriteNumber", "int");
+
+        return returnValue;
     }
 }
