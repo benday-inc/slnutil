@@ -7,4 +7,6 @@ public class PersonAddress
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
     public string PostalCode { get; set; } = string.Empty;
+
+    public Thingy ThingyThing { get; set; } = new Thingy();
 }

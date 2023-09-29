@@ -47,8 +47,6 @@ public class JsonToClassGenerator
                 PopulateFromJsonObject(item.AsObject(), className);
             }
         }
-
-
     }
 
     private void PopulateFromJsonObject(JsonObject fromValue, string className)
@@ -57,9 +55,17 @@ public class JsonToClassGenerator
 
         foreach (var item in fromValue)
         {
-            if (item.Value is JsonArray)
+            Console.WriteLine($"item: {item}");
+
+            if (item.Value is JsonObject)
             {
-                AddClass(Singularize(item.Key));
+                PopulateFromJsonObject((JsonObject)item.Value, item.Key);
+            }
+            else if (item.Value is JsonArray)
+            {
+                string singularized = Singularize(item.Key);
+                AddClass(singularized);
+                PopulateFromArray((JsonArray)item.Value, singularized);
             }            
         }
     }

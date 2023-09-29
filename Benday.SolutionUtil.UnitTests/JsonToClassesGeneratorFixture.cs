@@ -186,11 +186,12 @@ public class JsonToClassesGeneratorFixture
         // arrange
         var fromJson = GetComplexClassAsJson();
 
-        var expectedClassCount = 2;
+        var expectedClassCount = 3;
         var expectedClassNames = new List<string>()
         {
             "RootClass",
-            "Address"
+            "Address",
+            "ThingyThing"
         };
 
         // act
@@ -209,11 +210,12 @@ public class JsonToClassesGeneratorFixture
         // arrange
         var fromJson = GetComplexClassArrayAsJson();
 
-        var expectedClassCount = 2;
+        var expectedClassCount = 3;
         var expectedClassNames = new List<string>()
         {
             "RootClass",
-            "Address"
+            "Address",
+            "ThingyThing"
         };
 
         // act
