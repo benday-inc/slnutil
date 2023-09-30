@@ -11,7 +11,9 @@ public class ClassInfo
 
     public Dictionary<string, PropertyInfo> Properties { get; set; } = new();
 
-    public PropertyInfo AddProperty(string name, string dataType = "string")
+    public PropertyInfo AddProperty(string name, 
+        string dataType = "string", 
+        bool isArray = false)
     {
         if (Properties.ContainsKey(name) == true)
         {
@@ -21,7 +23,9 @@ public class ClassInfo
         {
             var prop = new PropertyInfo()
             {
-                Name = name
+                Name = name,
+                DataType = dataType,
+                IsArray = isArray
             };
 
             Properties.Add(name, prop);

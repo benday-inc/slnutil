@@ -60,7 +60,7 @@ public class JsonToClassGenerator
             if (item.Value is JsonObject)
             {
                 toClass.AddProperty(
-                    item.Key, 
+                    item.Key,
                     item.Key
                 );
 
@@ -69,8 +69,9 @@ public class JsonToClassGenerator
             else if (item.Value is JsonArray)
             {
                 toClass.AddProperty(
-                    item.Key, 
-                    $"List<{Singularize(item.Key)}>"
+                    item.Key,
+                    $"{Singularize(item.Key)}",
+                    true
                 );
 
                 PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
@@ -83,14 +84,42 @@ public class JsonToClassGenerator
                 }
                 else
                 {
-                    var temp = item.Value.GetValue<object>();
-
-                    toClass.AddProperty(item.Key, temp.GetType().Name);
+                    toClass.AddProperty(item.Key, GetTypeName(item));
                 }
-
             }
         }
     }
+
+    private string GetTypeName(KeyValuePair<string, JsonNode?> item)
+    {
+        if (item.Value is null)
+        {
+            return "string";
+        }
+        else
+        {
+            var temp = item.Value.GetValue<JsonElement>();
+
+            if (temp.ValueKind == JsonValueKind.String)
+            {
+                return "string";
+            }
+            else if (temp.ValueKind == JsonValueKind.Number)
+            {
+                return "int";
+            }
+            else if (temp.ValueKind == JsonValueKind.True ||
+                temp.ValueKind == JsonValueKind.False)
+            {
+                return "bool";
+            }
+            else
+            {
+                return item.Key;
+            }
+        }
+    }
+
 
     private string Singularize(string value)
     {
@@ -122,7 +151,7 @@ public class JsonToClassGenerator
 
     public void GenerateClasses()
     {
-        
+
     }
 
     public Dictionary<string, ClassInfo> Classes { get; set; } = new();

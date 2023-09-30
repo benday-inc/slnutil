@@ -196,6 +196,7 @@ public class JsonToClassesGeneratorFixture
     {
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
         Assert.AreEqual<string>(expected.DataType, actual.DataType, "DataType");
+        Assert.AreEqual<bool>(expected.IsArray, actual.IsArray, "IsArray");
     }
 
     [TestMethod]
