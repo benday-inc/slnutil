@@ -160,7 +160,7 @@ public class JsonToClassesGeneratorFixture
         AssertAreEqual(GetClassInfoForThingy(),
             SystemUnderTest.Classes["ThingyThing"]);
     }
-    private void AssertAreEqual(ClassInfo expected, 
+    private void AssertAreEqual(ClassInfo expected,
         ClassInfo actual)
     {
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
@@ -171,7 +171,7 @@ public class JsonToClassesGeneratorFixture
     }
 
     private void AssertAreEqual(
-        Dictionary<string, PropertyInfo> expected, 
+        Dictionary<string, PropertyInfo> expected,
         Dictionary<string, PropertyInfo> actual)
     {
         var expectedKeys = expected.Keys;
@@ -186,7 +186,7 @@ public class JsonToClassesGeneratorFixture
         }
 
     }
-    private void AssertAreEqual(PropertyInfo expected, 
+    private void AssertAreEqual(PropertyInfo expected,
         PropertyInfo actual)
     {
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
@@ -213,6 +213,8 @@ public class JsonToClassesGeneratorFixture
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+
+        AssertAreEqual(GetClassInfoForThingy("RootClass"), SystemUnderTest.Classes["RootClass"]);
     }
 
     [TestMethod]
@@ -263,11 +265,11 @@ public class JsonToClassesGeneratorFixture
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
     }
 
-    private ClassInfo GetClassInfoForThingy()
+    private ClassInfo GetClassInfoForThingy(string name = "ThingyThing")
     {
         var returnValue = new ClassInfo();
 
-        returnValue.Name = "ThingyThing";
+        returnValue.Name = name;
 
         returnValue.AddProperty("Title");
         returnValue.AddProperty("IsAwesome", "bool");
