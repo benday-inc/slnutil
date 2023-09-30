@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -151,7 +152,38 @@ public class JsonToClassGenerator
 
     public void GenerateClasses()
     {
+        foreach (var item in Classes)
+        {
+            var sb = new StringBuilder();
 
+            sb.AppendLine($"public class {item.Key}");
+            sb.AppendLine("{");
+
+            foreach (var prop in item.Value.Properties)
+            {
+                sb.AppendLine($"[JsonPropertyName(\"{prop.Value.Name}\")]");
+
+                if (prop.Value.IsArray == true)
+                {
+                    sb.AppendLine($"    public {prop.Value.DataType}[] {prop.Value.Name} {{ get; set; }} = new {prop.Value.DataType}[0];");
+                }
+                else
+                {
+                    if (prop.Value.DataType == "string")
+                    {
+                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name} {{ get; set; }} = string.Empty;");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name} {{ get; set; }}");
+                    }
+                }
+            }
+
+            sb.AppendLine("}");
+
+            GeneratedClasses.Add(item.Key, sb.ToString());
+        }
     }
 
     public Dictionary<string, ClassInfo> Classes { get; set; } = new();

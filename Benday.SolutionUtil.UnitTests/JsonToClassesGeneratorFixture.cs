@@ -166,8 +166,8 @@ public class JsonToClassesGeneratorFixture
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
 
         Assert.AreEqual<int>(
-            expected.Properties.Count, 
-            actual.Properties.Count, 
+            expected.Properties.Count,
+            actual.Properties.Count,
             $"Properties.Count on '{expected.Name}' is wrong.");
 
         AssertAreEqual(expected.Properties, actual.Properties, expected.Name);
@@ -243,14 +243,14 @@ public class JsonToClassesGeneratorFixture
         SystemUnderTest.GenerateClasses();
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, 
-            SystemUnderTest.GeneratedClasses.Count, 
+        Assert.AreEqual<int>(expectedClassCount,
+            SystemUnderTest.GeneratedClasses.Count,
             $"Generated class count is wrong");
 
         var actual = SystemUnderTest.GeneratedClasses["RootClass"];
 
-var expected = 
-@"public class RootClass
+        var expected =
+        @"public class RootClass
 {
     [JsonPropertyName(""Title"")]
     public string Title { get; set; } = string.Empty;
@@ -261,8 +261,20 @@ var expected =
     [JsonPropertyName(""FavoriteNumber"")]
     public int FavoriteNumber { get; set; }
 }";
+        AssertCodeIsPrettyMuchEqual(expected, actual);
+    }
 
-        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+    private void AssertCodeIsPrettyMuchEqual(string expected, string actual)
+    {
+        var expectedLines = expected.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var actualLines = actual.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+        Assert.AreEqual<int>(expectedLines.Length, actualLines.Length, "Line count is wrong.");
+
+        for (int i = 0; i < expectedLines.Length; i++)
+        {
+            Assert.AreEqual<string>(expectedLines[i].Trim(), actualLines[i].Trim(), $"Line {i} is wrong.");
+        }
     }
 
     [TestMethod]
@@ -305,16 +317,16 @@ var expected =
     public string LastName { get; set; } = string.Empty;
 
     [JsonPropertyName(""IsAwesome"")]
-    public bool IsAwesome { get; set; } = string.Empty;
+    public bool IsAwesome { get; set; }
 
     [JsonPropertyName(""FavoriteNumber"")]
-    public int FavoriteNumber { get; set; } = string.Empty;
+    public int FavoriteNumber { get; set; }
 
     [JsonPropertyName(""Addresses"")]
-    public List<Address> Addresses { get; set; } = new();
+    public Address[] Addresses { get; set; } = new Address[0];
 }";
 
-        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+        AssertCodeIsPrettyMuchEqual(expected, actual);
 
         actual = SystemUnderTest.GeneratedClasses["Address"];
 
@@ -339,7 +351,7 @@ var expected =
     public ThingyThing ThingyThing { get; set; }
 }";
 
-        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+        AssertCodeIsPrettyMuchEqual(expected, actual);
 
         actual = SystemUnderTest.GeneratedClasses["ThingyThing"];
 
@@ -354,6 +366,9 @@ var expected =
     [JsonPropertyName(""FavoriteNumber"")]
     public int FavoriteNumber { get; set; }
 }";
+
+        AssertCodeIsPrettyMuchEqual(expected, actual);
+
     }
 
     [TestMethod]
@@ -406,7 +421,7 @@ var expected =
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
-        
+
         AssertAreEqual(GetClassInfoForPerson(), SystemUnderTest.Classes["Person"]);
         AssertAreEqual(GetClassInfoForThingy(), SystemUnderTest.Classes["ThingyThing"]);
         AssertAreEqual(GetClassInfoForAddress(), SystemUnderTest.Classes["Address"]);
@@ -436,8 +451,8 @@ var expected =
         returnValue.AddProperty("LastName");
         returnValue.AddProperty("IsAwesome", "bool");
         returnValue.AddProperty("FavoriteNumber", "int");
-        returnValue.AddProperty("Addresses", "List<Address>");
-        
+        returnValue.AddProperty("Addresses", "Address", true);
+
         return returnValue;
     }
 
@@ -453,7 +468,7 @@ var expected =
         returnValue.AddProperty("State");
         returnValue.AddProperty("PostalCode");
         returnValue.AddProperty("ThingyThing", "ThingyThing");
-        
+
         return returnValue;
     }
 }
