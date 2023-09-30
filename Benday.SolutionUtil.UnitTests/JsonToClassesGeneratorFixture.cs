@@ -223,6 +223,139 @@ public class JsonToClassesGeneratorFixture
     }
 
     [TestMethod]
+    public void GenerateClasses_Simple()
+    {
+        // arrange
+        var fromJson = GetSimpleClassArrayAsJson();
+
+        var expectedClassCount = 1;
+        var expectedClassNames = new List<string>()
+        {
+            "RootClass"
+        };
+
+        SystemUnderTest.Parse(fromJson);
+
+        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+
+        // act
+        SystemUnderTest.GenerateClasses();
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount, 
+            SystemUnderTest.GeneratedClasses.Count, 
+            $"Generated class count is wrong");
+
+        var actual = SystemUnderTest.GeneratedClasses["RootClass"];
+
+var expected = 
+@"public class RootClass
+{
+    [JsonPropertyName(""Title"")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName(""IsAwesome"")]
+    public bool IsAwesome { get; set; }
+
+    [JsonPropertyName(""FavoriteNumber"")]
+    public int FavoriteNumber { get; set; }
+}";
+
+        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+    }
+
+    [TestMethod]
+    public void GenerateClasses_Complex()
+    {
+        // arrange
+        var fromJson = GetComplexClassArrayAsJson();
+
+        var expectedClassCount = 3;
+        var expectedClassNames = new List<string>()
+        {
+            "Person",
+            "Address",
+            "ThingyThing"
+        };
+
+        SystemUnderTest.Parse(fromJson, "Person");
+
+        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+
+        // act
+        SystemUnderTest.GenerateClasses();
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount,
+            SystemUnderTest.GeneratedClasses.Count,
+            $"Generated class count is wrong");
+
+        var actual = SystemUnderTest.GeneratedClasses["Person"];
+
+        var expected = @"public class Person
+{
+    [JsonPropertyName(""Id"")]
+    public int Id { get; set; }
+
+    [JsonPropertyName(""FirstName"")]
+    public string FirstName { get; set; } = string.Empty;
+
+    [JsonPropertyName(""LastName"")]
+    public string LastName { get; set; } = string.Empty;
+
+    [JsonPropertyName(""IsAwesome"")]
+    public bool IsAwesome { get; set; } = string.Empty;
+
+    [JsonPropertyName(""FavoriteNumber"")]
+    public int FavoriteNumber { get; set; } = string.Empty;
+
+    [JsonPropertyName(""Addresses"")]
+    public List<Address> Addresses { get; set; } = new();
+}";
+
+        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+
+        actual = SystemUnderTest.GeneratedClasses["Address"];
+
+        expected = @"public class Address
+{
+    [JsonPropertyName(""Line1"")]
+    public string Line1 { get; set; } = string.Empty;
+
+    [JsonPropertyName(""Line2"")]
+    public string Line2 { get; set; } = string.Empty;
+
+    [JsonPropertyName(""City"")]
+    public string City { get; set; } = string.Empty;
+
+    [JsonPropertyName(""State"")]
+    public string State { get; set; } = string.Empty;
+
+    [JsonPropertyName(""PostalCode"")]
+    public string PostalCode { get; set; } = string.Empty;
+
+    [JsonPropertyName(""ThingyThing"")]
+    public ThingyThing ThingyThing { get; set; }
+}";
+
+        Assert.AreEqual<string>(expected, actual, "Generated class is wrong.");
+
+        actual = SystemUnderTest.GeneratedClasses["ThingyThing"];
+
+        expected = @"public class ThingyThing
+{
+    [JsonPropertyName(""Title"")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName(""IsAwesome"")]
+    public bool IsAwesome { get; set; }
+
+    [JsonPropertyName(""FavoriteNumber"")]
+    public int FavoriteNumber { get; set; }
+}";
+    }
+
+    [TestMethod]
     public void ParseComplex_Single()
     {
         // arrange

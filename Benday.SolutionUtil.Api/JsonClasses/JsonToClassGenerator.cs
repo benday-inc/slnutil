@@ -120,11 +120,12 @@ public class JsonToClassGenerator
         }
     }
 
-    private Dictionary<string, ClassInfo> _classes = new();
-    public Dictionary<string, ClassInfo> Classes
+    public void GenerateClasses()
     {
-        get => _classes;
-        set => _classes = value;
+        
     }
+
+    public Dictionary<string, ClassInfo> Classes { get; set; } = new();
+    public Dictionary<string, string> GeneratedClasses { get; set; } = new();
 
 }
