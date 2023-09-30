@@ -184,7 +184,7 @@ public class JsonToClassGenerator
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"public class {item.Key}");
+            sb.AppendLine($"public class {item.Key.Capitalize()}");
             sb.AppendLine("{");
 
             foreach (var prop in item.Value.Properties)
@@ -193,17 +193,17 @@ public class JsonToClassGenerator
 
                 if (prop.Value.IsArray == true)
                 {
-                    sb.AppendLine($"    public {prop.Value.DataType}[] {prop.Value.Name} {{ get; set; }} = new {prop.Value.DataType}[0];");
+                    sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
                 }
                 else
                 {
                     if (prop.Value.DataType == "string")
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name} {{ get; set; }} = string.Empty;");
+                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }} = string.Empty;");
                     }
                     else
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name} {{ get; set; }}");
+                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }}");
                     }
                 }
             }
