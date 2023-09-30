@@ -264,25 +264,6 @@ public class JsonToClassesGeneratorFixture
         AssertCodeIsPrettyMuchEqual(expected, actual);
     }
 
-    [TestMethod]
-    public void GenerateClasses_FromFile()
-    {
-        // arrange
-        var fromJson = File.ReadAllText(
-            @"C:\code\repos\Commerce\misc\ps-json-info\ps-alm-for-devs-vs2012.json");
-
-        SystemUnderTest.Parse(fromJson);
-
-        // act
-        SystemUnderTest.GenerateClasses();
-
-        // assert
-        foreach (var item in SystemUnderTest.GeneratedClasses.Keys)
-        {
-            Console.WriteLine($"{item}");
-        }
-    }
-
     private void AssertCodeIsPrettyMuchEqual(string expected, string actual)
     {
         var expectedLines = expected.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
