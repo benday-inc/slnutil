@@ -59,10 +59,20 @@ public class JsonToClassGenerator
 
             if (item.Value is JsonObject)
             {
+                toClass.AddProperty(
+                    item.Key, 
+                    item.Key
+                );
+
                 PopulateFromJsonObject((JsonObject)item.Value, item.Key);
             }
             else if (item.Value is JsonArray)
             {
+                toClass.AddProperty(
+                    item.Key, 
+                    $"List<{Singularize(item.Key)}>"
+                );
+
                 PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
             }
             else
@@ -77,7 +87,7 @@ public class JsonToClassGenerator
 
                     toClass.AddProperty(item.Key, temp.GetType().Name);
                 }
-                
+
             }
         }
     }

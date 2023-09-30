@@ -165,20 +165,24 @@ public class JsonToClassesGeneratorFixture
     {
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
 
-        Assert.AreEqual<int>(expected.Properties.Count, actual.Properties.Count, "Properties.Count");
+        Assert.AreEqual<int>(
+            expected.Properties.Count, 
+            actual.Properties.Count, 
+            $"Properties.Count on '{expected.Name}' is wrong.");
 
-        AssertAreEqual(expected.Properties, actual.Properties);
+        AssertAreEqual(expected.Properties, actual.Properties, expected.Name);
     }
 
     private void AssertAreEqual(
         Dictionary<string, PropertyInfo> expected,
-        Dictionary<string, PropertyInfo> actual)
+        Dictionary<string, PropertyInfo> actual,
+        string className)
     {
         var expectedKeys = expected.Keys;
         var actualKeys = actual.Keys;
 
         CollectionAssert.AreEqual(expectedKeys, actualKeys,
-            "Key collections don't match.");
+            $"Property key collections don't match on {className}.");
 
         foreach (var key in expectedKeys)
         {
@@ -186,7 +190,8 @@ public class JsonToClassesGeneratorFixture
         }
 
     }
-    private void AssertAreEqual(PropertyInfo expected,
+    private void AssertAreEqual(
+        PropertyInfo expected,
         PropertyInfo actual)
     {
         Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
@@ -226,19 +231,23 @@ public class JsonToClassesGeneratorFixture
         var expectedClassCount = 3;
         var expectedClassNames = new List<string>()
         {
-            "RootClass",
+            "Person",
             "Address",
             "ThingyThing"
         };
 
         // act
-        SystemUnderTest.Parse(fromJson);
+        SystemUnderTest.Parse(fromJson, "Person");
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+
+        AssertAreEqual(GetClassInfoForPerson(), SystemUnderTest.Classes["Person"]);
+        AssertAreEqual(GetClassInfoForThingy(), SystemUnderTest.Classes["ThingyThing"]);
+        AssertAreEqual(GetClassInfoForAddress(), SystemUnderTest.Classes["Address"]);
     }
 
     [TestMethod]
@@ -250,19 +259,23 @@ public class JsonToClassesGeneratorFixture
         var expectedClassCount = 3;
         var expectedClassNames = new List<string>()
         {
-            "RootClass",
+            "Person",
             "Address",
             "ThingyThing"
         };
 
         // act
-        SystemUnderTest.Parse(fromJson);
+        SystemUnderTest.Parse(fromJson, "Person");
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
 
         expectedClassNames.ForEach(name =>
             Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+        
+        AssertAreEqual(GetClassInfoForPerson(), SystemUnderTest.Classes["Person"]);
+        AssertAreEqual(GetClassInfoForThingy(), SystemUnderTest.Classes["ThingyThing"]);
+        AssertAreEqual(GetClassInfoForAddress(), SystemUnderTest.Classes["Address"]);
     }
 
     private ClassInfo GetClassInfoForThingy(string name = "ThingyThing")
@@ -275,6 +288,38 @@ public class JsonToClassesGeneratorFixture
         returnValue.AddProperty("IsAwesome", "bool");
         returnValue.AddProperty("FavoriteNumber", "int");
 
+        return returnValue;
+    }
+
+    private ClassInfo GetClassInfoForPerson(string name = "Person")
+    {
+        var returnValue = new ClassInfo();
+
+        returnValue.Name = name;
+
+        returnValue.AddProperty("Id", "int");
+        returnValue.AddProperty("FirstName");
+        returnValue.AddProperty("LastName");
+        returnValue.AddProperty("IsAwesome", "bool");
+        returnValue.AddProperty("FavoriteNumber", "int");
+        returnValue.AddProperty("Addresses", "List<Address>");
+        
+        return returnValue;
+    }
+
+    private ClassInfo GetClassInfoForAddress(string name = "Address")
+    {
+        var returnValue = new ClassInfo();
+
+        returnValue.Name = name;
+
+        returnValue.AddProperty("Line1");
+        returnValue.AddProperty("Line2");
+        returnValue.AddProperty("City");
+        returnValue.AddProperty("State");
+        returnValue.AddProperty("PostalCode");
+        returnValue.AddProperty("ThingyThing", "ThingyThing");
+        
         return returnValue;
     }
 }
