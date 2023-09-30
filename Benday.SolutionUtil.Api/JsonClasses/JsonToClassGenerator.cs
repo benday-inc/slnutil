@@ -45,7 +45,32 @@ public class JsonToClassGenerator
             }
             else
             {
-                PopulateFromJsonObject(item.AsObject(), className);
+                if (item is JsonObject)
+                {
+                    PopulateFromJsonObject(item.AsObject(), className);
+                }
+
+                /*
+                string typeName = string.Empty;
+
+                try
+                {
+                    typeName = GetTypeName(item);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"");
+                }
+
+                if (typeName == "string" || typeName == "int" || typeName == "bool")
+                {
+                    // skip it
+                }
+                else
+                {
+                    PopulateFromJsonObject(item.AsObject(), className);
+                }
+                */
             }
         }
     }
@@ -56,8 +81,6 @@ public class JsonToClassGenerator
 
         foreach (var item in fromValue)
         {
-            Console.WriteLine($"item: {item}");
-
             if (item.Value is JsonObject)
             {
                 toClass.AddProperty(
@@ -99,28 +122,33 @@ public class JsonToClassGenerator
         }
         else
         {
-            var temp = item.Value.GetValue<JsonElement>();
-
-            if (temp.ValueKind == JsonValueKind.String)
-            {
-                return "string";
-            }
-            else if (temp.ValueKind == JsonValueKind.Number)
-            {
-                return "int";
-            }
-            else if (temp.ValueKind == JsonValueKind.True ||
-                temp.ValueKind == JsonValueKind.False)
-            {
-                return "bool";
-            }
-            else
-            {
-                return item.Key;
-            }
+            var temp = item.Value;
+            return GetTypeName(temp);
         }
     }
 
+    private static string GetTypeName(JsonNode temp)
+    {
+        var element = temp.GetValue<JsonElement>();
+
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            return "string";
+        }
+        else if (element.ValueKind == JsonValueKind.Number)
+        {
+            return "int";
+        }
+        else if (element.ValueKind == JsonValueKind.True ||
+            element.ValueKind == JsonValueKind.False)
+        {
+            return "bool";
+        }
+        else
+        {
+            return element.ValueKind.ToString();
+        }
+    }
 
     private string Singularize(string value)
     {

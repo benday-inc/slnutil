@@ -3,9 +3,12 @@
 using Benday.CommandsFramework;
 using Benday.SolutionUtil.Api.JsonClasses;
 
+
 namespace Benday.SolutionUtil.Api;
 
-[Command(Name = Constants.CommandArgumentNameClassesFromJson, Description = "Create C# classes from JSON with serialization attributes for System.Text.Json.")]
+[Command(
+    Name = Constants.CommandArgumentNameClassesFromJson, 
+    Description = "Create C# classes from JSON in clipboard with serialization attributes for System.Text.Json.")]
 public class CreateClassesFromJsonCommand : SynchronousCommand
 {
     public CreateClassesFromJsonCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -23,6 +26,49 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
 
     protected override void OnExecute()
+    {
+        string json = GetJsonFromConsole();
+
+        if (string.IsNullOrWhiteSpace(json) == true)
+        {
+            throw new KnownException("Input does not contain any text.");
+        }
+        else
+        {
+            var generator = new JsonToClassGenerator();
+
+            WriteLine("**** Input ****");
+            WriteLine(json);
+            WriteLine("**** Output ****");
+
+            generator.Parse(json);
+            generator.GenerateClasses();
+
+            if (generator.GeneratedClasses.Count == 0)
+            {
+                throw new KnownException("Input does not contain any classes.");
+            }
+            else
+            {
+                var code = new StringBuilder();
+
+                foreach (var key in generator.GeneratedClasses.Keys)
+                {
+                    // WriteLine($"Generated class: {key}");
+                    code.AppendLine(generator.GeneratedClasses[key]);
+                    code.AppendLine();
+                }
+
+                // await Clipboard.SetTextAsync(code.ToString());
+
+                // WriteLine("Classes set to clipboard");
+
+                WriteLine(code.ToString());
+            }
+        }
+    }
+
+    private static string GetJsonFromConsole()
     {
         Console.WriteLine("Paste JSON from the clipboard and press enter three times: ");
 
@@ -56,34 +102,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         }
 
         var json = lines.ToString().Trim();
-
-        if (string.IsNullOrWhiteSpace(json) == true)
-        {
-            throw new KnownException("Input does not contain any text.");
-        }
-        else
-        {
-            var generator = new JsonToClassGenerator();
-
-            WriteLine("**** Input ****");
-            WriteLine(json);
-            WriteLine("**** Output ****");
-
-            generator.Parse(json);
-            generator.GenerateClasses();
-
-            if (generator.GeneratedClasses.Count == 0)
-            {
-                throw new KnownException("Input does not contain any classes.");
-            }
-            else
-            {
-                foreach (var item in generator.GeneratedClasses)
-                {
-                    WriteLine(item.Value);
-                    WriteLine(string.Empty);
-                }
-            }
-        }
+        return json;
     }
 }
