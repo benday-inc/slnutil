@@ -7,7 +7,7 @@ using Benday.SolutionUtil.Api.JsonClasses;
 namespace Benday.SolutionUtil.Api;
 
 [Command(
-    Name = Constants.CommandArgumentNameClassesFromJson, 
+    Name = Constants.CommandArgumentNameClassesFromJson,
     Description = "Create C# classes from JSON in clipboard with serialization attributes for System.Text.Json.")]
 public class CreateClassesFromJsonCommand : SynchronousCommand
 {
@@ -27,7 +27,7 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        string json = GetJsonFromConsole();
+        string json = GetJsonFromConsole2();
 
         if (string.IsNullOrWhiteSpace(json) == true)
         {
@@ -36,10 +36,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         else
         {
             var generator = new JsonToClassGenerator();
-
-            WriteLine("**** Input ****");
-            WriteLine(json);
-            WriteLine("**** Output ****");
 
             generator.Parse(json);
             generator.GenerateClasses();
@@ -69,6 +65,33 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
     }
 
     private static string GetJsonFromConsole()
+    {
+        System.Console.Write("password: ");
+
+/*
+        byte[] inputBuffer = new byte[1024];
+        Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+        Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
+        var strInput = Console.ReadLine();
+
+        return strInput;
+*/
+/*
+        string password = string.Empty; // this will hold the password as it's being typed.
+
+        while (true)
+        {
+            var key = System.Console.ReadKey(true);
+            if (key.Key == ConsoleKey.Enter)
+                break;
+            password += key.KeyChar;
+        }
+
+        return password;
+        */
+    }
+
+    private static string GetJsonFromConsole2()
     {
         Console.WriteLine("Paste JSON from the clipboard and press enter three times: ");
 
