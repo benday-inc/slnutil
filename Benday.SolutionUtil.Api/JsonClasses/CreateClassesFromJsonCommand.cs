@@ -27,11 +27,16 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        string json = GetJsonFromConsole2();
+        string json = GetJsonFromConsole();
 
         if (string.IsNullOrWhiteSpace(json) == true)
         {
             throw new KnownException("Input does not contain any text.");
+        }
+        else if (1 == 1)
+        {
+            WriteLine("");
+            WriteLine(json);
         }
         else
         {
@@ -64,31 +69,73 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         }
     }
 
-    private static string GetJsonFromConsole()
+    private string GetJsonFromConsole()
     {
-        System.Console.Write("password: ");
+        // Console.Clear();
+        WriteLine("Paste in the JSON string: ");
 
-/*
-        byte[] inputBuffer = new byte[1024];
-        Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
-        Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
-        var strInput = Console.ReadLine();
+        /*
+                byte[] inputBuffer = new byte[1024];
+                Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+                Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
+                var strInput = Console.ReadLine();
 
-        return strInput;
-*/
-/*
+                return strInput;
+        */
+
         string password = string.Empty; // this will hold the password as it's being typed.
+
+        int emptyLineCount = 0;
+        int lineCountToExit = 4;
+
+        var LINE_RESET = "\f\u001bc\x1b[3J";
+
+        if (OperatingSystem.IsWindows() == true)
+        {
+            LINE_RESET = "\r";
+        }
+
+        long readCount = 0;
 
         while (true)
         {
+            readCount++;
             var key = System.Console.ReadKey(true);
             if (key.Key == ConsoleKey.Enter)
-                break;
-            password += key.KeyChar;
+            {
+                emptyLineCount++;
+
+                if (emptyLineCount >= lineCountToExit)
+                {
+                    break;
+                }
+
+                if (emptyLineCount > 0)
+                {
+                    Console.Write(LINE_RESET);
+                    Console.SetCursorPosition(0, 1);
+                    Console.Write($"Found {emptyLineCount} blank lines. Press Enter {(lineCountToExit - emptyLineCount)} more times to exit...");
+                }
+
+                password += Environment.NewLine;
+            }
+            else
+            {
+                emptyLineCount = 0;
+
+                password += key.KeyChar;
+
+                if (readCount % 100 == 0)
+                {
+                    Console.Write(LINE_RESET);
+                    Console.SetCursorPosition(0, 1);
+                    Console.Write($"Reading...                                                                                  ");
+                }
+            }
         }
 
         return password;
-        */
+
     }
 
     private static string GetJsonFromConsole2()
