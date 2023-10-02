@@ -78,24 +78,48 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
             Directory.CreateDirectory(tempDir);
         }
 
-        var tempFilename = $"paste-json-to-this-file-and-save-{0}.txt";
+        var tempFilename = $"paste-json-to-this-file-and-save-{DateTime.Now.Ticks}.txt";
 
         var pathToInputFile = Path.Combine(tempDir, tempFilename);
 
         if (File.Exists(pathToInputFile) == false)
         {
-            File.Create(pathToInputFile);
+            File.WriteAllText(pathToInputFile, string.Empty);
         }
 
-        var psi = new ProcessStartInfo()
+        if (OperatingSystem.IsWindows() == true)
         {
-            FileName = pathToInputFile,
-            UseShellExecute = true
-        };
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "notepad.exe",
+                Arguments = pathToInputFile,
+                CreateNoWindow = true,
+            };
 
-        Process.Start(psi)?.WaitForInputIdle();
+            Process.Start(psi)?.WaitForExit();
 
-        
+            WriteLine("exited...");
+
+            var json = File.ReadAllText(pathToInputFile);
+
+            return json;
+        }
+        else
+        {
+            var psi = new ProcessStartInfo()
+            {
+                FileName = pathToInputFile,
+                CreateNoWindow = true,
+            };
+
+            Process.Start(psi)?.WaitForExit();
+
+            WriteLine("exited...");
+
+            var json = File.ReadAllText(pathToInputFile);
+
+            return json;
+        }
     }
 
     private string GetJsonFromConsole()
