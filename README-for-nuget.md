@@ -23,6 +23,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files in a folder tree. |
 | getconnectionstring | Get database connection string in appsettings.json. |
+| classesfromjson | Create C# classes from JSON with serialization attributes for System.Text.Json. |
 | listpackages-oldstyle | Lists packages referenced in legacy style packages.config files. |
 | listsolutionprojects | Gets list of projects in a solution. |
 | replacetoken | Replace token in file. |
@@ -71,6 +72,11 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | filename | Optional | String | Path to json config file |
 | name | Required | String | Name of the connection string to get |
+## classesfromjson
+**Create C# classes from JSON with serialization attributes for System.Text.Json.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
 ## listpackages-oldstyle
 **Lists packages referenced in legacy style packages.config files.**
 ### Arguments

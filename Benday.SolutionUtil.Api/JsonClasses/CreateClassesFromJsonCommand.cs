@@ -12,7 +12,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(
     Name = Constants.CommandArgumentNameClassesFromJson,
-    Description = "Create C# classes from JSON in clipboard with serialization attributes for System.Text.Json.")]
+    Description = "Create C# classes from JSON with serialization attributes for System.Text.Json.")]
 public class CreateClassesFromJsonCommand : SynchronousCommand
 {
     public CreateClassesFromJsonCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
