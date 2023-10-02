@@ -183,9 +183,13 @@ public class JsonToClassGenerator
                     {
                         sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }} = string.Empty;");
                     }
-                    else
+                    else if (prop.Value.DataType == "int" || prop.Value.DataType == "bool")
                     {
                         sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }}");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"    public {prop.Value.DataType.Capitalize()} {prop.Value.Name.Capitalize()} {{ get; set; }} = new()");
                     }
                 }
 
