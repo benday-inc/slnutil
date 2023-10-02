@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Pluralize.NET;
+using System.Drawing;
 
 namespace Benday.SolutionUtil.Api.JsonClasses;
 
@@ -53,6 +54,77 @@ public class JsonToClassGenerator
         }
     }
 
+    private class ArrayDataTypeInfo
+    {
+        public bool IsScalar { get; set; }
+        public JsonValueKind Kind { get; set; }
+        public string ProposedDataType { get; set; } = string.Empty;
+        public bool IsEmpty { get; set; }
+    }
+
+    private ArrayDataTypeInfo GetArrayElementDataType(JsonArray itemValueAsArray)
+    {
+        var returnValue = new ArrayDataTypeInfo();
+
+        returnValue.ProposedDataType = "unknown";
+        returnValue.IsEmpty = true;
+
+        JsonElement asElement;
+
+        foreach (var item in itemValueAsArray)
+        {
+            if (item is null)
+            {
+                continue;
+            }
+
+            if (item is JsonObject)
+            {
+                returnValue.ProposedDataType = "unknown";
+                returnValue.IsScalar = false;
+                returnValue.IsEmpty = false;
+
+                return returnValue;
+            }
+            else
+            {
+                asElement = item.GetValue<JsonElement>();
+
+                returnValue.Kind = asElement.ValueKind;
+                returnValue.IsEmpty = false;
+
+                break;
+            }
+        }
+
+        if (returnValue.Kind == JsonValueKind.String)
+        {
+            returnValue.ProposedDataType = "string";
+            returnValue.IsScalar = true;
+        }
+        else if (returnValue.Kind == JsonValueKind.Number)
+        {
+            returnValue.ProposedDataType = "int";
+            returnValue.IsScalar = true;
+        }
+        else if (returnValue.Kind == JsonValueKind.True)
+        {
+            returnValue.ProposedDataType = "bool";
+            returnValue.IsScalar = true;
+        }
+        else if (returnValue.Kind == JsonValueKind.False)
+        {
+            returnValue.ProposedDataType = "bool";
+            returnValue.IsScalar = true;
+        }
+        else if (returnValue.Kind == JsonValueKind.Object)
+        {
+            returnValue.ProposedDataType = "unknown";
+            returnValue.IsScalar = false;
+        }
+
+        return returnValue;
+    }
     private void PopulateFromJsonObject(JsonObject fromValue, string className)
     {
         var toClass = AddClass(className);
@@ -70,13 +142,31 @@ public class JsonToClassGenerator
             }
             else if (item.Value is JsonArray)
             {
-                toClass.AddProperty(
-                    item.Key,
-                    $"{Singularize(item.Key)}",
-                    true
-                );
+                var arrayElementDataType = GetArrayElementDataType((JsonArray)item.Value);
 
-                PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
+                if (arrayElementDataType.IsEmpty == true)
+                {
+                    // skip it...can't determine anything
+                }
+                else if (arrayElementDataType.IsScalar == true)
+                {
+                    toClass.AddProperty(
+                        item.Key,
+                        $"{arrayElementDataType.ProposedDataType}",
+                        true
+                    );
+
+                }
+                else
+                {
+                    toClass.AddProperty(
+                        item.Key,
+                        $"{Singularize(item.Key)}",
+                        true
+                    );
+
+                    PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
+                }
             }
             else
             {
@@ -171,7 +261,7 @@ public class JsonToClassGenerator
 
                 if (prop.Value.IsArray == true && (prop.Value.DataType == "string" || prop.Value.DataType == "int"))
                 {
-                    sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
+                    sb.AppendLine($"    public {prop.Value.DataType}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
                 }
                 else if (prop.Value.IsArray == true)
                 {
@@ -189,7 +279,7 @@ public class JsonToClassGenerator
                     }
                     else
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType.Capitalize()} {prop.Value.Name.Capitalize()} {{ get; set; }} = new()");
+                        sb.AppendLine($"    public {prop.Value.DataType.Capitalize()} {prop.Value.Name.Capitalize()} {{ get; set; }} = new();");
                     }
                 }
 

@@ -4,7 +4,7 @@ using Benday.SolutionUtil.UnitTests.SampleClassesForSerialization;
 namespace Benday.SolutionUtil.UnitTests;
 
 [TestClass]
-public class JsonToClassesGeneratorFixture
+public partial class JsonToClassesGeneratorFixture
 {
     [TestInitialize]
     public void OnTestInitialize()
@@ -25,6 +25,28 @@ public class JsonToClassesGeneratorFixture
 
             return _SystemUnderTest;
         }
+    }
+
+    [TestMethod]
+    public void GenerateClasses_ArrayOfScalars()
+    {
+        // arrange
+        string json = "{ \"audiences\": [\"asdf\", \"qwer\", \"zxcv\"] }";
+
+        SystemUnderTest.Parse(json);
+
+        // act
+        SystemUnderTest.GenerateClasses();
+
+        // assert
+        foreach (var item in SystemUnderTest.GeneratedClasses.Keys)
+        {
+            Console.WriteLine($"{item}");
+        }
+
+        Console.WriteLine($"** CLASSES **");
+
+        Console.WriteLine($"{SystemUnderTest.GeneratedClasses.Values.FirstOrDefault()}");
     }
 
 
@@ -348,7 +370,7 @@ public class JsonToClassesGeneratorFixture
     public string PostalCode { get; set; } = string.Empty;
 
     [JsonPropertyName(""ThingyThing"")]
-    public ThingyThing ThingyThing { get; set; }
+    public ThingyThing ThingyThing { get; set; } = new();
 }";
 
         AssertCodeIsPrettyMuchEqual(expected, actual);

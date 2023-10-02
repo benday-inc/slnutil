@@ -93,7 +93,7 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
     {
         var builder = new StringBuilder();
 
-        builder.AppendLine("Paste JSON into this file, save the file, and then exit this text editor program.");
+        builder.AppendLine("Paste JSON into this file, save the file, and then exit this text editor program (or maybe just this tab).");
         builder.AppendLine("BTW, make sure you remove these instructions before saving the file.");
         builder.AppendLine();
         builder.AppendLine("When you exit this text editor, the JSON will be read from this file and converted to C# classes.");
