@@ -131,42 +131,5 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
         return password;
 
-    }
-
-    private static string GetJsonFromConsole2()
-    {
-        Console.WriteLine("Paste JSON from the clipboard and press enter three times: ");
-
-        var lines = new StringBuilder();
-        string? line;
-        int emptyLineCount = 0;
-
-        line = Console.ReadLine();
-
-        while (line != null)
-        {
-            // Either you do here something with each line separately or
-            lines.AppendLine(line);
-
-            if (string.IsNullOrWhiteSpace(line) == true)
-            {
-                emptyLineCount++;
-                if (emptyLineCount >= 3)
-                {
-                    break;
-                }
-                Console.WriteLine($"Empty line count: {emptyLineCount}");
-            }
-            else
-            {
-                emptyLineCount = 0;
-            }
-
-
-            line = Console.ReadLine();
-        }
-
-        var json = lines.ToString().Trim();
-        return json;
-    }
+    }    
 }
