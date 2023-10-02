@@ -166,7 +166,7 @@ public class SetJsonValueCommand : SynchronousCommand
                 level1, level2);
     }
 
-    private string ProcessIncrementIfExists(string currentValue, string newValue)
+    private string ProcessIncrementIfExists(string? currentValue, string newValue)
     {
         var incrementInt32Value = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementInt32Value);
         var incrementMinorVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementMinorVersionValue);

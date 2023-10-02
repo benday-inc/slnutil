@@ -3,8 +3,8 @@
 public class ReferenceInfo
 {
 
-    public string ReferenceType { get; set; }
-    private string _ReferenceTarget;
+    public string ReferenceType { get; set; } = string.Empty;
+    private string _ReferenceTarget = string.Empty;
     public string ReferenceTarget
     {
         get => _ReferenceTarget;
@@ -19,33 +19,28 @@ public class ReferenceInfo
     {
         get;
         private set;
-    }
+    } = string.Empty;
 
     private string CleanCommas(string value)
     {
-        if (value == null)
+
+        if (value.Contains(",") == false)
         {
             return value;
         }
         else
         {
-            if (value.Contains(",") == false)
+            var tokens = value.Split(',');
+
+            if (tokens.Length == 0)
             {
-                return value;
+                return string.Empty;
             }
             else
             {
-                var tokens = value.Split(',');
-
-                if (tokens.Length == 0)
-                {
-                    return string.Empty;
-                }
-                else
-                {
-                    return tokens[0];
-                }
+                return tokens[0];
             }
         }
+
     }
 }

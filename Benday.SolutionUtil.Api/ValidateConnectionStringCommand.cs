@@ -1,4 +1,5 @@
 ﻿using Benday.CommandsFramework;
+using Benday.Common;
 using Benday.JsonUtilities;
 
 using Microsoft.Data.SqlClient;
@@ -66,7 +67,12 @@ public class ValidateConnectionStringCommand : SynchronousCommand
         var value = editor.GetValue(
                 "ConnectionStrings", configKeyname);
 
-        WriteLine(value);
+        if (value == null)
+        {
+            throw new KnownException($"Could not find connection string for '{configKeyname}'");
+        }
+
+        WriteLine(value.SafeToString());
 
         ValidateConnection(value);
     }

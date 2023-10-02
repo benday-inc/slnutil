@@ -190,7 +190,8 @@ public class FindSolutionsCommand : SynchronousCommand
     private void AppendProjectInfo(StringBuilder returnValue, string solutionPath, bool skipReferences)
     {
         FileInfo solutionFileInfo = new FileInfo(solutionPath);
-        var solutionDir = solutionFileInfo.Directory;
+        var solutionDir = solutionFileInfo.Directory ?? 
+            throw new InvalidOperationException($"Solution file has a null directory.");
 
         var solutionPathDepth = GetPathDepth(solutionFileInfo.Directory.FullName);
 
@@ -262,7 +263,12 @@ public class FindSolutionsCommand : SynchronousCommand
             returnValue.Append(",");
 
             returnValue.Append(Path.GetFileName(reference.ReferenceTarget));
-            returnValue.Append(",");
+            returnValue.Append(",");            
+
+            if (projectFileInfo.Directory == null)
+            {
+                throw new InvalidOperationException($"projectFileInfo.Directory is null.");
+            }
 
             if (reference.ReferenceType == "project-ref")
             {
@@ -330,7 +336,7 @@ public class FindSolutionsCommand : SynchronousCommand
         returnValue.Append(solutionPathDepth);
         returnValue.Append(",");
 
-        returnValue.Append(GetPathDepth(projectFileInfo.Directory.FullName));
+        returnValue.Append(GetPathDepth(projectFileInfo.Directory!.FullName));
         returnValue.Append(",");
 
         // solution stuff
@@ -366,7 +372,7 @@ public class FindSolutionsCommand : SynchronousCommand
         returnValue.Append(solutionPathDepth);
         returnValue.Append(",");
 
-        returnValue.Append(GetPathDepth(projectFileInfo.Directory.FullName));
+        returnValue.Append(GetPathDepth(projectFileInfo.Directory!.FullName));
         returnValue.Append(",");
 
         // solution stuff
@@ -387,7 +393,7 @@ public class FindSolutionsCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo);
+        var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Process.Start() returned a null.");;
 
         process.WaitForExit();
 

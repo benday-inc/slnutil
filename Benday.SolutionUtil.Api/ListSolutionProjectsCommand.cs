@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using System.Xml;
 
 using Benday.CommandsFramework;
+using Benday.Common;
 
 namespace Benday.SolutionUtil.Api;
 
@@ -32,7 +33,7 @@ public class ListSolutionProjectsCommand : SynchronousCommand
 
         return args;
     }
-    private string _SolutionPath;
+    private string _SolutionPath = string.Empty;
 
     protected override void OnExecute()
     {
@@ -43,7 +44,7 @@ public class ListSolutionProjectsCommand : SynchronousCommand
         }
         else
         {
-            _SolutionPath = ProjectUtilities.FindSolution();
+            _SolutionPath = ProjectUtilities.FindSolution().SafeToString();
         }
 
         var foundSolution = false;

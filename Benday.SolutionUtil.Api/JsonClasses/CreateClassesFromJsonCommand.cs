@@ -33,11 +33,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         {
             throw new KnownException("Input does not contain any text.");
         }
-        else if (1 == 1)
-        {
-            WriteLine("");
-            WriteLine(json);
-        }
         else
         {
             var generator = new JsonToClassGenerator();
