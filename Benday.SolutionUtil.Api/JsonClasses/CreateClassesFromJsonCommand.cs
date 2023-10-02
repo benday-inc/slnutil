@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 using Benday.CommandsFramework;
 using Benday.SolutionUtil.Api.JsonClasses;
@@ -27,7 +28,8 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        string json = GetJsonFromConsole();
+        // string json = GetJsonFromConsole();
+        string json = GetJsonUsingFiles();
 
         if (string.IsNullOrWhiteSpace(json) == true)
         {
@@ -62,6 +64,38 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
                 WriteLine(code.ToString());
             }
         }
+    }
+
+    private string GetJsonUsingFiles()
+    {
+
+        // string tempFilePath = Path.GetTempFileName();
+
+        var tempDir = Path.Combine(Path.GetTempPath(), "slnutil");
+
+        if (Directory.Exists(tempDir) == false)
+        {
+            Directory.CreateDirectory(tempDir);
+        }
+
+        var tempFilename = $"paste-json-to-this-file-and-save-{0}.txt";
+
+        var pathToInputFile = Path.Combine(tempDir, tempFilename);
+
+        if (File.Exists(pathToInputFile) == false)
+        {
+            File.Create(pathToInputFile);
+        }
+
+        var psi = new ProcessStartInfo()
+        {
+            FileName = pathToInputFile,
+            UseShellExecute = true
+        };
+
+        Process.Start(psi)?.WaitForInputIdle();
+
+        
     }
 
     private string GetJsonFromConsole()
