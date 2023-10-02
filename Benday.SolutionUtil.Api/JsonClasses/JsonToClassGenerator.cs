@@ -49,28 +49,6 @@ public class JsonToClassGenerator
                 {
                     PopulateFromJsonObject(item.AsObject(), className);
                 }
-
-                /*
-                string typeName = string.Empty;
-
-                try
-                {
-                    typeName = GetTypeName(item);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"");
-                }
-
-                if (typeName == "string" || typeName == "int" || typeName == "bool")
-                {
-                    // skip it
-                }
-                else
-                {
-                    PopulateFromJsonObject(item.AsObject(), className);
-                }
-                */
             }
         }
     }
@@ -189,11 +167,15 @@ public class JsonToClassGenerator
 
             foreach (var prop in item.Value.Properties)
             {
-                sb.AppendLine($"[JsonPropertyName(\"{prop.Value.Name}\")]");
+                sb.AppendLine($"    [JsonPropertyName(\"{prop.Value.Name}\")]");
 
-                if (prop.Value.IsArray == true)
+                if (prop.Value.IsArray == true && (prop.Value.DataType == "string" || prop.Value.DataType == "int"))
                 {
                     sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
+                }
+                else if (prop.Value.IsArray == true)
+                {
+                    sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType.Capitalize()}[0];");
                 }
                 else
                 {
@@ -206,6 +188,8 @@ public class JsonToClassGenerator
                         sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }}");
                     }
                 }
+
+                sb.AppendLine();
             }
 
             sb.AppendLine("}");

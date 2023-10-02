@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 
 using Benday.CommandsFramework;
@@ -28,7 +31,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        // string json = GetJsonFromConsole();
         string json = GetJsonUsingFiles();
 
         if (string.IsNullOrWhiteSpace(json) == true)
@@ -57,36 +59,54 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
                     code.AppendLine();
                 }
 
-                // await Clipboard.SetTextAsync(code.ToString());
-
-                // WriteLine("Classes set to clipboard");
-
-                WriteLine(code.ToString());
+                WriteClasesAndOpen(code.ToString());
             }
         }
     }
 
+    private void WriteClasesAndOpen(string code)
+    {
+        string tempDir = GetTempDirForApp();
+
+        var tempFilename = $"generated-classes-from-json-{DateTime.Now.Ticks}.txt";
+        var pathToOutputFile = Path.Combine(tempDir, tempFilename);
+
+        File.WriteAllText(pathToOutputFile, code);
+
+        OpenFileInTextEditor(tempDir, pathToOutputFile);
+    }
+
     private string GetJsonUsingFiles()
     {
-
-        // string tempFilePath = Path.GetTempFileName();
-
-        var tempDir = Path.Combine(Path.GetTempPath(), "slnutil");
-
-        if (Directory.Exists(tempDir) == false)
-        {
-            Directory.CreateDirectory(tempDir);
-        }
+        string tempDir = GetTempDirForApp();
 
         var tempFilename = $"paste-json-to-this-file-and-save-{DateTime.Now.Ticks}.txt";
 
-        var pathToInputFile = Path.Combine(tempDir, tempFilename);
+        string pathToInputFile = CreateEmptyFile(tempDir, tempFilename);
 
-        if (File.Exists(pathToInputFile) == false)
-        {
-            File.WriteAllText(pathToInputFile, string.Empty);
-        }
+        WriteInstructionsToInputFile(tempDir, tempFilename);
 
+        return OpenFileInTextEditorAndReadContentsAfterClose(tempDir, pathToInputFile);
+    }
+
+    private void WriteInstructionsToInputFile(string tempDir, string tempFilename)
+    {
+        var builder = new StringBuilder();
+
+        builder.AppendLine("Paste JSON into this file, save the file, and then exit this text editor program.");
+        builder.AppendLine("BTW, make sure you remove these instructions before saving the file.");
+        builder.AppendLine();
+        builder.AppendLine("When you exit this text editor, the JSON will be read from this file and converted to C# classes.");
+        builder.AppendLine();
+        builder.AppendLine("Yes, this is a bit of a hack.  I'm not sure how to get the JSON from the clipboard in a cross-platform way.");
+        builder.AppendLine("If you have any suggestions, please let me know.  Thanks!");
+        builder.AppendLine();
+
+        File.WriteAllText(Path.Combine(tempDir, tempFilename), builder.ToString());
+    }
+
+    private void OpenFileInTextEditor(string tempDir, string pathToInputFile)
+    {
         if (OperatingSystem.IsWindows() == true)
         {
             var psi = new ProcessStartInfo()
@@ -94,6 +114,35 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
                 FileName = "notepad.exe",
                 Arguments = pathToInputFile,
                 CreateNoWindow = true,
+                WorkingDirectory = tempDir
+            };
+
+            Process.Start(psi);
+        }
+        else
+        {
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "open",
+                Arguments = $"-t {pathToInputFile}",
+                CreateNoWindow = true,
+                WorkingDirectory = tempDir
+            };
+
+            Process.Start(psi);
+        }
+    }
+
+    private string OpenFileInTextEditorAndReadContentsAfterClose(string tempDir, string pathToInputFile)
+    {
+        if (OperatingSystem.IsWindows() == true)
+        {
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "notepad.exe",
+                Arguments = pathToInputFile,
+                CreateNoWindow = true,
+                WorkingDirectory = tempDir
             };
 
             Process.Start(psi)?.WaitForExit();
@@ -108,8 +157,10 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         {
             var psi = new ProcessStartInfo()
             {
-                FileName = pathToInputFile,
+                FileName = "open",
+                Arguments = $"-t -F -W {pathToInputFile}",
                 CreateNoWindow = true,
+                WorkingDirectory = tempDir
             };
 
             Process.Start(psi)?.WaitForExit();
@@ -120,6 +171,30 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
             return json;
         }
+    }
+
+    private static string CreateEmptyFile(string tempDir, string tempFilename)
+    {
+        var pathToInputFile = Path.Combine(tempDir, tempFilename);
+
+        if (File.Exists(pathToInputFile) == false)
+        {
+            File.WriteAllText(pathToInputFile, string.Empty);
+        }
+
+        return pathToInputFile;
+    }
+
+    private static string GetTempDirForApp()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "slnutil");
+
+        if (Directory.Exists(tempDir) == false)
+        {
+            Directory.CreateDirectory(tempDir);
+        }
+
+        return tempDir;
     }
 
     private string GetJsonFromConsole()
@@ -189,5 +264,5 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
         return password;
 
-    }    
+    }
 }
