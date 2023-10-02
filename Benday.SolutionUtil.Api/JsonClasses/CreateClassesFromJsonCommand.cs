@@ -147,8 +147,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
             Process.Start(psi)?.WaitForExit();
 
-            WriteLine("exited...");
-
             var json = File.ReadAllText(pathToInputFile);
 
             return json;
@@ -164,8 +162,6 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
             };
 
             Process.Start(psi)?.WaitForExit();
-
-            WriteLine("exited...");
 
             var json = File.ReadAllText(pathToInputFile);
 
