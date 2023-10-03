@@ -4,6 +4,7 @@ using System.Text;
 using System.Xml.Linq;
 
 using Benday.CommandsFramework;
+using Benday.Common;
 using Benday.XmlUtilities;
 
 namespace Benday.SolutionUtil.Api;
@@ -37,8 +38,8 @@ public class CleanReferencesCommand : SynchronousCommand
         return args;
     }
 
-    private string _SolutionPath;
-    private string _SolutionFolder;
+    private string _SolutionPath = string.Empty;
+    private string _SolutionFolder = string.Empty;
 
     protected override void OnExecute()
     {
@@ -49,7 +50,7 @@ public class CleanReferencesCommand : SynchronousCommand
         }
         else
         {
-            _SolutionPath = ProjectUtilities.FindSolution();
+            _SolutionPath = ProjectUtilities.FindSolution().SafeToString();
         }
 
         var foundSolution = false;
@@ -62,7 +63,8 @@ public class CleanReferencesCommand : SynchronousCommand
         {
             foundSolution = true;
 
-            _SolutionFolder = new FileInfo(_SolutionPath).DirectoryName;
+            _SolutionFolder = new FileInfo(_SolutionPath).DirectoryName ?? 
+                throw new InvalidOperationException($"Solution path does not have a non-null directory name.");
 
             WriteLine($"Solution:        {_SolutionPath}");
             WriteLine($"Solution Folder: {_SolutionFolder}");
@@ -161,7 +163,8 @@ public class CleanReferencesCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo);
+        var process = Process.Start(startInfo) ?? 
+            throw new InvalidOperationException($"Process.Start() returned null.");
 
         process.WaitForExit();
 

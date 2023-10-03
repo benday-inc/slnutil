@@ -103,6 +103,12 @@ public class BulkRenameCommand : SynchronousCommand
         foreach (var item in dirs)
         {
             toName = item.Name.Replace(fromValue, toValue);
+
+            if (item.Parent is null)
+            {
+                continue;
+            }
+
             toPath = Path.Combine(item.Parent.FullName, toName);
 
             if (preview == true)
@@ -143,6 +149,12 @@ public class BulkRenameCommand : SynchronousCommand
         foreach (var item in files)
         {
             toFilename = item.Name.Replace(fromValue, toValue);
+
+            if (item.DirectoryName is null)
+            {
+                continue;
+            }
+
             toFilepath = Path.Combine(item.DirectoryName, toFilename);
 
             if (preview == true)

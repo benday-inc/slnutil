@@ -1,4 +1,5 @@
 ﻿using Benday.CommandsFramework;
+using Benday.Common;
 using Benday.JsonUtilities;
 
 namespace Benday.SolutionUtil.Api;
@@ -62,7 +63,7 @@ public class GetConnectionStringCommand : SynchronousCommand
         var editor = new JsonEditor(configFilename);
 
         var value = editor.GetValue(
-                "ConnectionStrings", configKeyname);
+                "ConnectionStrings", configKeyname).SafeToString();
 
         WriteLine(value);
     }

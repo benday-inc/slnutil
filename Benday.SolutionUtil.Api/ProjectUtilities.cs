@@ -7,7 +7,7 @@ namespace Benday.SolutionUtil.Api;
 
 public static class ProjectUtilities
 {
-    public static string FindSolution()
+    public static string? FindSolution()
     {
         var currentDirectory = Environment.CurrentDirectory;
 
@@ -28,7 +28,7 @@ public static class ProjectUtilities
         }
     }
 
-    public static string FindSolution(string startingDirectory)
+    public static string? FindSolution(string startingDirectory)
     {
         var solutionFile = Directory.GetFiles(startingDirectory, "*.sln", SearchOption.AllDirectories).FirstOrDefault();
 
@@ -44,14 +44,14 @@ public static class ProjectUtilities
         return solutionFile;
     }
 
-    private static string FindSolutionInParentFolders(string currentDirectory)
+    private static string? FindSolutionInParentFolders(string currentDirectory)
     {
         var dir = new DirectoryInfo(currentDirectory);
 
         return FindSolutionInParentFolders(dir);
     }
 
-    private static string FindSolutionInParentFolders(DirectoryInfo dir)
+    private static string? FindSolutionInParentFolders(DirectoryInfo dir)
     {
         if (dir.Parent == null)
         {

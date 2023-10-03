@@ -112,7 +112,7 @@ public class MarkdownUsageFormatterFixture
             readmeHeader + Environment.NewLine + readmeCommandsForNuget
             );
 
-        
+
 
         File.WriteAllText(pathToGitHubReadme,
             readmeHeader + Environment.NewLine + readmeCommandsForGitHub

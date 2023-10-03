@@ -5,6 +5,7 @@ public static class Constants
     public const string ExeName = "slnutil";
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
+    public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
     public const string CommandArgumentNameSetFrameworkVersion = "setframework";
     public const string CommandArgumentNameSetProjectProperty = "setprojectproperty";
@@ -14,6 +15,7 @@ public static class Constants
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
     public const string ArgumentNameListProjects = "listprojects";
+    public const string ArgumentNameWriteToClipboard = "toclipboard";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNamePropertyName = "propertyname";

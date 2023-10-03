@@ -27,6 +27,10 @@
       "commandName": "Project",
       "commandLineArgs": "setprojectproperty /propertyname:EnforceCodeStyleInBuild /propertyvalue:True",
       "workingDirectory": "C:\\code\\repos\\code-generator-web"
+    },
+    "classesfromjson": {
+      "commandName": "Project",
+      "commandLineArgs": "classesfromjson"
     }
   }
 }
