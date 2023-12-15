@@ -105,6 +105,12 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
         else if (binariesDirInfo.GetFiles("*.deps.json").Count() > 1)
         {
             WriteLine($"More than one *.deps.json files found in '{binariesDir}'.");
+
+            foreach (var item in binariesDirInfo.GetFiles("*.deps.json"))
+            {
+                WriteLine($"Found deps.json file: {item.FullName}");
+            }
+
             throw new KnownException($"More than one *.deps.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
         }
         else

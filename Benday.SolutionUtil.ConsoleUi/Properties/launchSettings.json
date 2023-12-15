@@ -36,6 +36,16 @@
       "commandName": "Project",
       "commandLineArgs": "deployefmigrations",
       "workingDirectory": "c:\\temp\\build-demo"
+    },
+    "deployefmigrations-macos": {
+      "commandName": "Project",
+      "commandLineArgs": "deployefmigrations",
+      "workingDirectory": "/Users/benday/temp/webapi-temp"
+    },
+    "deployefmigrations-macos-complex": {
+      "commandName": "Project",
+      "commandLineArgs": "deployefmigrations",
+      "workingDirectory": "/Users/benday/temp/webapi-temp-complex"
     }
   }
 }
