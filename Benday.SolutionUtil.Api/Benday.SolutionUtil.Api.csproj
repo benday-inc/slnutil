@@ -1,19 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Benday.CommandsFramework" Version="2.4.0" />
-		<PackageReference Include="Benday.Common" Version="7.1.0" />
-		<PackageReference Include="Benday.JsonUtilities" Version="4.0.0" />
-		<PackageReference Include="Benday.XmlUtilities" Version="4.0.1" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-		<PackageReference Include="Pluralize.NET" Version="1.0.2" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Benday.CommandsFramework" Version="2.4.0" />
+    <PackageReference Include="Benday.Common" Version="7.1.0" />
+    <PackageReference Include="Benday.JsonUtilities" Version="4.0.0" />
+    <PackageReference Include="Benday.XmlUtilities" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="Pluralize.NET" Version="1.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ef.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ef.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
