@@ -5,6 +5,7 @@ public static class Constants
     public const string ExeName = "slnutil";
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
+    public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
     public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
     public const string CommandArgumentNameSetFrameworkVersion = "setframework";
@@ -12,6 +13,7 @@ public static class Constants
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentNameRootDirectory = "rootdir";
+    public const string ArgumentNameBinariesDirectory = "binariesdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
     public const string ArgumentNameListProjects = "listprojects";
@@ -46,5 +48,13 @@ public static class Constants
     public const string ArgumentNameLevel2 = "level2";
     public const string ArgumentNameLevel3 = "level3";
     public const string ArgumentNameLevel4 = "level4";
+
+    public const string ArgumentNameVerbose = "verbose";
+
+    public const string ArgumentNameStartupDll = "startupdll";
+
+    public const string ArgumentNameMigrationsDll = "migrationsdll";
+
+    public const string ArgumentNameDbContextName = "dbcontextname";
 
 }

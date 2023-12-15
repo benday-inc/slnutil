@@ -41,4 +41,29 @@ public static class Utilities
                 $"{message}");
         }
     }
+
+    public static int FindNumberOfMatchingCharacters(string originalFileName, string fileName)
+    {
+        var originalFileNameLength = originalFileName.Length;
+
+        var matchingCharCount = 0;
+
+        for (int i = 0; i < fileName.Length; i++)
+        {
+            if (i >= originalFileNameLength)
+            {
+                return i;
+            }
+            else if (originalFileName[i] != fileName[i])
+            {
+                return i;
+            }
+            else
+            {
+                matchingCharCount++;
+            }
+        }
+
+        return matchingCharCount;
+    }
 }
