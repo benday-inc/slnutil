@@ -13,4 +13,4 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 `dotnet tool install slnutil -g`
 
 ### Prerequisites
-- You'll need to install .NET Core 7 from https://dotnet.microsoft.com/
+- You'll need to install .NET Core 8 from https://dotnet.microsoft.com/

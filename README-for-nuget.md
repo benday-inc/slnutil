@@ -13,13 +13,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 `dotnet tool install slnutil -g`
 
 ### Prerequisites
-- You'll need to install .NET Core 7 from https://dotnet.microsoft.com/
+- You'll need to install .NET Core 8 from https://dotnet.microsoft.com/
 
 ## Commands
 | Command Name | Description |
 | --- | --- |
 | rename | Bulk rename for files and folders. |
 | cleanreferences | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
+| deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files in a folder tree. |
 | getconnectionstring | Get database connection string in appsettings.json. |
@@ -50,6 +51,17 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution file to use |
 | preview | Optional | Boolean | Preview changes only |
+## deployefmigrations
+**Deploy EF Core Migrations from DLL binaries.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| binariesdir | Optional | String | Path to EF Core migration binaries. Defaults to current directory. |
+| startupdll | Optional | String | Path to EF Core startup DLL. |
+| migrationsdll | Optional | String | Path to EF Core migrations DLL. |
+| dbcontextname | Optional | String | Name of the EF Core DbContext class. |
+| namespace | Optional | String | Root namespace of the EF Core migrations DLL. |
+| verbose | Optional | Boolean | Output results as comma-separated values |
 ## devtreeclean
 **Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.**
 ### Arguments
