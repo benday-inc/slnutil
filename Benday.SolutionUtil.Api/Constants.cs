@@ -56,5 +56,6 @@ public static class Constants
     public const string ArgumentNameMigrationsDll = "migrationsdll";
 
     public const string ArgumentNameDbContextName = "dbcontextname";
+    public const string ArgumentNameMigrationsNamespace = "namespace";
 
 }

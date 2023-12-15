@@ -26,15 +26,21 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
             .WithDefaultValue(Environment.CurrentDirectory)
             .WithDescription("Path to EF Core migration binaries. Defaults to current directory.");
 
-        //args.AddBoolean(Constants.ArgumentNameListProjects)
-        //    .AsNotRequired()
-        //    .AllowEmptyValue()
-        //    .WithDescription("List projects in solutions");
+        args.AddString(Constants.ArgumentNameStartupDll)
+            .AsNotRequired()
+            .WithDescription("Path to EF Core startup DLL.");
 
-        //args.AddBoolean(Constants.ArgumentNameCommaSeparatedValues)
-        //    .AsNotRequired()
-        //    .AllowEmptyValue()
-        //    .WithDescription("Output results as comma-separated values");
+        args.AddString(Constants.ArgumentNameMigrationsDll)
+            .AsNotRequired()
+            .WithDescription("Path to EF Core migrations DLL.");
+
+        args.AddString(Constants.ArgumentNameDbContextName)
+            .AsNotRequired()
+            .WithDescription("Name of the EF Core DbContext class.");
+
+        args.AddString(Constants.ArgumentNameMigrationsNamespace)
+            .AsNotRequired()
+            .WithDescription("Root namespace of the EF Core migrations DLL.");
 
         args.AddBoolean(Constants.ArgumentNameVerbose)
             .AsNotRequired()
@@ -55,7 +61,7 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
             WriteLine("Verbose output enabled.");
         }
 
-        var binariesDir = 
+        var binariesDir =
             Arguments.GetStringValue(
                 Constants.ArgumentNameBinariesDirectory);
 
@@ -63,9 +69,9 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
         ProjectUtilities.AssertDirectoryExists(binariesDir, Constants.ArgumentNameBinariesDirectory);
 
         var rootDir = Environment.CurrentDirectory;
-        
+
         var processPath = Environment.ProcessPath;
-        
+
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
 
         if (verbose == true)
@@ -75,7 +81,7 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
             WriteLine($"Assembly location: {assemblyLocation}");
         }
 
-        var assemblyDir = new FileInfo(assemblyLocation).Directory ?? 
+        var assemblyDir = new FileInfo(assemblyLocation).Directory ??
             throw new InvalidOperationException($"Cannot find directory for assembly location: '{assemblyLocation}'");
 
         WriteLine($"Assembly directory: {assemblyDir.FullName}");
@@ -93,63 +99,134 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
             WriteLine($"Path to ef.runtimeconfig.json: {pathToEfRuntimeConfigJson}");
         }
 
-        var binariesDirInfo = new DirectoryInfo(binariesDir);
-        FileInfo depsJsonPath;
-        FileInfo runtimeConfigJsonPath;
-
-        if (binariesDirInfo.GetFiles("*.deps.json").Count() == 0)
+        if (Arguments.HasValue(Constants.ArgumentNameStartupDll) == true ||
+        Arguments.HasValue(Constants.ArgumentNameMigrationsDll) == true ||
+        Arguments.HasValue(Constants.ArgumentNameDbContextName) == true ||
+        Arguments.HasValue(Constants.ArgumentNameMigrationsNamespace) == true)
         {
-            WriteLine($"No *.deps.json files found in '{binariesDir}'.");
-            throw new KnownException($"No *.deps.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            DeployMigrationsWithCustomValues(verbose, binariesDir, pathToEfDll, pathToEfRuntimeConfigJson);
         }
-        else if (binariesDirInfo.GetFiles("*.deps.json").Count() > 1)
+        else
         {
-            WriteLine($"More than one *.deps.json files found in '{binariesDir}'.");
 
-            foreach (var item in binariesDirInfo.GetFiles("*.deps.json"))
+            var binariesDirInfo = new DirectoryInfo(binariesDir);
+            FileInfo depsJsonPath;
+            FileInfo runtimeConfigJsonPath;
+
+            if (binariesDirInfo.GetFiles("*.deps.json").Count() == 0)
             {
-                WriteLine($"Found deps.json file: {item.FullName}");
+                WriteLine($"No *.deps.json files found in '{binariesDir}'.");
+                throw new KnownException($"No *.deps.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            }
+            else if (binariesDirInfo.GetFiles("*.deps.json").Count() > 1)
+            {
+                WriteLine($"More than one *.deps.json files found in '{binariesDir}'.");
+
+                foreach (var item in binariesDirInfo.GetFiles("*.deps.json"))
+                {
+                    WriteLine($"Found deps.json file: {item.FullName}");
+                }
+
+                throw new KnownException($"More than one *.deps.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            }
+            else
+            {
+                depsJsonPath = binariesDirInfo.GetFiles("*.deps.json").FirstOrDefault() ?? throw new InvalidOperationException("No deps.json file found");
             }
 
-            throw new KnownException($"More than one *.deps.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
-        }
-        else
-        {
-            depsJsonPath = binariesDirInfo.GetFiles("*.deps.json").FirstOrDefault() ?? throw new InvalidOperationException("No deps.json file found");
-        }
+            if (binariesDirInfo.GetFiles("*.runtimeconfig.json").Count() == 0)
+            {
+                WriteLine($"No *.runtimeconfig.json files found in '{binariesDir}'.");
+                throw new KnownException($"No *.runtimeconfig.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            }
+            else if (binariesDirInfo.GetFiles("*.runtimeconfig.json").Count() > 1)
+            {
+                WriteLine($"More than one *.runtimeconfig.json files found in '{binariesDir}'.");
+                throw new KnownException($"More than one *.runtimeconfig.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            }
+            else
+            {
+                runtimeConfigJsonPath = binariesDirInfo.GetFiles("*.runtimeconfig.json").FirstOrDefault() ?? throw new InvalidOperationException("No runtimeconfig.json file found");
+            }
 
-        if (binariesDirInfo.GetFiles("*.runtimeconfig.json").Count() == 0)
-        {
-            WriteLine($"No *.runtimeconfig.json files found in '{binariesDir}'.");
-            throw new KnownException($"No *.runtimeconfig.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
-        }
-        else if (binariesDirInfo.GetFiles("*.runtimeconfig.json").Count() > 1)
-        {
-            WriteLine($"More than one *.runtimeconfig.json files found in '{binariesDir}'.");
-            throw new KnownException($"More than one *.runtimeconfig.json files found in '{binariesDir}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
-        }
-        else
-        {
-            runtimeConfigJsonPath = binariesDirInfo.GetFiles("*.runtimeconfig.json").FirstOrDefault() ?? throw new InvalidOperationException("No runtimeconfig.json file found");
-        }
+            var proposedStartupDll = depsJsonPath.FullName.Replace(".deps.json", ".dll");
 
-        var proposedStartupDll = depsJsonPath.FullName.Replace(".deps.json", ".dll");
+            if (File.Exists(proposedStartupDll) == false)
+            {
+                throw new KnownException($"Could not find startup DLL '{proposedStartupDll}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            }
 
-        if (File.Exists(proposedStartupDll) == false)
-        {
-            throw new KnownException($"Could not find startup DLL '{proposedStartupDll}'. Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+            var dbContextType = FindDbContext(binariesDir, depsJsonPath) ?? throw new KnownException("Could not find a DbContext class");
+
+            WriteLine($"Found DbContext type: {dbContextType.DbContextType?.FullName}");
+
+            DeployMigrations(binariesDir, pathToEfDll, pathToEfRuntimeConfigJson, proposedStartupDll, dbContextType, depsJsonPath, runtimeConfigJsonPath);
         }
-
-        var dbContextType = FindDbContext(binariesDir, depsJsonPath) ?? throw new KnownException("Could not find a DbContext class");
-  
-        WriteLine($"Found DbContext type: {dbContextType.DbContextType?.FullName}");
-
-        DeployMigrations(binariesDir, pathToEfDll, pathToEfRuntimeConfigJson, proposedStartupDll, dbContextType, depsJsonPath, runtimeConfigJsonPath);
     }
 
-    private void DeployMigrations(string binariesDir, 
-        string pathToEfDll, string pathToEfRuntimeConfigJson, 
+    private void DeployMigrationsWithCustomValues(bool verbose, string binariesDir, 
+        string pathToEfDll, 
+        string pathToEfRuntimeConfigJson)
+    {
+
+        if (Arguments.HasValue(Constants.ArgumentNameStartupDll) == false)
+        {
+            throw new KnownException($"Please specify a startup DLL using the /{Constants.ArgumentNameStartupDll} argument.");
+        }
+        else if (Arguments.HasValue(Constants.ArgumentNameMigrationsDll) == false)
+        {
+            throw new KnownException($"Please specify a migrations DLL using the /{Constants.ArgumentNameMigrationsDll} argument.");
+        }
+        else if (Arguments.HasValue(Constants.ArgumentNameDbContextName) == false)
+        {
+            throw new KnownException($"Please specify the name of the DbContext using the /{Constants.ArgumentNameDbContextName} argument.");
+        }
+        else if (Arguments.HasValue(Constants.ArgumentNameMigrationsNamespace) == false)
+        {
+            throw new KnownException($"Please specify the root namespace of the migrations DLL using the /{Constants.ArgumentNameMigrationsNamespace} argument.");
+        }
+
+        var startupDll = Arguments.GetStringValue(Constants.ArgumentNameStartupDll);
+        var depsJsonPath = new FileInfo(startupDll.Replace(".dll", ".deps.json"));
+        var runtimeConfigJsonPath = new FileInfo(startupDll.Replace(".dll", ".runtimeconfig.json"));
+        var migrationsDll = Arguments.GetStringValue(Constants.ArgumentNameMigrationsDll);
+        var dbContextName = Arguments.GetStringValue(Constants.ArgumentNameDbContextName);
+        var migrationsNamespace = Arguments.GetStringValue(Constants.ArgumentNameMigrationsNamespace);
+
+        if (verbose == true)
+        {
+            WriteLine($"Startup DLL: {startupDll}");
+            WriteLine($"Migrations DLL: {migrationsDll}");
+            WriteLine($"DbContext Name: {dbContextName}");
+            WriteLine($"Migrations Namespace: {migrationsNamespace}");
+            WriteLine($"Deps JSON: {depsJsonPath.FullName}");
+            WriteLine($"Runtime Config JSON: {runtimeConfigJsonPath.FullName}");
+        }
+
+
+        DeployMigrations(binariesDir, pathToEfDll, pathToEfRuntimeConfigJson, startupDll, 
+            migrationsDll, migrationsNamespace, dbContextName, depsJsonPath, runtimeConfigJsonPath);
+
+    }
+
+
+    private void DeployMigrations(string binariesDir,
+        string pathToEfDll, string pathToEfRuntimeConfigJson,
         string proposedStartupDll, DbContextInfo dbContextType,
+        FileInfo depsJsonPath, FileInfo runtimeConfigJsonPath)
+    {
+        DeployMigrations(binariesDir, 
+            pathToEfDll, pathToEfRuntimeConfigJson,
+            proposedStartupDll, dbContextType.AssemblyFileName, 
+            dbContextType.DbContextType!.Namespace!, 
+            dbContextType.DbContextType!.Name,             
+            depsJsonPath, runtimeConfigJsonPath);
+    }
+
+    private void DeployMigrations(string binariesDir,
+        string pathToEfDll, string pathToEfRuntimeConfigJson,
+        string proposedStartupDll, string migrationDll, string migrationNamespace, 
+        string dbContextName, 
         FileInfo depsJsonPath, FileInfo runtimeConfigJsonPath)
     {
         var processInfo = new ProcessStartInfo("dotnet");
@@ -167,7 +244,7 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
         processInfo.ArgumentList.Add("update");
 
         processInfo.ArgumentList.Add("--assembly");
-        processInfo.ArgumentList.Add(dbContextType.AssemblyFileName);
+        processInfo.ArgumentList.Add(migrationDll);
 
         processInfo.ArgumentList.Add("--project-dir");
         processInfo.ArgumentList.Add(binariesDir);
@@ -176,12 +253,12 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
         processInfo.ArgumentList.Add(binariesDir);
 
         processInfo.ArgumentList.Add("--context");
-        processInfo.ArgumentList.Add(dbContextType.DbContextType!.Name);
+        processInfo.ArgumentList.Add(dbContextName);
 
         processInfo.ArgumentList.Add("--verbose");
 
         processInfo.ArgumentList.Add("--root-namespace");
-        processInfo.ArgumentList.Add(dbContextType.DbContextType!.Namespace!);
+        processInfo.ArgumentList.Add(migrationNamespace);
 
         processInfo.WorkingDirectory = binariesDir;
 
