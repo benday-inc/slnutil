@@ -5,6 +5,7 @@ public static class Constants
     public const string ExeName = "slnutil";
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
+    public const string CommandArgumentNameTouchFile = "touch";
     public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
     public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
@@ -42,6 +43,7 @@ public static class Constants
     
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";
+    public const string ArgumentNameFilename = "filename";
     public const string ArgumentNameConnectionStringName = "name";
 
     public const string ArgumentNameLevel1 = "level1";
