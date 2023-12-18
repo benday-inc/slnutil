@@ -33,6 +33,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [setjsonvalue](#setjsonvalue) | Set a string value in a json file. |
 | [setprojectproperty](#setprojectproperty) | Set a project property value on all projects. |
 | [base64](#base64) | Encodes a string value as a base 64 string. |
+| [touch](#touch) | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | [validateconnectionstring](#validateconnectionstring) | Validate that specified connection string can connect to SQL Server. |
 ## <a name="rename"></a> rename
 **Bulk rename for files and folders.**
@@ -152,6 +153,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | value | Required | String | Value to encode as base64 |
+## <a name="touch"></a> touch
+**Modifies a file's date to current date time or creates a new empty file if it doesn't exist.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Required | String | Path to file |
 ## <a name="validateconnectionstring"></a> validateconnectionstring
 **Validate that specified connection string can connect to SQL Server.**
 ### Arguments

@@ -11,7 +11,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameTouchFile,
     IsAsync = false,
-    Description = "This is supposed to be something like 'touch' in unix. Modifies a file's date to current date time or creates a new empty file if it doesn't exist.")]
+    Description = "Modifies a file's date to current date time or creates a new empty file if it doesn't exist.")]
 public class TouchFileCommand : SynchronousCommand
 {
     public TouchFileCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
