@@ -1,4 +1,6 @@
-﻿namespace Benday.SolutionUtil.Api;
+﻿using System.Text;
+
+namespace Benday.SolutionUtil.Api;
 
 public static class Utilities
 {
@@ -65,5 +67,75 @@ public static class Utilities
         }
 
         return matchingCharCount;
+    }
+    public static string JsonNameToCsharpName(string input)
+    {
+        var returnValue = RemoveUnderscoreToPascalCase('_', input);
+
+        returnValue = RemoveUnderscoreToPascalCase(' ', returnValue);
+
+        return returnValue;
+    }
+
+    public static string ToCapitalized(string fromValue)
+    {
+        if (string.IsNullOrWhiteSpace(fromValue) == true)
+        {
+            return string.Empty;
+        }
+        else
+        {
+            var returnValue = fromValue.Trim();
+
+            var builder = new StringBuilder();
+
+            var isFirstChar = true;
+
+            foreach (var currentChar in returnValue)
+            {
+                if (isFirstChar == true)
+                {
+                    builder.Append(char.ToUpper(currentChar));
+                }
+                else
+                {
+                    builder.Append(currentChar);
+                }
+
+                isFirstChar = false;
+            }
+
+            return builder.ToString();
+        }
+    }
+
+    public static string RemoveUnderscoreToPascalCase(char replaceCharacter, string fromValue)
+    {
+        if (fromValue == null)
+        {
+            return string.Empty;
+        }
+        else
+        {
+            fromValue = fromValue.Trim();
+
+            var tokens = fromValue.Split(replaceCharacter);
+
+            if (tokens.Length == 0)
+            {
+                return ToCapitalized(fromValue);
+            }
+            else
+            {
+                var builder = new StringBuilder();
+
+                foreach (var token in tokens)
+                {
+                    builder.Append(ToCapitalized(token));
+                }
+
+                return builder.ToString();
+            }
+        }
     }
 }

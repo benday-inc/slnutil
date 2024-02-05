@@ -15,10 +15,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.2.0.0</AssemblyVersion>
-    <Version>$(VersionPrefix)2.2.0</Version>
+    <AssemblyVersion>2.3.0.0</AssemblyVersion>
+    <Version>$(VersionPrefix)2.3.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
-    <PackageReleaseNotes>v2.2 - Bug fixes for setjsonvalue and setconnectionstring</PackageReleaseNotes>
+    <PackageReleaseNotes>v2.3 - Bug fixes for jsontoclasses, setjsonvalue and setconnectionstring</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\bdc_mark_128_128.png">

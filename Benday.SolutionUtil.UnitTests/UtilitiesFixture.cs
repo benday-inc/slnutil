@@ -30,4 +30,25 @@ public class UtilitiesFixture
             "FindNumberOfMatchingCharacters() returned wrong value.");
     }
 
+    [TestMethod]
+    [DataRow("voice_id", "VoiceId")]
+    [DataRow("settings", "Settings")]
+    [DataRow("high_quality_base_model_ids", "HighQualityBaseModelIds")]
+    [DataRow("TestValue", "TestValue")]
+    [DataRow("use case", "UseCase")]
+    public void JsonNameToCsharpName(string input, string expected)
+    {
+        // arrange
+
+        // act
+        var actual =
+            Utilities.JsonNameToCsharpName(input);
+
+        // assert
+        Assert.AreEqual(
+            expected,
+            actual,
+            "JsonNameToCsharpName() returned wrong value.");
+    }
+
 }
