@@ -182,6 +182,48 @@ public partial class JsonToClassesGeneratorFixture
         AssertAreEqual(GetClassInfoForThingy(),
             SystemUnderTest.Classes["ThingyThing"]);
     }
+
+    [TestMethod]
+    public void ParseSimple_Single_ComplexClassName()
+    {
+        // arrange
+        var fromJson = @"{
+""fine_tuning"": {
+        ""is_allowed_to_fine_tune"": false,
+        ""finetuning_state"": ""not_started"",
+        ""verification_attempts_count"": 0        
+      }
+}";
+
+        var expectedClassInfo = new ClassInfo();
+
+        expectedClassInfo.Name = "FineTuning";
+
+        expectedClassInfo.AddProperty("IsAllowedToFineTune", "bool");
+        expectedClassInfo.AddProperty("FinetuningState");
+        expectedClassInfo.AddProperty("VerificationAttemptsCount", "int");               
+
+        var expectedClassCount = 2;
+        var expectedClassNames = new List<string>()
+        {
+            "RootClass",
+            "FineTuning"
+        };
+
+        // act
+        SystemUnderTest.Parse(fromJson);
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+
+        expectedClassNames.ForEach(name =>
+            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+
+        AssertAreEqual(expectedClassInfo,
+            SystemUnderTest.Classes["FineTuning"]);
+    }
+
+
     private void AssertAreEqual(ClassInfo expected,
         ClassInfo actual)
     {

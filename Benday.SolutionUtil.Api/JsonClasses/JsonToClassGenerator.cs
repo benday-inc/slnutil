@@ -131,14 +131,16 @@ public class JsonToClassGenerator
 
         foreach (var item in fromValue)
         {
+            var formattedKey = Utilities.JsonNameToCsharpName(item.Key);
+
             if (item.Value is JsonObject)
             {
                 toClass.AddProperty(
-                    item.Key,
-                    item.Key
+                    Utilities.JsonNameToCsharpName(formattedKey),
+                    Utilities.JsonNameToCsharpName(formattedKey)
                 );
 
-                PopulateFromJsonObject((JsonObject)item.Value, item.Key);
+                PopulateFromJsonObject((JsonObject)item.Value, formattedKey);
             }
             else if (item.Value is JsonArray)
             {
@@ -151,7 +153,7 @@ public class JsonToClassGenerator
                 else if (arrayElementDataType.IsScalar == true)
                 {
                     toClass.AddProperty(
-                        item.Key,
+                        formattedKey,
                         $"{arrayElementDataType.ProposedDataType}",
                         true
                     );
@@ -160,23 +162,23 @@ public class JsonToClassGenerator
                 else
                 {
                     toClass.AddProperty(
-                        item.Key,
-                        $"{Singularize(item.Key)}",
+                        formattedKey,
+                        $"{Singularize(formattedKey)}",
                         true
                     );
 
-                    PopulateFromArray((JsonArray)item.Value, Singularize(item.Key));
+                    PopulateFromArray((JsonArray)item.Value, Singularize(formattedKey));
                 }
             }
             else
             {
                 if (item.Value is null)
                 {
-                    toClass.AddProperty(item.Key);
+                    toClass.AddProperty(formattedKey);
                 }
                 else
                 {
-                    toClass.AddProperty(item.Key, GetTypeName(item));
+                    toClass.AddProperty(formattedKey, GetTypeName(item));
                 }
             }
         }
