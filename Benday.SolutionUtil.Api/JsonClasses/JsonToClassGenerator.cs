@@ -132,12 +132,14 @@ public class JsonToClassGenerator
         foreach (var item in fromValue)
         {
             var formattedKey = Utilities.JsonNameToCsharpName(item.Key);
+            var originalKey = item.Key;
 
             if (item.Value is JsonObject)
             {
                 toClass.AddProperty(
-                    Utilities.JsonNameToCsharpName(formattedKey),
-                    Utilities.JsonNameToCsharpName(formattedKey)
+                    originalKey,
+                    formattedKey,
+                    formattedKey
                 );
 
                 PopulateFromJsonObject((JsonObject)item.Value, formattedKey);
@@ -153,6 +155,7 @@ public class JsonToClassGenerator
                 else if (arrayElementDataType.IsScalar == true)
                 {
                     toClass.AddProperty(
+                        originalKey,
                         formattedKey,
                         $"{arrayElementDataType.ProposedDataType}",
                         true
@@ -162,6 +165,7 @@ public class JsonToClassGenerator
                 else
                 {
                     toClass.AddProperty(
+                        originalKey,
                         formattedKey,
                         $"{Singularize(formattedKey)}",
                         true
@@ -174,11 +178,11 @@ public class JsonToClassGenerator
             {
                 if (item.Value is null)
                 {
-                    toClass.AddProperty(formattedKey);
+                    toClass.AddProperty(originalKey, formattedKey);
                 }
                 else
                 {
-                    toClass.AddProperty(formattedKey, GetTypeName(item));
+                    toClass.AddProperty(originalKey, formattedKey, GetTypeName(item));
                 }
             }
         }
@@ -259,7 +263,7 @@ public class JsonToClassGenerator
 
             foreach (var prop in item.Value.Properties)
             {
-                sb.AppendLine($"    [JsonPropertyName(\"{prop.Value.Name}\")]");
+                sb.AppendLine($"    [JsonPropertyName(\"{prop.Value.JsonName}\")]");
 
                 if (prop.Value.IsArray == true && (prop.Value.DataType == "string" || prop.Value.DataType == "int"))
                 {

@@ -199,9 +199,9 @@ public partial class JsonToClassesGeneratorFixture
 
         expectedClassInfo.Name = "FineTuning";
 
-        expectedClassInfo.AddProperty("IsAllowedToFineTune", "bool");
-        expectedClassInfo.AddProperty("FinetuningState");
-        expectedClassInfo.AddProperty("VerificationAttemptsCount", "int");               
+        expectedClassInfo.AddProperty("is_allowed_to_fine_tune", "IsAllowedToFineTune", "bool");
+        expectedClassInfo.AddProperty("finetuning_state", "FinetuningState");
+        expectedClassInfo.AddProperty("verification_attempts_count", "VerificationAttemptsCount", "int");               
 
         var expectedClassCount = 2;
         var expectedClassNames = new List<string>()
@@ -324,6 +324,55 @@ public partial class JsonToClassesGeneratorFixture
 
     [JsonPropertyName(""FavoriteNumber"")]
     public int FavoriteNumber { get; set; }
+}";
+        AssertCodeIsPrettyMuchEqual(expected, actual);
+    }
+
+
+    [TestMethod]
+    public void GenerateClasses_Simple_ComplexNames()
+    {
+        // arrange
+        var fromJson = @"{
+""fine_tuning"": {
+        ""is_allowed_to_fine_tune"": false,
+        ""finetuning_state"": ""not_started"",
+        ""verification_attempts_count"": 0        
+      }
+}";
+
+        var expectedClassCount = 2;
+        var expectedClassNames = new List<string>()
+        {
+            "RootClass",
+            "FineTuning"
+        };
+
+        SystemUnderTest.Parse(fromJson);
+
+        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+
+        // act
+        SystemUnderTest.GenerateClasses();
+
+        // assert
+        Assert.AreEqual<int>(expectedClassCount,
+            SystemUnderTest.GeneratedClasses.Count,
+            $"Generated class count is wrong");
+
+        var actual = SystemUnderTest.GeneratedClasses["FineTuning"];
+
+        var expected =
+        @"public class FineTuning
+{
+    [JsonPropertyName(""is_allowed_to_fine_tune"")]
+    public bool IsAllowedToFineTune { get; set; }
+
+    [JsonPropertyName(""finetuning_state"")]
+    public string FinetuningState { get; set; } = string.Empty;
+
+    [JsonPropertyName(""verification_attempts_count"")]
+    public int VerificationAttemptsCount { get; set; }
 }";
         AssertCodeIsPrettyMuchEqual(expected, actual);
     }
@@ -498,8 +547,8 @@ public partial class JsonToClassesGeneratorFixture
         returnValue.Name = name;
 
         returnValue.AddProperty("Title");
-        returnValue.AddProperty("IsAwesome", "bool");
-        returnValue.AddProperty("FavoriteNumber", "int");
+        returnValue.AddProperty("IsAwesome", "IsAwesome", "bool");
+        returnValue.AddProperty("FavoriteNumber", "FavoriteNumber", "int");
 
         return returnValue;
     }
@@ -510,12 +559,12 @@ public partial class JsonToClassesGeneratorFixture
 
         returnValue.Name = name;
 
-        returnValue.AddProperty("Id", "int");
+        returnValue.AddProperty("Id", "Id", "int");
         returnValue.AddProperty("FirstName");
         returnValue.AddProperty("LastName");
-        returnValue.AddProperty("IsAwesome", "bool");
-        returnValue.AddProperty("FavoriteNumber", "int");
-        returnValue.AddProperty("Addresses", "Address", true);
+        returnValue.AddProperty("IsAwesome", "IsAwesome", "bool");
+        returnValue.AddProperty("FavoriteNumber", "FavoriteNumber", "int");
+        returnValue.AddProperty("Addresses", "Addresses", "Address", true);
 
         return returnValue;
     }
@@ -531,7 +580,7 @@ public partial class JsonToClassesGeneratorFixture
         returnValue.AddProperty("City");
         returnValue.AddProperty("State");
         returnValue.AddProperty("PostalCode");
-        returnValue.AddProperty("ThingyThing", "ThingyThing");
+        returnValue.AddProperty("ThingyThing", "ThingyThing", "ThingyThing");
 
         return returnValue;
     }
