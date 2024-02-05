@@ -126,6 +126,12 @@ public class SetJsonValueCommand : SynchronousCommand
         {
             SetValue(editor, newValue, level1);
         }
+
+        var json = editor.ToJson(true);
+
+        File.WriteAllText(configFilename, json);
+
+        WriteLine($"Updated '{configFilename}'.");
     }
 
     private void SetValue(JsonEditor editor,

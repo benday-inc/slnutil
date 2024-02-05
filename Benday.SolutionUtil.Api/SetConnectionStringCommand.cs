@@ -65,6 +65,12 @@ public class SetConnectionStringCommand : SynchronousCommand
 
         editor.SetValue(
             configValue, "ConnectionStrings", configKeyname);
+
+        var json = editor.ToJson(true);
+
+        File.WriteAllText(configFilename, json);
+
+        WriteLine($"Updated '{configFilename}'.");
     }
 
 
