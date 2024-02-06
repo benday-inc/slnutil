@@ -337,7 +337,8 @@ public partial class JsonToClassesGeneratorFixture
 ""fine_tuning"": {
         ""is_allowed_to_fine_tune"": false,
         ""finetuning_state"": ""not_started"",
-        ""verification_attempts_count"": 0        
+        ""verification_attempts_count"": 0,
+        ""asdf-thingy-time"": 0
       }
 }";
 
@@ -373,6 +374,9 @@ public partial class JsonToClassesGeneratorFixture
 
     [JsonPropertyName(""verification_attempts_count"")]
     public int VerificationAttemptsCount { get; set; }
+
+    [JsonPropertyName(""asdf-thingy-time"")]
+    public int AsdfThingyTime { get; set; }
 }";
         AssertCodeIsPrettyMuchEqual(expected, actual);
     }

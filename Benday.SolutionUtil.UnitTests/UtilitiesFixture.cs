@@ -36,6 +36,7 @@ public class UtilitiesFixture
     [DataRow("high_quality_base_model_ids", "HighQualityBaseModelIds")]
     [DataRow("TestValue", "TestValue")]
     [DataRow("use case", "UseCase")]
+    [DataRow("testy-thingy", "TestyThingy")]
     public void JsonNameToCsharpName(string input, string expected)
     {
         // arrange
