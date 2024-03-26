@@ -35,6 +35,15 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [base64](#base64) | Encodes a string value as a base 64 string. |
 | [touch](#touch) | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | [validateconnectionstring](#validateconnectionstring) | Validate that specified connection string can connect to SQL Server. |
+| [get-configuration](#get-configuration) | Display all configuration values or a specific configuration value |
+| [remove-configuration](#remove-configuration) | Remove a configuration value |
+| [set-configuration](#set-configuration) | Set a configuration value |
+| [get-configuration](#get-configuration) | Display all configuration values or a specific configuration value |
+| [remove-configuration](#remove-configuration) | Remove a configuration value |
+| [set-configuration](#set-configuration) | Set a configuration value |
+| [get-configuration](#get-configuration) | Display all configuration values or a specific configuration value |
+| [remove-configuration](#remove-configuration) | Remove a configuration value |
+| [set-configuration](#set-configuration) | Set a configuration value |
 ## <a name="rename"></a> rename
 **Bulk rename for files and folders.**
 ### Arguments
@@ -166,3 +175,60 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | filename | Optional | String | Path to json config file |
 | name | Required | String | Name of the connection string to validate |
+## <a name="get-configuration"></a> get-configuration
+**Display all configuration values or a specific configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Optional | String | Name of the configuration name to display |
+## <a name="remove-configuration"></a> remove-configuration
+**Remove a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration name to display |
+## <a name="set-configuration"></a> set-configuration
+**Set a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration value to set |
+| value | Required | String | Value of the configuration |
+## <a name="get-configuration"></a> get-configuration
+**Display all configuration values or a specific configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Optional | String | Name of the configuration name to display |
+## <a name="remove-configuration"></a> remove-configuration
+**Remove a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration name to display |
+## <a name="set-configuration"></a> set-configuration
+**Set a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration value to set |
+| value | Required | String | Value of the configuration |
+## <a name="get-configuration"></a> get-configuration
+**Display all configuration values or a specific configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Optional | String | Name of the configuration name to display |
+## <a name="remove-configuration"></a> remove-configuration
+**Remove a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration name to display |
+## <a name="set-configuration"></a> set-configuration
+**Set a configuration value**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the configuration value to set |
+| value | Required | String | Value of the configuration |
