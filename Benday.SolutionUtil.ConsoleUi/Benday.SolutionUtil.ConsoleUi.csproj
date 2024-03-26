@@ -15,10 +15,12 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.5.0.0</AssemblyVersion>
-    <Version>$(VersionPrefix)2.5.0</Version>
+    <AssemblyVersion>2.6.0.0</AssemblyVersion>
+    <Version>$(VersionPrefix)2.6.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
-    <PackageReleaseNotes>v2.5 - Updated jsontoclasses to add support for hyphens in json property names.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      v2.6 - Updated nuget package to include Benday.CommandsFramework v3.2.0.
+      v2.5 - Updated jsontoclasses to add support for hyphens in json property names.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\bdc_mark_128_128.png">
@@ -31,7 +33,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="2.5.0" />
+    <PackageReference Include="Benday.CommandsFramework" Version="3.2.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Benday.SolutionUtil.Api\Benday.SolutionUtil.Api.csproj" />

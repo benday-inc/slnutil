@@ -26,6 +26,15 @@ public class MarkdownUsageFormatterFixture
             return _SystemUnderTest;
         }
     }
+    public DefaultProgramOptions GetProgramOptions()
+    {
+        var options = new DefaultProgramOptions();
+
+        options.ApplicationName = "Solution & Project Utilities";
+        options.Website = "https://www.benday.com";
+
+        return options;
+    }
 
     [TestMethod]
     public void FormatUsagesAsMarkdown_GitHubReadme()
@@ -33,7 +42,7 @@ public class MarkdownUsageFormatterFixture
         // arrange
         var assembly = typeof(StringUtility).Assembly;
 
-        var usages = new CommandAttributeUtility().GetAllCommandUsages(assembly);
+        var usages = new CommandAttributeUtility(GetProgramOptions()).GetAllCommandUsages(assembly);
 
         // act
         var actual = SystemUnderTest.Format(usages, false);
@@ -57,7 +66,7 @@ public class MarkdownUsageFormatterFixture
         // arrange
         var assembly = typeof(StringUtility).Assembly;
 
-        var usages = new CommandAttributeUtility().GetAllCommandUsages(assembly);
+        var usages = new CommandAttributeUtility(GetProgramOptions()).GetAllCommandUsages(assembly);
 
         // act
         var actual = SystemUnderTest.Format(usages, true);
@@ -81,7 +90,7 @@ public class MarkdownUsageFormatterFixture
         // arrange
         var assembly = typeof(StringUtility).Assembly;
 
-        var usages = new CommandAttributeUtility().GetAllCommandUsages(assembly);
+        var usages = new CommandAttributeUtility(GetProgramOptions()).GetAllCommandUsages(assembly);
 
         var solutionDir = GetPathToSolutionRootDirectory();
 
