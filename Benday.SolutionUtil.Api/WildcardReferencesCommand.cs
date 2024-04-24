@@ -9,20 +9,16 @@ using Benday.XmlUtilities;
 
 namespace Benday.SolutionUtil.Api;
 
-
-
-[Command(Name = Constants.CommandArgumentNameCleanReferences,
+[Command(Name = Constants.CommandArgumentNameMakeReferenceUseWildcard,
     IsAsync = false,
-    Description = "Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.")]
-public class CleanReferencesCommand : SynchronousCommand
+    Description = "Changes package references in a C# project file to use wildcard version rather than fixed version number.")]
+public class WildcardReferencesCommand : SynchronousCommand
 {
-
-    public CleanReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
+    public WildcardReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
     {
 
     }
-
 
     public override ArgumentCollection GetArguments()
     {
@@ -34,6 +30,11 @@ public class CleanReferencesCommand : SynchronousCommand
 
         args.AddBoolean(Constants.ArgumentNamePreview)
             .AsNotRequired().AllowEmptyValue().WithDescription("Preview changes only");
+
+        args.AddString(Constants.ArgumentNamePackageNameFilter)
+            .AsNotRequired()
+            .WithDescription("Filter package by name. If package name starts with this value, it gets updated.")
+            .WithDefaultValue(string.Empty);
 
         return args;
     }
@@ -63,7 +64,7 @@ public class CleanReferencesCommand : SynchronousCommand
         {
             foundSolution = true;
 
-            _SolutionFolder = new FileInfo(_SolutionPath).DirectoryName ?? 
+            _SolutionFolder = new FileInfo(_SolutionPath).DirectoryName ??
                 throw new InvalidOperationException($"Solution path does not have a non-null directory name.");
 
             WriteLine($"Solution:        {_SolutionPath}");
@@ -81,18 +82,34 @@ public class CleanReferencesCommand : SynchronousCommand
             else
             {
                 var projects = ParseProjects(projectsAsString);
-                CleanProjects(projects);
+                UpdateReferences(projects);
             }
         }
     }
 
-    private void CleanProjects(List<string> projectPaths)
+    private void UpdateReferences(List<string> projectPaths)
     {
-        var wroteProjectHeader = false;
+        var previewMode = Arguments.GetBooleanValue(Constants.ArgumentNamePreview);
+
+        var filter = Arguments.GetStringValue(Constants.ArgumentNamePackageNameFilter);
+
+        bool doFilter;
+
+        if (string.IsNullOrWhiteSpace(filter) == false)
+        {
+            doFilter = true;
+            WriteLine($"Filtering by package name starting with '{filter}'.");
+        }
+        else
+        {
+            doFilter = false;
+            WriteLine("Not filtering by package name.");
+        }
 
         foreach (var projectPath in projectPaths)
         {
-            wroteProjectHeader = false;
+            var hasChanges = false;
+            var wroteProjectName = false;
 
             var projectPathAbsolute = Path.Combine(_SolutionFolder, projectPath);
 
@@ -102,35 +119,51 @@ public class CleanReferencesCommand : SynchronousCommand
 
             var packageRefs = doc.Descendants("PackageReference");
 
-            var foundJunk = false;
-            var removeThese = new List<XElement>();
-
             foreach (var packageRef in packageRefs)
             {
-                var include = packageRef.AttributeValue("Include");
-                var version = packageRef.AttributeValue("Version");
-                var hasChildren = packageRef.HasElements;
+                var include = packageRef.AttributeValue("Include");                
 
-                if (hasChildren == true)
+                if (doFilter == true && include.StartsWith(filter, StringComparison.CurrentCultureIgnoreCase) == false)
                 {
-                    if (wroteProjectHeader == false)
+                    // skip this one
+                    continue;
+                }
+
+                var version = packageRef.AttributeValue("Version");
+
+                var wildcardVersion = Utilities.PackageVersionNumberToWildcard(version);
+
+                if (previewMode == true)
+                {
+                    if (wroteProjectName == false)
                     {
-                        Console.WriteLine();
-                        Console.WriteLine($"* PROJECT: {projectPath}");
-                        wroteProjectHeader = true;
+                        WriteLine($"{projectPath}");
+                        wroteProjectName = true;
                     }
 
-                    Console.WriteLine($"\t{include} - {version} - has junk: {hasChildren}");
-                    foundJunk = true;
-                    removeThese.AddRange(packageRef.Elements());
+                    WriteLine($"\t{include} - '{version}' -> '{wildcardVersion}'");
+                }
+                else
+                {
+                    packageRef.SetAttributeValue("Version", wildcardVersion);
+
+                    hasChanges = true;
+
+                    if (wroteProjectName == false)
+                    {
+                        WriteLine($"{projectPath}");
+                        wroteProjectName = true;
+                    }
+
+                    WriteLine($"\t{include} - '{version}' -> '{wildcardVersion}'");
                 }
             }
 
-            if (foundJunk == true && Arguments.GetBooleanValue(Constants.ArgumentNamePreview) == false)
-            {
-                removeThese.ForEach(x => x.Remove());
+            if (hasChanges == true && Arguments.GetBooleanValue(Constants.ArgumentNamePreview) == false)
+            {                
                 var xml = doc.ToString();
                 File.WriteAllText(projectPathAbsolute, xml);
+                WriteLine($"Saved changes to {projectPathAbsolute}.");
             }
         }
     }
@@ -163,7 +196,7 @@ public class CleanReferencesCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo) ?? 
+        var process = Process.Start(startInfo) ??
             throw new InvalidOperationException($"Process.Start() returned null.");
 
         process.WaitForExit();

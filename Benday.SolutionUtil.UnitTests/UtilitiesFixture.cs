@@ -52,4 +52,25 @@ public class UtilitiesFixture
             "JsonNameToCsharpName() returned wrong value.");
     }
 
+    [TestMethod]
+    [DataRow("8.1.2", "8.*")]
+    [DataRow("18.1.2", "18.*")]
+    [DataRow("18.*.*", "18.*")]
+    [DataRow("182.*", "182.*")]
+    [DataRow("182", "182")]
+    public void PackageVersionNumberToWildcard(string input, string expected)
+    {
+        // arrange
+
+        // act
+        var actual =
+            Utilities.PackageVersionNumberToWildcard(input);
+
+        // assert
+        Assert.AreEqual(
+            expected,
+            actual,
+            "PackageVersionNumberToWildcard() returned wrong value.");
+    }
+
 }

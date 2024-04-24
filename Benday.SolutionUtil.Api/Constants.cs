@@ -20,12 +20,14 @@ public static class Constants
     public const string ArgumentNameListProjects = "listprojects";
     public const string ArgumentNameWriteToClipboard = "toclipboard";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
+    public const string CommandArgumentNameMakeReferenceUseWildcard = "wildcardreference";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNamePropertyName = "propertyname";
     public const string ArgumentNamePropertyValue = "propertyvalue";
     public const string ArgumentNamePathOnly = "pathonly";
     public const string ArgumentNameFrameworkVersion = "version";
     public const string ArgumentNamePreview = "preview";
+    public const string ArgumentNamePackageNameFilter = "filter";
     public const string ArgumentNameRecursive = "recursive";
     public const string ArgumentNameFromValue = "from";
     public const string ArgumentNameToValue = "to";

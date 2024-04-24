@@ -32,6 +32,7 @@ public class MarkdownUsageFormatterFixture
 
         options.ApplicationName = "Solution & Project Utilities";
         options.Website = "https://www.benday.com";
+        options.UsesConfiguration = false;
 
         return options;
     }
