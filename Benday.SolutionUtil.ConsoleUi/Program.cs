@@ -19,6 +19,7 @@ class Program
         options.Version = $"v{versionInfo.FileVersion}";
         options.ApplicationName = "Solution & Project Utilities";
         options.Website = "https://www.benday.com";
+        options.UsesConfiguration = false;
 
         var program = new DefaultProgram(options, assembly);
 
