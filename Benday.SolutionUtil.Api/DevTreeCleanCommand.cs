@@ -22,6 +22,11 @@ internal class DevTreeCleanCommand : SynchronousCommand
             .WithDescription(
                 "Starting directory. If not supplied, the tool uses the current directory.");
 
+        args.AddBoolean(Constants.ArgumentNameKeepGitRepo)
+            .AsNotRequired()
+            .WithDescription("If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders.")
+            .WithDefaultValue(true);
+
         return args;
     }
 
@@ -39,10 +44,18 @@ internal class DevTreeCleanCommand : SynchronousCommand
             throw new KnownException($"Starting directory '{rootDir}' does not exist.");
         }
 
-        CleanDirectory(rootDir);
+        bool keepGit = false;
+
+        if (Arguments.GetBooleanValue(Constants.ArgumentNameKeepGitRepo) == true)
+        {
+            WriteLine("Skipping deletion of .git folders.");
+            keepGit = true;
+        }
+
+        CleanDirectory(rootDir, keepGit);
     }
 
-    public void CleanDirectory(string fromDir)
+    public void CleanDirectory(string fromDir, bool keepGit)
     {
         DirectoryInfo dirInfo = new DirectoryInfo(fromDir);
 
@@ -54,7 +67,27 @@ internal class DevTreeCleanCommand : SynchronousCommand
         {
             string dirFullNameToLower = dir.FullName.ToLower();
 
-            if (dirFullNameToLower.EndsWith($"{pathSeparator}.git") == true ||
+            if (keepGit == false &&
+                dirFullNameToLower.EndsWith($"{pathSeparator}.git") == true ||
+                dirFullNameToLower.EndsWith($"{pathSeparator}bin") == true ||
+                dir.FullName.EndsWith($"{pathSeparator}obj") == true ||
+                dir.FullName.EndsWith($"{pathSeparator}node_modules") == true ||
+                dir.FullName.EndsWith($"{pathSeparator}packages") == true ||
+                dir.FullName.EndsWith($"{pathSeparator}TestResults") == true)
+            {
+                WriteLine($"Deleting directory '{dir.FullName}'");
+
+                try
+                {
+                    dir.Delete(true);
+                    WriteLine("...DONE");
+                }
+                catch (Exception ex)
+                {
+                    WriteLine($"Error: {Environment.NewLine}{ex.Message}");
+                }
+            }
+            else if (keepGit == true &&
                 dirFullNameToLower.EndsWith($"{pathSeparator}bin") == true ||
                 dir.FullName.EndsWith($"{pathSeparator}obj") == true ||
                 dir.FullName.EndsWith($"{pathSeparator}node_modules") == true ||

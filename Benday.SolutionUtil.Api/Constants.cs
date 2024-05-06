@@ -14,6 +14,7 @@ public static class Constants
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentNameRootDirectory = "rootdir";
+    public const string ArgumentNameKeepGitRepo = "keepgit";
     public const string ArgumentNameBinariesDirectory = "binariesdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
