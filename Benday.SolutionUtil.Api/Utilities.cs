@@ -140,4 +140,22 @@ public static class Utilities
             }
         }
     }
+
+    public static string PackageVersionNumberToWildcard(string input)
+    {
+        var tokens = input.Split('.');
+
+        if (tokens.Length == 0)
+        {
+            return input;
+        }
+        else if (tokens.Length == 1)
+        {
+            return tokens[0];
+        }
+        else
+        {
+            return $"{tokens[0]}.*";
+        }        
+    }
 }
