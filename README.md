@@ -78,6 +78,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
+| keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 ## <a name="findsolutions"></a> findsolutions
 **Find solution files in a folder tree.**
 ### Arguments
