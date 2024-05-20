@@ -142,7 +142,7 @@ public static class ProjectUtilities
                 returnValues.Add(new ReferenceInfo()
                 {
                     ReferenceType = referenceType,
-                    ReferenceTarget = item.ElementValue("HintPath")
+                    ReferenceTarget = item.ElementValue("HintPath") ?? string.Empty
                 });
             }
             else

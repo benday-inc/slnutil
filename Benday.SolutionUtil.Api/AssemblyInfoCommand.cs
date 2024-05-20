@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Benday.CommandsFramework;
 
@@ -82,7 +83,7 @@ public class AssemblyInfoCommand : SynchronousCommand
 
         foreach (var attribute in attributes)
         {
-            builder.AppendLine($"{attribute.AttributeType.Name}:");
+            builder.AppendLine($"{FormatName(attribute.AttributeType.Name)}:");
 
             LogAttributeProperties(builder, attribute);
 
@@ -91,6 +92,17 @@ public class AssemblyInfoCommand : SynchronousCommand
 
         WriteLine(builder.ToString());
     }
+
+    private string FormatName(string name)
+    {
+        // split by uppercase letters
+        var parts = Regex.Split(name, @"(?<!^)(?=[A-Z])");
+
+        var returnValue = string.Join(" ", parts);
+
+        return returnValue;        
+    }
+
 
     private void LogAttributeProperties(
         StringBuilder builder, CustomAttributeData attribute)

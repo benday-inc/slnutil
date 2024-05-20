@@ -18,6 +18,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ## Commands
 | Command Name | Description |
 | --- | --- |
+| assemblyinfo | View assembly info for a DLL. |
 | rename | Bulk rename for files and folders. |
 | cleanreferences | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
@@ -36,6 +37,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | touch | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 | wildcardreference | Changes package references in a C# project file to use wildcard version rather than fixed version number. |
+## assemblyinfo
+**View assembly info for a DLL.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Required | String | Assembly to view |
 ## rename
 **Bulk rename for files and folders.**
 ### Arguments

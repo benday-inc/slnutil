@@ -46,6 +46,11 @@
       "commandName": "Project",
       "commandLineArgs": "deployefmigrations",
       "workingDirectory": "/Users/benday/temp/webapi-temp-complex"
+    },
+    "assemblyinfo": {
+      "commandName": "Project",
+      "commandLineArgs": "assemblyinfo PowerpointUtil.FunctionsApp.dll",
+      "workingDirectory": "/Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.FunctionsApp/bin/Debug/net8.0"
     }
   }
 }
