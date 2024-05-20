@@ -8,6 +8,8 @@ using Benday.CommandsFramework;
 
 namespace Benday.SolutionUtil.Api;
 
+
+
 [Command(Name = Constants.CommandArgumentNameRename,
     Description = "Bulk rename for files and folders.")]
 public class BulkRenameCommand : SynchronousCommand
