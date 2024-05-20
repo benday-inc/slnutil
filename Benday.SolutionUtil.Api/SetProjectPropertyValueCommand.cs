@@ -142,18 +142,26 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
             throw new InvalidOperationException($"Project file does not contain a project definition");
         }
 
-        ProjectUtilities.SetProjectPropertyElement(pathToProjectFile, root, propertyName, propertyValue);
+        var result = ProjectUtilities.SetProjectPropertyElement(pathToProjectFile, root, propertyName, propertyValue);
 
-        var settings = new XmlWriterSettings
+        if (result == null || result.ValueChanged == false)
         {
-            OmitXmlDeclaration = true,
-            Indent = true
-        };
+            // no change
+            WriteLine($"No change to project '{pathToProjectFile}'.");
+        }
+        else
+        {
+            var settings = new XmlWriterSettings
+            {
+                OmitXmlDeclaration = true,
+                Indent = true
+            };
 
-        using var writer = XmlWriter.Create(pathToProjectFile, settings);
+            using var writer = XmlWriter.Create(pathToProjectFile, settings);
 
-        doc.Save(writer);
+            doc.Save(writer);
 
-        WriteLine($"Updated project '{pathToProjectFile}'.");
+            WriteLine($"Updated project '{pathToProjectFile}'.");
+        }
     }
 }

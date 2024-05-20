@@ -15,10 +15,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.9.0.0</AssemblyVersion>
-    <Version>$(VersionPrefix)2.9.0</Version>
+    <AssemblyVersion>2.10.0.0</AssemblyVersion>
+    <Version>$(VersionPrefix)2.10.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+      v2.10 - Fixed bug in setprojectproperty command where values were not updated if the property already existed.
       v2.9 - Added assembly info viewer.
       v2.8 - Added option to devtreeclean to keep git repositories when cleaning a directory tree.
       v2.7 - Added wildcard reference command.

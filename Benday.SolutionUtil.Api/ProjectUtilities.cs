@@ -248,7 +248,7 @@ public static class ProjectUtilities
         }
     }
 
-    public static XElement SetProjectPropertyElement(string filename, XElement root, string propertyName, string propertyValue)
+    public static OperationResult<XElement>? SetProjectPropertyElement(string filename, XElement root, string propertyName, string propertyValue)
     {
         var propertyGroups =
             root.ElementsByLocalName("PropertyGroup");
@@ -277,7 +277,16 @@ public static class ProjectUtilities
 
                 if (returnValue != null)
                 {
-                    return returnValue;
+                    if (returnValue.Value != propertyValue)
+                    {
+                        returnValue.Value = propertyValue;
+
+                        return new OperationResult<XElement>(returnValue, true);
+                    }
+                    else
+                    {
+                        return new OperationResult<XElement>(returnValue, false);
+                    }
                 }
             }
 
@@ -288,9 +297,11 @@ public static class ProjectUtilities
                 returnValue = new XElement(propertyName, propertyValue);
 
                 propertyGroup.Add(returnValue);                
+
+                return new OperationResult<XElement>(returnValue, true);
             }
 
-            return returnValue;
+            return null;
         }
     }
 
