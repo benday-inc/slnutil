@@ -53,6 +53,12 @@ public class SetJsonValueCommand : SynchronousCommand
             .WithDescription(
                 $"Increment the minor version of the existing value or use the '/{Constants.ArgumentNameValue}' as the value if it does not exist or isn't an integer.");
 
+        args.AddBoolean(Constants.ArgumentNameSetValueAsBoolean)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription($"Set value into the json as boolean")
+            .WithDefaultValue(false);
+
         return args;
     }
 
@@ -82,6 +88,8 @@ public class SetJsonValueCommand : SynchronousCommand
 
         WriteLine($"Using '{configFilename}'...");
 
+        var setAsBoolean = Arguments.GetBooleanValue(Constants.ArgumentNameSetValueAsBoolean);
+
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);
         string? level2 = null;
@@ -99,7 +107,7 @@ public class SetJsonValueCommand : SynchronousCommand
             level4 = Arguments.GetStringValue(Constants.ArgumentNameLevel4);
 
             SetValue(
-                editor,
+                editor, setAsBoolean,
                 newValue, level1, level2, level3, level4);
         }
         else if (Arguments.HasValue(Constants.ArgumentNameLevel2) == true &&
@@ -109,7 +117,7 @@ public class SetJsonValueCommand : SynchronousCommand
             level3 = Arguments.GetStringValue(Constants.ArgumentNameLevel3);
 
             SetValue(
-                editor,
+                editor, setAsBoolean,
                 newValue, level1, level2, level3);
         }
         else if (Arguments.HasValue(Constants.ArgumentNameLevel2) == true &&
@@ -118,13 +126,13 @@ public class SetJsonValueCommand : SynchronousCommand
             level2 = Arguments.GetStringValue(Constants.ArgumentNameLevel2);
 
             SetValue(
-                editor,
+                editor, setAsBoolean,
                 newValue,
                 level1, level2);
         }
         else
         {
-            SetValue(editor, newValue, level1);
+            SetValue(editor, setAsBoolean, newValue, level1);
         }
 
         var json = editor.ToJson(true);
@@ -134,42 +142,35 @@ public class SetJsonValueCommand : SynchronousCommand
         WriteLine($"Updated '{configFilename}'.");
     }
 
-    private void SetValue(JsonEditor editor,
-        string newValue, string level1, string level2,
-        string level3, string level4)
+    private void SetValue(JsonEditor editor, bool setAsBoolean,
+        string newValue, params string[] levels)
     {
-        var currentValue = editor.GetValue(level1, level2, level3, level4);
+        var currentValue = editor.GetValue(levels);
 
         newValue = ProcessIncrementIfExists(currentValue, newValue);
 
-        editor.SetValue(
+        if (setAsBoolean == true)
+        {
+            // try parse the value as a boolean
+
+            if (bool.TryParse(newValue, out var valueAsBoolean) == false)
+            {
+                throw new KnownException(
+                    $"Could not parse '{newValue}' as a boolean value.");
+            }
+            else
+            {
+                editor.SetValue(
+                    bool.Parse(newValue),
+                    levels);
+            }
+        }
+        else
+        {
+            editor.SetValue(
                 newValue,
-                level1, level2, level3, level4);
-    }
-
-    private void SetValue(JsonEditor editor,
-        string newValue, string level1, string level2,
-        string level3)
-    {
-        var currentValue = editor.GetValue(level1, level2, level3);
-
-        newValue = ProcessIncrementIfExists(currentValue, newValue);
-
-        editor.SetValue(
-                newValue,
-                level1, level2, level3);
-    }
-
-    private void SetValue(JsonEditor editor,
-        string newValue, string level1, string level2)
-    {
-        var currentValue = editor.GetValue(level1, level2);
-        
-        newValue = ProcessIncrementIfExists(currentValue, newValue);
-
-        editor.SetValue(
-                newValue,
-                level1, level2);
+                levels);
+        }
     }
 
     private string ProcessIncrementIfExists(string? currentValue, string newValue)
@@ -181,7 +182,7 @@ public class SetJsonValueCommand : SynchronousCommand
         {
             if (!string.IsNullOrEmpty(currentValue) && Int32.TryParse(currentValue, out var valueAsInt))
             {
-                return (++valueAsInt).ToString(); 
+                return (++valueAsInt).ToString();
             }
             else
             {

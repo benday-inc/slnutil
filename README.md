@@ -148,6 +148,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | value | Required | String | String value to set |
 | increment-int | Optional | Boolean | Increment the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | increment-minor-version | Optional | Boolean | Increment the minor version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
+| bool | Optional | Boolean | Set value into the json as boolean |
 ## <a name="setprojectproperty"></a> setprojectproperty
 **Set a project property value on all projects.**
 ### Arguments

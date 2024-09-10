@@ -44,6 +44,7 @@ public static class Constants
     public const string ArgumentNameToken = "token";
     public const string ArgumentNameIncrementInt32Value = "increment-int";
     public const string ArgumentNameIncrementMinorVersionValue = "increment-minor-version";
+    public const string ArgumentNameSetValueAsBoolean = "bool";
     
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";

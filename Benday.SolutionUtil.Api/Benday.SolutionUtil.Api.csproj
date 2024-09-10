@@ -6,12 +6,12 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="3.2.0" />
+    <PackageReference Include="Benday.CommandsFramework" Version="4.3.0" />
     <PackageReference Include="Benday.Common" Version="8.0.0" />
-    <PackageReference Include="Benday.JsonUtilities" Version="4.1.0" />
+    <PackageReference Include="Benday.JsonUtilities" Version="5.0.0" />
     <PackageReference Include="Benday.XmlUtilities" Version="5.3.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
