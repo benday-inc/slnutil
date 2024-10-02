@@ -354,3 +354,5 @@ MigrationBackup/
 .ionide/
 
 *.unversioned.cs
+.DS_Store
+Benday.SolutionUtil.ConsoleUi/.DS_Store
