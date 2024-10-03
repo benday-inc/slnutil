@@ -6,8 +6,8 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="3.4.0" />
-    <PackageReference Include="Benday.Common" Version="8.0.0" />
+    <PackageReference Include="Benday.CommandsFramework" Version="4.0.0-beta" />
+    <PackageReference Include="Benday.Common" Version="9.0.0-alpha" />
     <PackageReference Include="Benday.JsonUtilities" Version="4.1.0" />
     <PackageReference Include="Benday.XmlUtilities" Version="5.3.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
