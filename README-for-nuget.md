@@ -33,6 +33,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | setframework | Set the target framework version on all projects. |
 | setjsonvalue | Set a string value in a json file. |
 | setprojectproperty | Set a project property value on all projects. |
+| setprojectversion | Set the assembly and nuget package version property value on a project. |
 | base64 | Encodes a string value as a base 64 string. |
 | touch | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
@@ -157,6 +158,15 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
 | propertyname | Required | String | Name of the property to set. |
 | propertyvalue | Required | String | Value for the property. |
+## setprojectversion
+**Set the assembly and nuget package version property value on a project.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
+| project | Required | String | Project name to update. |
+| increment | Optional | Boolean | Increment the minor value. |
+| value | Optional | String | Value for the property. |
 ## base64
 **Encodes a string value as a base 64 string.**
 ### Arguments
