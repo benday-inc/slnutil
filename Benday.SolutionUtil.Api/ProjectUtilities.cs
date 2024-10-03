@@ -335,4 +335,125 @@ public static class ProjectUtilities
             return targetFrameworkElement.Value;
         }
     }
+    public static string GetProjectVersion(string projectPath)
+    {
+        var doc = XDocument.Load(projectPath);
+
+        var root = doc.Root;
+
+        if (root == null || root.Name.LocalName != "Project")
+        {
+            throw new InvalidOperationException(
+                $"Could not find root node in file '{projectPath}'.");
+        }
+
+        var assemblyVersion =
+            ProjectUtilities.GetProjectPropertyValue(
+                projectPath, root, "AssemblyVersion");
+
+        var assemblyVersionString = string.Empty;
+
+        if (assemblyVersion == null || 
+            string.IsNullOrEmpty(assemblyVersion.Value) == true)
+        {
+            
+        }
+        else
+        {
+            assemblyVersionString = assemblyVersion.Value;
+        }
+
+        if (string.IsNullOrWhiteSpace(assemblyVersionString) == false)
+        {
+            return assemblyVersionString;
+        }
+
+
+        var packageVersion =
+            ProjectUtilities.GetProjectPropertyValue(
+                projectPath, root, "Version");
+
+        var packageVersionString = string.Empty;
+
+        if (packageVersion == null ||
+            string.IsNullOrEmpty(packageVersion.Value) == true)
+        {
+
+        }
+        else
+        {
+            packageVersionString = packageVersion.Value;
+        }
+
+        return packageVersionString;
+
+    }
+
+    public static XElement? GetProjectPropertyValue(
+        string filename, XElement root, 
+        string propertyName)
+    {
+        var propertyGroups =
+            root.ElementsByLocalName("PropertyGroup");
+
+        if (propertyGroups == null || propertyGroups.Count() == 0)
+        {
+            throw new InvalidOperationException(
+                $"Could not locate PropertyGroup node in file '{filename}'.");
+        }
+        else
+        {
+            XElement? returnValue = null;
+
+            foreach (var propertyGroup in propertyGroups)
+            {
+                returnValue =
+                    propertyGroup.ElementByLocalName(
+                        propertyName);
+
+                if (returnValue != null)
+                {
+                    return returnValue;
+                }
+            }
+
+            if (returnValue == null)
+            {
+                return null;
+            }
+            else
+            {
+                return returnValue;
+            }
+        }
+    }
+    public static string IncrementVersion(string currentValue)
+    {
+        if (string.IsNullOrEmpty(currentValue) == false)
+        {
+            var tokens = currentValue.Split('.');
+
+            if (tokens.Length < 2)
+            {
+
+            }
+            else
+            {
+                var minorVersionAsString = tokens[1];
+
+                if (Int32.TryParse(minorVersionAsString, out var valueAsInt) == true)
+                {
+                    valueAsInt++;
+
+                    tokens[1] = valueAsInt.ToString();
+
+                    var returnValue = string.Join(".", tokens);
+
+                    return returnValue;
+                }                
+            }
+        }
+
+        return currentValue;
+    }
 }

@@ -11,6 +11,7 @@ public static class Constants
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
     public const string CommandArgumentNameSetFrameworkVersion = "setframework";
     public const string CommandArgumentNameSetProjectProperty = "setprojectproperty";
+    public const string CommandArgumentNameSetVersion = "setprojectversion";
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentNameRootDirectory = "rootdir";
@@ -23,6 +24,7 @@ public static class Constants
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string CommandArgumentNameMakeReferenceUseWildcard = "wildcardreference";
     public const string ArgumentNameSolutionPath = "solutionpath";
+    public const string ArgumentNameProjectName = "project";
     public const string ArgumentNamePropertyName = "propertyname";
     public const string ArgumentNamePropertyValue = "propertyvalue";
     public const string ArgumentNamePathOnly = "pathonly";
@@ -44,6 +46,7 @@ public static class Constants
     public const string ArgumentNameToken = "token";
     public const string ArgumentNameIncrementInt32Value = "increment-int";
     public const string ArgumentNameIncrementMinorVersionValue = "increment-minor-version";
+    public const string ArgumentNameIncrement = "increment";
     public const string ArgumentNameSetValueAsBoolean = "bool";
     
     public const string ArgumentNameValue = "value";

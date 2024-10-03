@@ -51,6 +51,16 @@
       "commandName": "Project",
       "commandLineArgs": "assemblyinfo PowerpointUtil.FunctionsApp.dll",
       "workingDirectory": "/Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.FunctionsApp/bin/Debug/net8.0"
+    },
+    "setprojectversion increment": {
+      "commandName": "Project",
+      "commandLineArgs": "setprojectversion /project:TestProject.ConsoleUi /increment",
+      "workingDirectory": "C:\\code\\temp\\TestProject"
+    },
+    "setprojectversion setvalue": {
+      "commandName": "Project",
+      "commandLineArgs": "setprojectversion /project:TestProject.ConsoleUi /value:2.0.1",
+      "workingDirectory": "C:\\code\\temp\\TestProject"
     }
   }
 }
