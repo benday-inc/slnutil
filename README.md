@@ -27,6 +27,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [deployefmigrations](#deployefmigrations) | Deploy EF Core Migrations from DLL binaries. |
 | [devtreeclean](#devtreeclean) | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | [findsolutions](#findsolutions) | Find solution files in a folder tree. |
+| [formatxml](#formatxml) | Formats XML files |
 | [getconnectionstring](#getconnectionstring) | Get database connection string in appsettings.json. |
 | [classesfromjson](#classesfromjson) | Create C# classes from JSON with serialization attributes for System.Text.Json. |
 | [listpackages-oldstyle](#listpackages-oldstyle) | Lists packages referenced in legacy style packages.config files. |
@@ -91,6 +92,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
 | skipreferences | Optional | Boolean | Output results as comma-separated values |
+## <a name="formatxml"></a> formatxml
+**Formats XML files**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Required | String | Path to file or wildcard to files |
+| recursive | Optional | Boolean | Apply to matching files recursively |
+| write | Optional | Boolean | Write changes back to the file |
 ## <a name="getconnectionstring"></a> getconnectionstring
 **Get database connection string in appsettings.json.**
 ### Arguments

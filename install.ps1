@@ -10,4 +10,6 @@ if ($reinstall -eq $true)
     &.\uninstall.ps1
 }
 
+dotnet build
+
 dotnet tool install --global --add-source .\Benday.SolutionUtil.ConsoleUi\bin\Debug slnutil

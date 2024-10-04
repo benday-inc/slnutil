@@ -81,29 +81,32 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Process start returned null");
-
-        process.WaitForExit();
-
         var projects = new List<string>();
 
-        var line = process.StandardOutput.ReadLine();
-
-        var lineNumber = 0;
-
-        while (line != null)
+        using (var process = Process.Start(startInfo) ?? 
+            throw new InvalidOperationException("Process start returned null"))
         {
-            if (lineNumber == 0 || lineNumber == 1)
-            {
-                // skip header
-            }
-            else
-            {
-                projects.Add(line);
-            }
+            process.WaitForExit();
 
-            lineNumber++;
-            line = process.StandardOutput.ReadLine();
+
+            var line = process.StandardOutput.ReadLine();
+
+            var lineNumber = 0;
+
+            while (line != null)
+            {
+                if (lineNumber == 0 || lineNumber == 1)
+                {
+                    // skip header
+                }
+                else
+                {
+                    projects.Add(line);
+                }
+
+                lineNumber++;
+                line = process.StandardOutput.ReadLine();
+            }
         }
 
         SetPropertyValue(solutionPath, projects, propertyName, propertyValue);
@@ -133,7 +136,7 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
             throw new InvalidOperationException($"Could not find project file '{pathToProjectFile}'");
         }
 
-        var doc = XDocument.Load(pathToProjectFile);
+        var doc = XDocument.Parse(File.ReadAllText(pathToProjectFile));
 
         var root = doc.Root;
 
@@ -160,6 +163,8 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
             using var writer = XmlWriter.Create(pathToProjectFile, settings);
 
             doc.Save(writer);
+
+            writer.Close();
 
             WriteLine($"Updated project '{pathToProjectFile}'.");
         }

@@ -5,11 +5,17 @@
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <RestoreSources>$(RestoreSources);C:\code\benday-inc\Benday.XmlUtilities\Benday.XmlUtilities\bin\Debug</RestoreSources>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Benday.CommandsFramework" Version="4.3.0" />
     <PackageReference Include="Benday.Common" Version="8.0.0" />
     <PackageReference Include="Benday.JsonUtilities" Version="5.0.0" />
-    <PackageReference Include="Benday.XmlUtilities" Version="5.3.0" />
+    <PackageReference Include="Benday.XmlUtilities" Version="5.5.0" />
+
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />

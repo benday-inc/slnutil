@@ -61,6 +61,10 @@
       "commandName": "Project",
       "commandLineArgs": "setprojectversion /project:TestProject.ConsoleUi /value:2.0.1",
       "workingDirectory": "C:\\code\\temp\\TestProject"
+    },
+    "formatxml": {
+      "commandName": "Project",
+      "commandLineArgs": "formatxml C:\\temp\\pptx-repairs\\bdc-slide-template-638636226699468571-original\\[Content_Types].xml"
     }
   }
 }

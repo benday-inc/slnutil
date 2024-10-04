@@ -6,6 +6,7 @@ public static class Constants
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
     public const string CommandArgumentNameTouchFile = "touch";
+    public const string CommandArgumentNameFormatXml = "formatxml";
     public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
     public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
@@ -32,6 +33,7 @@ public static class Constants
     public const string ArgumentNamePreview = "preview";
     public const string ArgumentNamePackageNameFilter = "filter";
     public const string ArgumentNameRecursive = "recursive";
+    public const string ArgumentNameWriteToFile = "write";
     public const string ArgumentNameFromValue = "from";
     public const string ArgumentNameToValue = "to";
     public const string CommandArgumentNameToBase64String = "base64";
