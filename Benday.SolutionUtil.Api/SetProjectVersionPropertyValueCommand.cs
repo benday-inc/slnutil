@@ -110,6 +110,8 @@ public class SetProjectVersionPropertyValueCommand : SynchronousCommand
                     solutionPath,
                     new List<string> { projectPath }, "AssemblyVersion",
                     version);
+
+                WriteLine($"Incremented version to '{version}'.");
             }
             else
             {

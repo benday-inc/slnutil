@@ -87,8 +87,9 @@ public class ClassDiagramCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
-        var filename = Arguments.GetStringValue(Constants.ArgumentNameFilename);
-        Utilities.AssertFileExists(filename, Constants.ArgumentNameFilename);
+        var filename = Arguments.GetPathToFile(Constants.ArgumentNameFilename, true);
+        
+        filename = Path.GetFullPath(filename);
 
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
         var typeNameFilterValue = Arguments.GetStringValue(Constants.ArgumentsFilterByTypeNames);
@@ -143,6 +144,8 @@ public class ClassDiagramCommand : SynchronousCommand
             }
         }
 
+        var lastType = types.Last();
+
         foreach (var type in types)
         {
             if (MatchesFilter(type, filterByNamespace, filterByTypeNames, typeNameExactMatch) == false)
@@ -170,6 +173,21 @@ public class ClassDiagramCommand : SynchronousCommand
 
     private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames, bool typeNameExactMatch)
     {
+        if (type == null)
+        {
+            return false;
+        }
+
+        if (type.IsNestedPrivate == true)
+        {
+            return false;
+        }
+        
+        if (string.IsNullOrWhiteSpace(type.Name) == true)
+        {
+            return false;
+        }
+
         if (MatchesNamespaceFilter(type, filterByNamespace) == false)
         {
             return false;

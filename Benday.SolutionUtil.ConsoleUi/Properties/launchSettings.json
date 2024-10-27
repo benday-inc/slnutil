@@ -70,6 +70,10 @@
       "commandName": "Project",
       "commandLineArgs": "classdiagram /namespace:domainmodel /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     },
+    "classdiagram-v2": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram /Users/benday/code/benday-inc/XamlUtil/XamlUtil.ConsoleUi/bin/Debug/net8.0/Benday.CommandsFramework.dll"
+    },
     "classdiagram-filter-by-typename-exact": {
       "commandName": "Project",
       "commandLineArgs": "classdiagram /typenames:IOwnedItem,owneditembase /typenamesmatchexact /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"

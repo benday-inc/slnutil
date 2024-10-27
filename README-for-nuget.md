@@ -23,6 +23,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- |
 | assemblyinfo | View assembly info for a DLL. |
 | rename | Bulk rename for files and folders. |
+| classdiagram | Generate a class diagram for an assembly. |
 | cleanreferences | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
@@ -58,6 +59,16 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | to | Required | String | Replacement value |
 | preview | Optional | Boolean | Preview changes |
 | recursive | Optional | Boolean | Recurse the directory tree |
+## classdiagram
+**Generate a class diagram for an assembly.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| namespace | Optional | String | Filter by namespace |
+| filename | Required | String | Path to assembly that you want a class diagram for. |
+| hideinheritance | Optional | Boolean | Hide inheritance relationships. |
+| typenamesmatchexact | Optional | Boolean | Exact match for type names.  Default is contains. |
+| typenames | Optional | String | Show types that exist in this comma separated list. Default search is contains match that matches by substring. |
 ## cleanreferences
 **Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.**
 ### Arguments
