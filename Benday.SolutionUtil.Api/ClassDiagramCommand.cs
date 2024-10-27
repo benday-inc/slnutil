@@ -2,6 +2,8 @@
 using System.Text;
 
 using Benday.CommandsFramework;
+
+using Microsoft.IdentityModel.Tokens;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameClassDiagram,
@@ -33,6 +35,12 @@ public class ClassDiagramCommand : SynchronousCommand
             .AllowEmptyValue()
             .WithDescription("Hide inheritance relationships.")
             .WithDefaultValue(false);
+
+        args.AddString(Constants.ArgumentsFilterByTypeNames)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Only show types in this comma separated list.")
+            .WithDefaultValue(string.Empty);
 
         return args;
     }
@@ -77,6 +85,10 @@ public class ClassDiagramCommand : SynchronousCommand
         Utilities.AssertFileExists(filename, Constants.ArgumentNameFilename);
 
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
+        var typeNameFilterValue = Arguments.GetStringValue(Constants.ArgumentsFilterByTypeNames);
+
+        var filterByTypeNames = typeNameFilterValue.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
         var hideinheritance = Arguments.GetBooleanValue(Constants.ArgumentNameHideInheritance);
 
         var assembly = Assembly.LoadFile(filename);
@@ -94,14 +106,14 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             foreach (var type in types)
             {
-                if (MatchesFilter(type, filterByNamespace) == false)
+                if (MatchesFilter(type, filterByNamespace, filterByTypeNames) == false)
                 {
                     continue;
                 }
 
                 if (type.BaseType != null)
                 {
-                    if (MatchesFilter(type.BaseType, filterByNamespace) == true &&
+                    if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames) == true &&
                         classes.Contains(type.BaseType) == true)
                     {
                         builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
@@ -112,7 +124,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
                 foreach (var interfaceType in interfacesImplemented)
                 {
-                    if (MatchesFilter(interfaceType, filterByNamespace) == true &&
+                    if (MatchesFilter(interfaceType, filterByNamespace, filterByTypeNames) == true &&
                         interfaces.Contains(interfaceType) == true)
                     {
                         builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
@@ -123,7 +135,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
         foreach (var type in types)
         {
-            if (MatchesFilter(type, filterByNamespace) == false)
+            if (MatchesFilter(type, filterByNamespace, filterByTypeNames) == false)
             {
                 continue;
             }
@@ -146,7 +158,28 @@ public class ClassDiagramCommand : SynchronousCommand
         OpenFileInBrowser(outputFilename);
     }
 
-    private bool MatchesFilter(Type type, string filterByNamespace)
+    private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByClassNamesArray)
+    {
+        if (MatchesNamespaceFilter(type, filterByNamespace) == false)
+        {
+            return false;
+        }
+
+        if (filterByClassNamesArray.IsNullOrEmpty() == true)
+        {
+            return true;
+        }
+        else if (filterByClassNamesArray.Contains(type.Name) == false)
+        {
+            return false;
+        }
+        else 
+        {
+            return true;
+        }
+    }
+
+    private bool MatchesNamespaceFilter(Type type, string filterByNamespace)
     {
         if (string.IsNullOrWhiteSpace(filterByNamespace) == false)
         {
@@ -181,7 +214,6 @@ public class ClassDiagramCommand : SynchronousCommand
             return true;
         }
     }
-
 
     private void OpenFileInBrowser(string outputFilename)
     {
