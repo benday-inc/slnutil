@@ -74,7 +74,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var assembly = Assembly.LoadFile(filename);
 
-        var assemblyName = assembly.FullName;
+        var assemblyName = assembly.FullName ?? string.Empty;
 
         var types = GetTypesSafe(assembly);
 
