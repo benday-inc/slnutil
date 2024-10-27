@@ -127,7 +127,7 @@ public class ClassDiagramCommand : SynchronousCommand
                     if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
                         classes.Contains(type.BaseType) == true)
                     {
-                        builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
+                        builder.AppendLine($"{GetName(type.BaseType)} <|-- {GetName(type)}");
                     }
                 }
 
@@ -138,7 +138,7 @@ public class ClassDiagramCommand : SynchronousCommand
                     if (MatchesFilter(interfaceType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
                         interfaces.Contains(interfaceType) == true)
                     {
-                        builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
+                        builder.AppendLine($"{GetName(interfaceType)} <|.. {GetName(type)}");
                     }
                 }
             }
@@ -351,7 +351,7 @@ classDiagram
 
         foreach (var property in properties)
         {
-            builder.AppendLine($"    +{property.PropertyType.Name} {property.Name}");
+            builder.AppendLine($"    +{GetName(property.PropertyType)} {property.Name}");
         }
 
         var methods = type.GetMethods();
