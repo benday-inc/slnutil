@@ -76,7 +76,38 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var types = GetTypesSafe(assembly);
 
+        var classes = types.Where(t => t.IsClass == true).ToArray();
+        var interfaces = types.Where(t => t.IsInterface == true).ToArray();
+
         var builder = new StringBuilder();
+
+        foreach (var type in types)
+        {
+            if (MatchesFilter(type, filterByNamespace) == false)
+            {
+                continue;
+            }
+
+            if (type.BaseType != null)
+            {
+                if (MatchesFilter(type.BaseType, filterByNamespace) == true && 
+                    classes.Contains(type.BaseType) == true)
+                {
+                    builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
+                }
+            }
+
+            var interfacesImplemented = type.GetInterfaces();
+
+            foreach (var interfaceType in interfacesImplemented)
+            {
+                if (MatchesFilter(interfaceType, filterByNamespace) == true && 
+                    interfaces.Contains(interfaceType) == true)
+                {
+                    builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
+                }
+            }
+        }
 
         foreach (var type in types)
         {
