@@ -28,6 +28,12 @@ public class ClassDiagramCommand : SynchronousCommand
             .WithDescription("Path to assembly that you want a class diagram for.")
             .FromPositionalArgument(1);
 
+        args.AddBoolean(Constants.ArgumentNameHideInheritance)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Hide inheritance relationships.")
+            .WithDefaultValue(false);
+
         return args;
     }
 
@@ -71,6 +77,7 @@ public class ClassDiagramCommand : SynchronousCommand
         Utilities.AssertFileExists(filename, Constants.ArgumentNameFilename);
 
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
+        var hideinheritance = Arguments.GetBooleanValue(Constants.ArgumentNameHideInheritance);
 
         var assembly = Assembly.LoadFile(filename);
 
@@ -83,30 +90,33 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var builder = new StringBuilder();
 
-        foreach (var type in types)
+        if (hideinheritance == false)
         {
-            if (MatchesFilter(type, filterByNamespace) == false)
+            foreach (var type in types)
             {
-                continue;
-            }
-
-            if (type.BaseType != null)
-            {
-                if (MatchesFilter(type.BaseType, filterByNamespace) == true && 
-                    classes.Contains(type.BaseType) == true)
+                if (MatchesFilter(type, filterByNamespace) == false)
                 {
-                    builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
+                    continue;
                 }
-            }
 
-            var interfacesImplemented = type.GetInterfaces();
-
-            foreach (var interfaceType in interfacesImplemented)
-            {
-                if (MatchesFilter(interfaceType, filterByNamespace) == true && 
-                    interfaces.Contains(interfaceType) == true)
+                if (type.BaseType != null)
                 {
-                    builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
+                    if (MatchesFilter(type.BaseType, filterByNamespace) == true &&
+                        classes.Contains(type.BaseType) == true)
+                    {
+                        builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
+                    }
+                }
+
+                var interfacesImplemented = type.GetInterfaces();
+
+                foreach (var interfaceType in interfacesImplemented)
+                {
+                    if (MatchesFilter(interfaceType, filterByNamespace) == true &&
+                        interfaces.Contains(interfaceType) == true)
+                    {
+                        builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
+                    }
                 }
             }
         }
@@ -235,12 +245,12 @@ classDiagram
 
         if (string.IsNullOrWhiteSpace(filterByNamespace) == false)
         {
-            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%", 
+            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%",
                 $"<h2>Filtered by namespace: {filterByNamespace}</h2>");
         }
         else
         {
-            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%", 
+            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%",
                 string.Empty);
         }
 

@@ -69,6 +69,10 @@
     "classdiagram": {
       "commandName": "Project",
       "commandLineArgs": "classdiagram /namespace:domainmodel /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
+    },
+    "classdiagram-hide-inheritance": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram /namespace:domainmodel /hideinheritance /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     }
   }
 }

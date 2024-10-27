@@ -56,6 +56,7 @@ public static class Constants
     public const string ArgumentNameValue = "value";
     public const string ArgumentNameConfigFilename = "filename";
     public const string ArgumentNameFilename = "filename";
+    public const string ArgumentNameHideInheritance = "hideinheritance";
     public const string ArgumentNameConnectionStringName = "name";
 
     public const string ArgumentNameLevel1 = "level1";
