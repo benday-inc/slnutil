@@ -5,6 +5,7 @@ public static class Constants
     public const string ExeName = "slnutil";
 
     public const string CommandArgumentNameFindSolutions = "findsolutions";
+    public const string CommandArgumentNameClassDiagram = "classdiagram";
     public const string CommandArgumentNameTouchFile = "touch";
     public const string CommandArgumentNameFormatXml = "formatxml";
     public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
@@ -15,6 +16,7 @@ public static class Constants
     public const string CommandArgumentNameSetVersion = "setprojectversion";
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameRename = "rename";
+    public const string ArgumentsFilterByNamespace = "namespace";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameKeepGitRepo = "keepgit";
     public const string ArgumentNameBinariesDirectory = "binariesdir";

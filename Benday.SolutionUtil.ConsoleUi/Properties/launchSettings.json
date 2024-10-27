@@ -65,6 +65,10 @@
     "formatxml": {
       "commandName": "Project",
       "commandLineArgs": "formatxml C:\\temp\\pptx-repairs\\bdc-slide-template-638636226699468571-original\\[Content_Types].xml"
+    },
+    "classdiagram": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram /namespace:domainmodel /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     }
   }
 }
