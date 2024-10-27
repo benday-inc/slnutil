@@ -18,6 +18,7 @@ public static class Constants
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentsFilterByNamespace = "namespace";
     public const string ArgumentsFilterByTypeNames = "typenames";
+    public const string ArgumentsFilterByTypeNamesModeExact = "typenamesmatchexact";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameKeepGitRepo = "keepgit";
     public const string ArgumentNameBinariesDirectory = "binariesdir";

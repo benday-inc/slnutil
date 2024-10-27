@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameClassDiagram,
-    Description = "Replace token in file.")]
+    Description = "Generate a class diagram for an assembly.")]
 public class ClassDiagramCommand : SynchronousCommand
 {
     public ClassDiagramCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,10 +36,16 @@ public class ClassDiagramCommand : SynchronousCommand
             .WithDescription("Hide inheritance relationships.")
             .WithDefaultValue(false);
 
+        args.AddBoolean(Constants.ArgumentsFilterByTypeNamesModeExact)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Exact match for type names.  Default is contains.")
+            .WithDefaultValue(false);
+
         args.AddString(Constants.ArgumentsFilterByTypeNames)
             .AsNotRequired()
             .AllowEmptyValue()
-            .WithDescription("Only show types in this comma separated list.")
+            .WithDescription("Show types that exist in this comma separated list. Default search is contains match that matches by substring.")
             .WithDefaultValue(string.Empty);
 
         return args;
@@ -86,6 +92,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
         var typeNameFilterValue = Arguments.GetStringValue(Constants.ArgumentsFilterByTypeNames);
+        var typeNameExactMatch = Arguments.GetBooleanValue(Constants.ArgumentsFilterByTypeNamesModeExact);
 
         var filterByTypeNames = typeNameFilterValue.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
@@ -109,14 +116,14 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             foreach (var type in types)
             {
-                if (MatchesFilter(type, filterByNamespace, filterByTypeNames) == false)
+                if (MatchesFilter(type, filterByNamespace, filterByTypeNames, typeNameExactMatch) == false)
                 {
                     continue;
                 }
 
                 if (type.BaseType != null)
                 {
-                    if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames) == true &&
+                    if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
                         classes.Contains(type.BaseType) == true)
                     {
                         builder.AppendLine($"{type.BaseType.Name} <|-- {type.Name}");
@@ -127,7 +134,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
                 foreach (var interfaceType in interfacesImplemented)
                 {
-                    if (MatchesFilter(interfaceType, filterByNamespace, filterByTypeNames) == true &&
+                    if (MatchesFilter(interfaceType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
                         interfaces.Contains(interfaceType) == true)
                     {
                         builder.AppendLine($"{interfaceType.Name} <|.. {type.Name}");
@@ -138,7 +145,7 @@ public class ClassDiagramCommand : SynchronousCommand
 
         foreach (var type in types)
         {
-            if (MatchesFilter(type, filterByNamespace, filterByTypeNames) == false)
+            if (MatchesFilter(type, filterByNamespace, filterByTypeNames, typeNameExactMatch) == false)
             {
                 continue;
             }
@@ -161,7 +168,7 @@ public class ClassDiagramCommand : SynchronousCommand
         OpenFileInBrowser(outputFilename);
     }
 
-    private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames)
+    private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames, bool typeNameExactMatch)
     {
         if (MatchesNamespaceFilter(type, filterByNamespace) == false)
         {
@@ -172,11 +179,17 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             return true;
         }
-        else if (filterByTypeNames.Contains(type.Name.ToLower()) == false)
+        else if (typeNameExactMatch == true &&
+            filterByTypeNames.Contains(type.Name.ToLower()) == false)
         {
             return false;
         }
-        else 
+        else if (typeNameExactMatch == false &&
+            filterByTypeNames.Any(x => type.Name.ToLower().Contains(x)) == false)
+        {
+            return false;
+        }
+        else
         {
             return true;
         }
@@ -220,8 +233,6 @@ public class ClassDiagramCommand : SynchronousCommand
 
     private void OpenFileInBrowser(string outputFilename)
     {
-        Console.WriteLine($"Opening '{outputFilename}' in browser...");
-
         if (OperatingSystem.IsMacOS())
         {
             System.Diagnostics.Process.Start("open", outputFilename);
@@ -238,8 +249,6 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             throw new InvalidOperationException("Operating system not supported.");
         }
-
-        Console.WriteLine($"Opened '{outputFilename}' in browser.");
     }
 
 
@@ -247,8 +256,6 @@ public class ClassDiagramCommand : SynchronousCommand
         StringBuilder diagramBuilder, string outputFilename,
         string assemblyName, string filterByNamespace)
     {
-        var html = new StringBuilder();
-
         var htmlTemplate = @"<!DOCTYPE html>
 <html lang=""en"">
 <head>
@@ -289,13 +296,21 @@ classDiagram
                 string.Empty);
         }
 
-        html.Append(htmlTemplate.Replace("%%DIAGRAM%%", diagramBuilder.ToString())
-            .Replace("%%FILENAME%%", assemblyName));
+        htmlTemplate = htmlTemplate.Replace("%%DIAGRAM%%", diagramBuilder.ToString());
+        htmlTemplate = htmlTemplate.Replace("%%FILENAME%%", assemblyName);
 
-        System.IO.File.WriteAllText(outputFilename, html.ToString());
+        System.IO.File.WriteAllText(outputFilename, htmlTemplate);
 
-        Console.WriteLine($"Wrote class diagram to");
-        Console.WriteLine(outputFilename);
+        WriteLine();
+        WriteLine();
+
+        WriteLine(htmlTemplate);
+
+        WriteLine();
+        WriteLine();
+        
+        WriteLine($"Wrote class diagram to:");
+        WriteLine(outputFilename);
     }
 
     public const string ABSTRACT_TAG = @"&lt;&lt;abstract&gt;&gt;";
@@ -303,7 +318,7 @@ classDiagram
 
     private void AddTypeToDiagram(StringBuilder builder, Type type)
     {
-        builder.AppendLine($"class {type.Name} {{");
+        builder.AppendLine($"class {GetName(type)} {{");
 
         if (type.IsInterface == true)
         {
@@ -346,9 +361,49 @@ classDiagram
         }
 
         builder.AppendLine("}");
-
-        System.Console.WriteLine($"{builder.ToString()}");
     }
+
+    private string GetName(Type type)
+    {
+        if (type.IsGenericType == true)
+        {
+            var name = type.Name;
+
+            var backtickIndex = name.IndexOf('`');
+
+            if (backtickIndex > 0)
+            {
+                name = name.Substring(0, backtickIndex);
+            }
+
+            var genericArguments = type.GetGenericArguments();
+
+            var genericArgumentNames = new List<string>();
+
+            foreach (var genericArgType in genericArguments)
+            {
+                if (genericArgType == null)
+                {
+                    genericArgumentNames.Add(string.Empty);
+                }
+                else if (genericArgType.IsGenericParameter == true)
+                {
+                    genericArgumentNames.Add(genericArgType.Name);
+                }
+                else
+                {
+                    genericArgumentNames.Add(GetName(genericArgType));
+                }
+            }
+
+            return $"{name}~{string.Join(",", genericArgumentNames)}~";
+        }
+        else
+        {
+            return type.Name;
+        }
+    }
+
 
     private bool IsPropertyMethod(MethodInfo method)
     {
@@ -374,7 +429,7 @@ classDiagram
     {
         try
         {
-            return method.ReturnType.Name;
+            return GetName(method.ReturnType);
         }
         catch (Exception)
         {

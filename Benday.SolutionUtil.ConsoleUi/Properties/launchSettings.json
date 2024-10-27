@@ -70,9 +70,13 @@
       "commandName": "Project",
       "commandLineArgs": "classdiagram /namespace:domainmodel /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     },
-    "classdiagram-filter-by-classes": {
+    "classdiagram-filter-by-typename-exact": {
       "commandName": "Project",
-      "commandLineArgs": "classdiagram /typenames:IOwnedItem,owneditembase /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
+      "commandLineArgs": "classdiagram /typenames:IOwnedItem,owneditembase /typenamesmatchexact /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
+    },
+    "classdiagram-filter-by-typename-contains": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram /typenames:owned /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     },
     "classdiagram-hide-inheritance": {
       "commandName": "Project",
