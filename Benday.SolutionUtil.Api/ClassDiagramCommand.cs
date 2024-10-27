@@ -89,6 +89,9 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var filterByTypeNames = typeNameFilterValue.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
+        // make all the names lowercase for case-insensitive comparison
+        filterByTypeNames = filterByTypeNames.Select(x => x.ToLower()).ToArray();
+
         var hideinheritance = Arguments.GetBooleanValue(Constants.ArgumentNameHideInheritance);
 
         var assembly = Assembly.LoadFile(filename);
@@ -158,18 +161,18 @@ public class ClassDiagramCommand : SynchronousCommand
         OpenFileInBrowser(outputFilename);
     }
 
-    private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByClassNamesArray)
+    private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames)
     {
         if (MatchesNamespaceFilter(type, filterByNamespace) == false)
         {
             return false;
         }
 
-        if (filterByClassNamesArray.IsNullOrEmpty() == true)
+        if (filterByTypeNames.IsNullOrEmpty() == true)
         {
             return true;
         }
-        else if (filterByClassNamesArray.Contains(type.Name) == false)
+        else if (filterByTypeNames.Contains(type.Name.ToLower()) == false)
         {
             return false;
         }

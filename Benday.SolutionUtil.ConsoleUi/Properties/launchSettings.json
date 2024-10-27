@@ -72,7 +72,7 @@
     },
     "classdiagram-filter-by-classes": {
       "commandName": "Project",
-      "commandLineArgs": "classdiagram /typenames:IOwnedItem,OwnedItemBase /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
+      "commandLineArgs": "classdiagram /typenames:IOwnedItem,owneditembase /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     },
     "classdiagram-hide-inheritance": {
       "commandName": "Project",
