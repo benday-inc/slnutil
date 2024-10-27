@@ -74,6 +74,8 @@ public class ClassDiagramCommand : SynchronousCommand
 
         var assembly = Assembly.LoadFile(filename);
 
+        var assemblyName = assembly.FullName;
+
         var types = GetTypesSafe(assembly);
 
         var classes = types.Where(t => t.IsClass == true).ToArray();
@@ -129,7 +131,7 @@ public class ClassDiagramCommand : SynchronousCommand
             System.IO.Directory.CreateDirectory(outputDir);
         }
 
-        WriteDiagramToFile(builder, outputFilename);
+        WriteDiagramToFile(builder, outputFilename, assemblyName, filterByNamespace);
 
         OpenFileInBrowser(outputFilename);
     }
@@ -196,7 +198,9 @@ public class ClassDiagramCommand : SynchronousCommand
     }
 
 
-    private void WriteDiagramToFile(StringBuilder diagramBuilder, string outputFilename)
+    private void WriteDiagramToFile(
+        StringBuilder diagramBuilder, string outputFilename,
+        string assemblyName, string filterByNamespace)
     {
         var html = new StringBuilder();
 
@@ -218,6 +222,8 @@ public class ClassDiagramCommand : SynchronousCommand
 </head>
 <body>
     <h1>Class Diagram for %%FILENAME%%</h1>
+    %%NAMESPACE_FILTER%%
+    
 
     <!-- Mermaid Class Diagram Container -->
     <div class=""mermaid"">
@@ -227,8 +233,19 @@ classDiagram
 </body>
 </html>";
 
+        if (string.IsNullOrWhiteSpace(filterByNamespace) == false)
+        {
+            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%", 
+                $"<h2>Filtered by namespace: {filterByNamespace}</h2>");
+        }
+        else
+        {
+            htmlTemplate = htmlTemplate.Replace("%%NAMESPACE_FILTER%%", 
+                string.Empty);
+        }
+
         html.Append(htmlTemplate.Replace("%%DIAGRAM%%", diagramBuilder.ToString())
-            .Replace("%%FILENAME%%", outputFilename));
+            .Replace("%%FILENAME%%", assemblyName));
 
         System.IO.File.WriteAllText(outputFilename, html.ToString());
 
