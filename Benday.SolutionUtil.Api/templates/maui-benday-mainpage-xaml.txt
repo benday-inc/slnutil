@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="%%PROJECT_NAMESPACE%%.MainPage"
+    xmlns:PresentationControls="clr-namespace:Benday.Presentation.Controls;assembly=Benday.Presentation.Controls"
+    xmlns:ViewModels="clr-namespace:%%PROJECT_NAMESPACE%%.Api.ViewModels">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition
+                Width="Auto"></ColumnDefinition>
+            <ColumnDefinition
+                Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <VerticalStackLayout
+            Grid.Column="0"
+            Padding="10"
+            Spacing="15">
+            <Button
+                Text="View Model Summary"
+                Command="{Binding ShowSummaryCommand}"></Button>
+            <Button
+                Text="Message Box"
+                Command="{Binding ShowMessageCommand}"></Button>
+            <Button
+                Text="Error Message Box"
+                Command="{Binding ShowErrorMessageCommand}"></Button>
+            <Button
+                Text="Change Combobox Selection"
+                Command="{Binding ChangeComboboxSelectionCommand}"></Button>
+            <Button
+                Text="Change Listbox Selection"
+                Command="{Binding ChangeListboxSelectionCommand}"></Button>
+            <Button
+                Text="Update Label Field"
+                Command="{Binding UpdateLabelFieldCommand}"></Button>
+            <Button
+                Text="Toggle Validation Errors"
+                Command="{Binding ToggleIsValidCommand}"></Button>
+            <Button
+                Text="Toggle Visibility"
+                Command="{Binding ToggleVisibilityCommand}"></Button>
+            <Button
+                Text="Toggle Enabled"
+                Command="{Binding ToggleEnabledCommand}"></Button>
+
+        </VerticalStackLayout>
+
+        <VerticalStackLayout
+            Grid.Column="1"
+            Padding="0,5,5,0"
+            Spacing="15">
+
+            <PresentationControls:TextboxField
+                LabelText="String Field"
+                BindingContext="{Binding StringField}"></PresentationControls:TextboxField>
+
+            <PresentationControls:TextboxField
+                LabelText="Int Field"
+                BindingContext="{Binding IntField}">
+            </PresentationControls:TextboxField>
+
+            <PresentationControls:ComboboxField
+                LabelText="Combo Field"
+                BindingContext="{Binding SingleSelectField}">
+
+            </PresentationControls:ComboboxField>
+
+            <PresentationControls:ListboxField
+                LabelText="Listbox Field"
+                BindingContext="{Binding ListboxSingleSelectField}">
+
+            </PresentationControls:ListboxField>
+
+            <PresentationControls:LabelField
+                LabelText="Label Field"
+                BindingContext="{Binding LabelField}">
+
+            </PresentationControls:LabelField>
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

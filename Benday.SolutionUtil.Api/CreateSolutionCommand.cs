@@ -82,6 +82,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         returnValue.Add("console", "Console Application");
         returnValue.Add("commands", "Console Application with Benday.CommandsFramework");
         returnValue.Add("maui", ".NET Maui Application with xUnit tests");
+        returnValue.Add("maui-demo", ".NET Maui Demo Application with ViewModels and xUnit tests");
 
         return returnValue;
     }
@@ -145,6 +146,11 @@ internal class CreateSolutionCommand : SynchronousCommand
         {
             CreateMauiSolution(solution, rootNamespace);
         }
+        else if (solutionType == "maui-demo")
+        {
+            CreateMauiSolution(solution, rootNamespace);
+            AddMauiDemo(solution);
+        }
         else
         {
             throw new KnownException($"Unknown solution type '{solutionType}'.");
@@ -154,6 +160,44 @@ internal class CreateSolutionCommand : SynchronousCommand
 
         Create(solution, rootDirInfo);
     }
+
+    private void AddMauiDemo(SolutionInfo solution)
+    {
+        var mauiProject = solution.Projects.FirstOrDefault(x => x.ShortName == "maui");
+        var apiProject = solution.Projects.FirstOrDefault(x => x.ShortName == "api");
+        var unitTestProject = solution.Projects.FirstOrDefault(x => x.ShortName == "unittests");
+
+        if (mauiProject == null)
+        {
+            throw new InvalidOperationException("Could not find maui project.");
+        }
+
+        if (apiProject == null)
+        {
+            throw new InvalidOperationException("Could not find api project.");
+        }
+
+        if (unitTestProject == null)
+        {
+            throw new InvalidOperationException("Could not find unit test project.");
+        }
+
+        AddDefaultFile(mauiProject, "MainPage.xaml", "maui-benday-mainpage-xaml");
+        AddDefaultFile(mauiProject, "MauiProgram.cs", "maui-benday-mauiprogram-cs");
+        AddDefaultFile(mauiProject, "MainPage.xaml.cs", "maui-benday-mainpage-xaml-cs");
+        AddDefaultFile(mauiProject, "App.xaml", "maui-benday-app-xaml");        
+
+        AddDefaultFile(apiProject, "ViewModels/MainPageViewModel.cs", "maui-benday-api-mainpageviewmodel-cs");
+
+        AddDefaultFile(unitTestProject, "MainPageViewModelTests.cs", "maui-benday-unit-tests-mainpage-viewmodel-tests-cs");
+        AddDefaultFile(unitTestProject, "MessageManagerTester.cs", "maui-benday-unit-tests-message-manager-tester-cs");
+
+        unitTestProject.AddPackageReference("Benday.Presentation");
+        apiProject.AddPackageReference("Benday.Presentation");
+        mauiProject.AddPackageReference("Benday.Presentation");
+        mauiProject.AddPackageReference("Benday.Presentation.Controls");        
+    }
+
 
     private void AddCommands(SolutionInfo solution)
     {

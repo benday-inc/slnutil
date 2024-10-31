@@ -93,6 +93,10 @@
     "create-maui": {
       "commandName": "Project",
       "commandLineArgs": "create /rootdir:/Users/benday/code/temp/20241031 maui Benday.MauiTest123"
+    },
+    "create-maui-demo": {
+      "commandName": "Project",
+      "commandLineArgs": "create /rootdir:/Users/benday/code/temp/20241031 maui-demo Benday.Demo1"
     }
     
   }

@@ -1,0 +1,167 @@
+using Benday.Presentation;
+using %%API_PROJECT_NAMESPACE%%.ViewModels;
+
+namespace %%PROJECT_NAMESPACE%%;
+
+public class MainPageViewModelTests
+{
+    private MessageManagerTester _MessageManager;
+
+    public MainPageViewModelTests()
+    {
+        _MessageManager = new MessageManagerTester();
+    }
+
+    [Fact]
+    public void ShowMessageCommand_ShouldShowMessage()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // Act
+        viewModel.ShowMessageCommand.Execute(null);
+
+        // Assert
+        _MessageManager.AssertShowMessageString();
+    }
+
+    [Fact]
+    public void ShowErrorMessageCommand_ShouldShowMessage()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // Act
+        viewModel.ShowErrorMessageCommand.Execute(null);
+
+        // Assert
+        _MessageManager.AssertShowMessageException();
+    }
+
+    [Fact]
+    public void ShowSummaryCommand_ShouldShowSummary()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // Act
+        viewModel.ShowSummaryCommand.Execute(null);
+
+        // Assert
+        _MessageManager.AssertShowMessageString();
+    }
+
+    [Fact]
+    public void ToggleVisibilityCommand_ShouldToggleVisibility()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // get the original isvisible values
+        var originalStringFieldIsVisible = viewModel.StringField.IsVisible;
+        var originalLabelFieldIsVisible = viewModel.LabelField.IsVisible;
+        var originalIntFieldIsVisible = viewModel.IntField.IsVisible;
+        var originalSingleSelectFieldIsVisible = viewModel.SingleSelectField.IsVisible;
+        var originalListboxSingleSelectFieldIsVisible =
+            viewModel.ListboxSingleSelectField.IsVisible;
+
+        // Act
+        viewModel.ToggleVisibilityCommand.Execute(null);
+
+        // Assert
+
+        // check that the values have been toggled
+        Assert.NotEqual(originalStringFieldIsVisible, viewModel.StringField.IsVisible);
+        Assert.NotEqual(originalLabelFieldIsVisible, viewModel.LabelField.IsVisible);
+        Assert.NotEqual(originalIntFieldIsVisible, viewModel.IntField.IsVisible);
+        Assert.NotEqual(originalSingleSelectFieldIsVisible, viewModel.SingleSelectField.IsVisible);
+        Assert.NotEqual(originalListboxSingleSelectFieldIsVisible,
+            viewModel.ListboxSingleSelectField.IsVisible);
+    }
+
+    [Fact]
+    public void ToggleVisibilityCommand_ShouldToggleVisibilityBackWhenCalledTwice()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // get the original isvisible values
+        var originalStringFieldIsVisible = viewModel.StringField.IsVisible;
+        var originalLabelFieldIsVisible = viewModel.LabelField.IsVisible;
+        var originalIntFieldIsVisible = viewModel.IntField.IsVisible;
+        var originalSingleSelectFieldIsVisible = viewModel.SingleSelectField.IsVisible;
+        var originalListboxSingleSelectFieldIsVisible =
+            viewModel.ListboxSingleSelectField.IsVisible;
+
+        // Act
+        viewModel.ToggleVisibilityCommand.Execute(null);
+        viewModel.ToggleVisibilityCommand.Execute(null);
+
+        // Assert
+
+        // check that the values have been toggled
+        Assert.Equal(originalStringFieldIsVisible, viewModel.StringField.IsVisible);
+        Assert.Equal(originalLabelFieldIsVisible, viewModel.LabelField.IsVisible);
+        Assert.Equal(originalIntFieldIsVisible, viewModel.IntField.IsVisible);
+        Assert.Equal(originalSingleSelectFieldIsVisible, viewModel.SingleSelectField.IsVisible);
+        Assert.Equal(originalListboxSingleSelectFieldIsVisible,
+            viewModel.ListboxSingleSelectField.IsVisible);
+    }
+
+    [Fact]
+    public void ToggleEnabledCommand_ShouldToggleEnabled()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // get the original isEnabled values
+        var originalStringFieldIsEnabled = viewModel.StringField.IsEnabled;
+        var originalLabelFieldIsEnabled = viewModel.LabelField.IsEnabled;
+        var originalIntFieldIsEnabled = viewModel.IntField.IsEnabled;
+        var originalSingleSelectFieldIsEnabled = viewModel.SingleSelectField.IsEnabled;
+        var originalListboxSingleSelectFieldIsEnabled =
+            viewModel.ListboxSingleSelectField.IsEnabled;
+
+        // Act
+        viewModel.ToggleEnabledCommand.Execute(null);
+
+        // Assert
+
+        // check that the values have been toggled
+        Assert.NotEqual(originalStringFieldIsEnabled, viewModel.StringField.IsEnabled);
+        Assert.NotEqual(originalLabelFieldIsEnabled, viewModel.LabelField.IsEnabled);
+        Assert.NotEqual(originalIntFieldIsEnabled, viewModel.IntField.IsEnabled);
+        Assert.NotEqual(originalSingleSelectFieldIsEnabled, viewModel.SingleSelectField.IsEnabled);
+        Assert.NotEqual(originalListboxSingleSelectFieldIsEnabled,
+            viewModel.ListboxSingleSelectField.IsEnabled);
+    }
+
+    [Fact]
+    public void ToggleEnabledCommand_ShouldToggleEnabledBackWhenCalledTwice()
+    {
+        // Arrange
+        var viewModel = new MainPageViewModel(_MessageManager);
+
+        // get the original isEnabled values
+        var originalStringFieldIsEnabled = viewModel.StringField.IsEnabled;
+        var originalLabelFieldIsEnabled = viewModel.LabelField.IsEnabled;
+        var originalIntFieldIsEnabled = viewModel.IntField.IsEnabled;
+        var originalSingleSelectFieldIsEnabled = viewModel.SingleSelectField.IsEnabled;
+        var originalListboxSingleSelectFieldIsEnabled =
+            viewModel.ListboxSingleSelectField.IsEnabled;
+
+        // Act
+        viewModel.ToggleEnabledCommand.Execute(null);
+        viewModel.ToggleEnabledCommand.Execute(null);
+
+        // Assert
+
+        // check that the values have been toggled
+        Assert.Equal(originalStringFieldIsEnabled, viewModel.StringField.IsEnabled);
+        Assert.Equal(originalLabelFieldIsEnabled, viewModel.LabelField.IsEnabled);
+        Assert.Equal(originalIntFieldIsEnabled, viewModel.IntField.IsEnabled);
+        Assert.Equal(originalSingleSelectFieldIsEnabled, viewModel.SingleSelectField.IsEnabled);
+        Assert.Equal(originalListboxSingleSelectFieldIsEnabled,
+            viewModel.ListboxSingleSelectField.IsEnabled);
+    }
+}

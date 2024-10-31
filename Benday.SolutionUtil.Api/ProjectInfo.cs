@@ -28,6 +28,14 @@ public class ProjectInfo
 
     public void AddDefaultFile(string fileNameInProject, string templateContents)
     {
+        // if contains, replace
+        var existing = DefaultFiles.FirstOrDefault(x => x.FileName == fileNameInProject);
+
+        if (existing != null)
+        {
+            DefaultFiles.Remove(existing);
+        }
+
         DefaultFiles.Add(new ProjectDefaultFile()
         {
             FileName = fileNameInProject,
@@ -69,6 +77,13 @@ public class ProjectInfo
         foreach (var fileToWrite in DefaultFiles)
         {
             var fullFilePath = System.IO.Path.Combine(projectDirectory.FullName, fileToWrite.FileName);
+
+            var directory = System.IO.Path.GetDirectoryName(fullFilePath) ?? throw new InvalidOperationException("Could not get directory name.");
+
+            if (System.IO.Directory.Exists(directory) == false)
+            {
+                System.IO.Directory.CreateDirectory(directory);
+            }
 
             var contents = 
                 fileToWrite.TemplateContents;

@@ -1,0 +1,16 @@
+using %%API_PROJECT_NAMESPACE%%.ViewModels;
+using Benday.Presentation;
+
+namespace %%PROJECT_NAMESPACE%%;
+
+public partial class MainPage : ContentPage
+{
+    private MessageBoxMessageManager _MessageManager = new();
+
+    public MainPage(MainPageViewModel viewModel)
+    {
+        BindingContext = viewModel;
+
+        InitializeComponent();
+    }   
+}
