@@ -1,0 +1,63 @@
+using Benday.CommandsFramework;
+
+namespace %%PROJECT_NAMESPACE%%;
+
+[Command(
+    IsAsync = true,
+    Name = "sampleasync",
+    Description = "This is a sample command that runs asynchronously.")]
+public class SampleAsyncCommand : AsynchronousCommand
+{
+    public SampleAsyncCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
+        base(info, outputProvider)
+    {
+
+    }
+
+    public override ArgumentCollection GetArguments()
+    {
+        var args = new ArgumentCollection();
+
+        args.AddString("message")
+            .AsRequired()
+            .WithDescription(
+                "Message to print out.");
+
+        args.AddBoolean("time")
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("If true, command prints the time before the message.")
+            .WithDefaultValue(false);
+
+        return args;
+    }
+
+    protected override async Task OnExecute()
+    {        
+        var message = Arguments.GetStringValue("message");
+        var printTime = Arguments.GetBooleanValue("time");
+
+        if (printTime == true)
+        {
+            await PrintTimeAsync();
+        }
+
+        await PrintMessageAsync(message);
+    }
+
+    private async Task PrintTimeAsync()
+    {
+        await Task.Run(() =>
+        {
+            WriteLine($"The time is {DateTime.Now.ToString()}");
+        });
+    }
+
+    private async Task PrintMessageAsync(string message)
+    {
+        await Task.Run(() =>
+        {
+            WriteLine(message);
+        });
+    }
+}

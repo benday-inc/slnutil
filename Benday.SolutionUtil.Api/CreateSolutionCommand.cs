@@ -169,6 +169,8 @@ internal class CreateSolutionCommand : SynchronousCommand
         }
 
         AddDefaultFile(consoleProject, "Program.cs", "commands-program-cs");
+        AddDefaultFile(apiProject, "SampleCommand.cs", "commands-sample-command-cs");
+        AddDefaultFile(apiProject, "SampleAsyncCommand.cs", "commands-sample-async-command-cs");
     }
 
     private void AddDefaultFile(ProjectInfo project, 
