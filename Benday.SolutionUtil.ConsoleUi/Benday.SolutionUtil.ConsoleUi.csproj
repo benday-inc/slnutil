@@ -15,8 +15,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.14.0</AssemblyVersion>
-    <Version>2.14.0</Version>
+    <AssemblyVersion>2.15.0</AssemblyVersion>
+    <Version>2.15.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
       v2.14 - Generate class diagrams for an assembly.

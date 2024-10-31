@@ -3,11 +3,10 @@ A collection of utilities for working with .NET Core Solutions and Projects.
 
 Written by Benjamin Day  
 Pluralsight Author | Microsoft MVP | Scrum.org Professional Scrum Trainer  
-https://www.benday.com
-https://www.slidespeaker.ai
-info@benday.com 
-
-YouTube: https://www.youtube.com/@_benday
+https://www.benday.com  
+https://www.slidespeaker.ai  
+info@benday.com  
+YouTube: https://www.youtube.com/@_benday  
 
 *Got ideas for utilities you'd like to see? Found a bug? Let us know by submitting an issue https://github.com/benday-inc/slnutil/issues*. *Want to contribute? Submit a pull request.*
 
