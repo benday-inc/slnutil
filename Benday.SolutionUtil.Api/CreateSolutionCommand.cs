@@ -8,7 +8,7 @@ using Benday.CommandsFramework;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameCreate,
-    Description = "Create a solution")]
+    Description = "Create a solution and projects")]
 internal class CreateSolutionCommand : SynchronousCommand
 {
     public const string PackageName_FluentAssertions = "FluentAssertions";

@@ -42,7 +42,7 @@ public static class Constants
     public const string ArgumentNameToValue = "to";
     public const string CommandArgumentNameToBase64String = "base64";
     public const string CommandArgumentNameDevTreeClean = "devtreeclean";
-    public const string CommandArgumentNameCreate = "create";
+    public const string CommandArgumentNameCreate = "createsolution";
     public const string CommandArgumentNameSolutionType = "type";
     public const string CommandArgumentNameNamespace = "namespace";
     public const string CommandArgumentNameSetConnectionString = "setconnectionstring";
