@@ -1,0 +1,1 @@
+dotnet tool uninstall --global %%PRIMARY_PROJECT_TOOL_NAME%%

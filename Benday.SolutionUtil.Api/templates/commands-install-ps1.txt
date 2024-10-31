@@ -1,0 +1,19 @@
+[CmdletBinding()]
+
+param([Parameter(HelpMessage='Uninstall before installing')]
+    [ValidateNotNullOrEmpty()]
+    [switch]
+    $reinstall)
+
+if ($reinstall -eq $true)
+{
+    &.\uninstall.ps1
+}
+
+dotnet build
+
+$pathToDebugFolder = Join-Path $PSScriptRoot 'src\%%PRIMARY_PROJECT_NAME%%\bin\Debug'
+
+Write-Host "Installing %%PRIMARY_PROJECT_NAME%% from $pathToDebugFolder"
+
+dotnet tool install --global --add-source "$pathToDebugFolder" %%PRIMARY_PROJECT_TOOL_NAME%%

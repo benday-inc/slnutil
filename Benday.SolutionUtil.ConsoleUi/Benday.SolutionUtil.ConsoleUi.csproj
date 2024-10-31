@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    
     <PackAsTool>True</PackAsTool>
     <AssemblyName>slnutil</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>

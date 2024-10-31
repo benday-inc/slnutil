@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
 
 using Benday.CommandsFramework;
 
@@ -168,13 +170,25 @@ internal class CreateSolutionCommand : SynchronousCommand
             throw new InvalidOperationException("Could not find console project.");
         }
 
+        AddDefaultFile(solution, "install.ps1", "commands-install-ps1");
+        AddDefaultFile(solution, "uninstall.ps1", "commands-uninstall-ps1");
         AddDefaultFile(consoleProject, "Program.cs", "commands-program-cs");
         AddDefaultFile(apiProject, "SampleCommand.cs", "commands-sample-command-cs");
         AddDefaultFile(apiProject, "SampleAsyncCommand.cs", "commands-sample-async-command-cs");
+
+        consoleProject.AddProjectProperty("PackAsTool", "True");
+        consoleProject.AddProjectProperty("GeneratePackageOnBuild", "True");
+        consoleProject.AddProjectProperty("Authors", "your-name-here");
+        consoleProject.AddProjectProperty("Copyright", DateTime.Now.Year.ToString());
+        consoleProject.AddProjectProperty("AssemblyVersion", "1.0.0");
+        consoleProject.AddProjectProperty("Version", "1.0.0");
+        consoleProject.AddProjectProperty("Description", "Your description here.");
+        consoleProject.AddProjectProperty("PackageReleaseNotes", "");
+        consoleProject.AddProjectProperty("AssemblyName", consoleProject.ProjectNameAsToolName);
     }
 
-    private void AddDefaultFile(ProjectInfo project, 
-        string fileNameInProject, 
+    private void AddDefaultFile(ProjectInfo project,
+        string fileNameInProject,
         string templateName)
     {
         var templateContents = GetTemplateFile(templateName);
@@ -182,14 +196,23 @@ internal class CreateSolutionCommand : SynchronousCommand
         project.AddDefaultFile(fileNameInProject, templateContents);
     }
 
+    private void AddDefaultFile(SolutionInfo solution,
+        string fileNameInSolution,
+        string templateName)
+    {
+        var templateContents = GetTemplateFile(templateName);
+
+        solution.AddDefaultFile(fileNameInSolution, templateContents);
+    }
+
     private string GetTemplateFile(string templateName)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
         var assemblyLocation = assembly.Location ?? throw new InvalidOperationException("Could not get assembly location.");
-        
+
         var assemblyDir = Path.GetDirectoryName(assemblyLocation) ?? throw new InvalidOperationException("Could not get assembly directory.");
-        
+
         var templatesDir = Path.Combine(assemblyDir, "templates");
 
         var resourcePath = Path.Combine(templatesDir, $"{templateName}.txt");
@@ -249,8 +272,62 @@ internal class CreateSolutionCommand : SynchronousCommand
 
         WriteDefaultFiles(solution);
 
+        WriteProjectProperties(solution);
+
+        WriteLine("Writing default files for solution...");
+        solution.WriteDefaultFiles();
+
         WriteLine("Done.");
     }
+
+    private void WriteProjectProperties(SolutionInfo solution)
+    {
+        foreach (var project in solution.Projects)
+        {
+            if (project.ProjectProperties.Count > 0)
+            {
+                WriteLine($"Adding project properties to project '{project.ProjectName}'...");
+
+                foreach (var key in project.ProjectProperties.Keys)
+                {
+                    var value = project.ProjectProperties[key];
+
+                    WriteLine($"Adding property to project '{project.ProjectName}' - {key} = {value}");
+
+                    if (project.Path == null)
+                    {
+                        throw new InvalidOperationException($"Path for project '{project.ProjectName}' is null.");
+                    }
+
+                    var projectFileContents = File.ReadAllText(project.Path.FullName);
+
+                    var doc = XDocument.Parse(projectFileContents);
+
+                    var root = doc.Root ?? throw new InvalidOperationException("Root element is null.");
+
+                    var result =
+                        ProjectUtilities.SetProjectPropertyElement(
+                            project.Path.FullName, root, key, value);
+
+                    if (result == null || result.ValueChanged == true)
+                    {
+                        var settings = new XmlWriterSettings
+                        {
+                            OmitXmlDeclaration = true,
+                            Indent = true
+                        };
+
+                        using var writer = XmlWriter.Create(project.Path.FullName, settings);
+
+                        doc.Save(writer);
+
+                        writer.Close();
+                    }
+                }
+            }
+        }
+    }
+
 
     private void WriteDefaultFiles(SolutionInfo solution)
     {
@@ -267,7 +344,7 @@ internal class CreateSolutionCommand : SynchronousCommand
 
                 project.WriteDefaultFiles();
             }
-        }   
+        }
     }
 
     private void AddPackageReferences(SolutionInfo solution, DirectoryInfo solutionDirInfo)
@@ -277,7 +354,7 @@ internal class CreateSolutionCommand : SynchronousCommand
             if (project.PackageReferences.Count > 0)
             {
                 AddPackageReferences(project);
-            }            
+            }
         }
     }
 
@@ -376,8 +453,8 @@ internal class CreateSolutionCommand : SynchronousCommand
         WriteLine($"Creating project '{project.ProjectName}' in '{projectDirInfo.FullName}'.");
 
         var projectFilePath = Path.Combine(
-            projectDirInfo.FullName, 
-            project.ProjectName, 
+            projectDirInfo.FullName,
+            project.ProjectName,
             $"{project.ProjectName}.csproj");
 
         var startInfo = new ProcessStartInfo("dotnet", $"new {project.ProjectType} -n {project.ProjectName}")
@@ -440,6 +517,8 @@ internal class CreateSolutionCommand : SynchronousCommand
     private void CreateMvcSolution(SolutionInfo solution, string rootNamespace)
     {
         var webProject = solution.AddProject("web", "mvc", SourceDirNameInSolution, $"{rootNamespace}.WebUi");
+        webProject.IsPrimaryProject = true;
+
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
         var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
         var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
@@ -456,6 +535,8 @@ internal class CreateSolutionCommand : SynchronousCommand
     private void CreateWebApiSolution(SolutionInfo solution, string rootNamespace)
     {
         var webProject = solution.AddProject("webapi", "webapi", SourceDirNameInSolution, $"{rootNamespace}.WebApi");
+        webProject.IsPrimaryProject = true;
+
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
         var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
         var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
@@ -473,6 +554,8 @@ internal class CreateSolutionCommand : SynchronousCommand
     private void CreateConsoleSolution(SolutionInfo solution, string rootNamespace)
     {
         var consoleProject = solution.AddProject("console", "console", SourceDirNameInSolution, $"{rootNamespace}.ConsoleUi");
+        consoleProject.IsPrimaryProject = true;
+
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
         var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
 
