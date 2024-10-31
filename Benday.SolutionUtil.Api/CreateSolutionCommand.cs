@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 
 using Benday.CommandsFramework;
 
@@ -9,6 +10,8 @@ namespace Benday.SolutionUtil.Api;
 internal class CreateSolutionCommand : SynchronousCommand
 {
     public const string PackageName_FluentAssertions = "FluentAssertions";
+    public const string SourceDirNameInSolution = "src";
+    public const string TestDirNameInSolution = "test";
 
     public CreateSolutionCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -75,6 +78,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         returnValue.Add("webapi", "ASP.NET Web API");
         returnValue.Add("mvc", "ASP.NET MVC");
         returnValue.Add("console", "Console Application");
+        returnValue.Add("commands", "Console Application with Benday.CommandsFramework");
 
         return returnValue;
     }
@@ -129,6 +133,11 @@ internal class CreateSolutionCommand : SynchronousCommand
         {
             CreateConsoleSolution(solution, rootNamespace);
         }
+        else if (solutionType == "commands")
+        {
+            CreateConsoleSolution(solution, rootNamespace);
+            AddCommands(solution);
+        }
         else
         {
             throw new KnownException($"Unknown solution type '{solutionType}'.");
@@ -137,6 +146,58 @@ internal class CreateSolutionCommand : SynchronousCommand
         var rootDirInfo = new DirectoryInfo(rootDir);
 
         Create(solution, rootDirInfo);
+    }
+
+    private void AddCommands(SolutionInfo solution)
+    {
+        foreach (var project in solution.Projects)
+        {
+            project.PackageReferences.Add("Benday.CommandsFramework");
+        }
+
+        var apiProject = solution.Projects.FirstOrDefault(x => x.ShortName == "api");
+        var consoleProject = solution.Projects.FirstOrDefault(x => x.ShortName == "console");
+
+        if (apiProject == null)
+        {
+            throw new InvalidOperationException("Could not find api project.");
+        }
+
+        if (consoleProject == null)
+        {
+            throw new InvalidOperationException("Could not find console project.");
+        }
+
+        AddDefaultFile(consoleProject, "Program.cs", "commands-program-cs");
+    }
+
+    private void AddDefaultFile(ProjectInfo project, 
+        string fileNameInProject, 
+        string templateName)
+    {
+        var templateContents = GetTemplateFile(templateName);
+
+        project.AddDefaultFile(fileNameInProject, templateContents);
+    }
+
+    private string GetTemplateFile(string templateName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var assemblyLocation = assembly.Location ?? throw new InvalidOperationException("Could not get assembly location.");
+        
+        var assemblyDir = Path.GetDirectoryName(assemblyLocation) ?? throw new InvalidOperationException("Could not get assembly directory.");
+        
+        var templatesDir = Path.Combine(assemblyDir, "templates");
+
+        var resourcePath = Path.Combine(templatesDir, $"{templateName}.txt");
+
+        if (File.Exists(resourcePath) == false)
+        {
+            throw new InvalidOperationException($"Could not find template '{templateName}'.");
+        }
+
+        return File.ReadAllText(resourcePath);
     }
 
     private void Create(SolutionInfo solution, DirectoryInfo rootDirInfo)
@@ -184,7 +245,27 @@ internal class CreateSolutionCommand : SynchronousCommand
         AddProjectsToSolution(solution, solutionDirInfo);
         AddPackageReferences(solution, solutionDirInfo);
 
+        WriteDefaultFiles(solution);
+
         WriteLine("Done.");
+    }
+
+    private void WriteDefaultFiles(SolutionInfo solution)
+    {
+        if (solution.Path == null)
+        {
+            throw new InvalidOperationException("Solution path is null.");
+        }
+
+        foreach (var project in solution.Projects)
+        {
+            if (project.DefaultFiles.Count > 0)
+            {
+                WriteLine($"Adding default files to project '{project.ProjectName}'...");
+
+                project.WriteDefaultFiles();
+            }
+        }   
     }
 
     private void AddPackageReferences(SolutionInfo solution, DirectoryInfo solutionDirInfo)
@@ -356,10 +437,10 @@ internal class CreateSolutionCommand : SynchronousCommand
 
     private void CreateMvcSolution(SolutionInfo solution, string rootNamespace)
     {
-        var webProject = solution.AddProject("web", "mvc", "src", $"{rootNamespace}.WebUi");
-        var apiProject = solution.AddProject("api", "classlib", "src", $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", "src", $"{rootNamespace}.UnitTests");
-        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", "src", $"{rootNamespace}.IntegrationTests");
+        var webProject = solution.AddProject("web", "mvc", SourceDirNameInSolution, $"{rootNamespace}.WebUi");
+        var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
+        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, apiProject);
@@ -372,10 +453,10 @@ internal class CreateSolutionCommand : SynchronousCommand
 
     private void CreateWebApiSolution(SolutionInfo solution, string rootNamespace)
     {
-        var webProject = solution.AddProject("webapi", "webapi", "src", $"{rootNamespace}.WebApi");
-        var apiProject = solution.AddProject("api", "classlib", "src", $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", "src", $"{rootNamespace}.UnitTests");
-        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", "src", $"{rootNamespace}.IntegrationTests");
+        var webProject = solution.AddProject("webapi", "webapi", SourceDirNameInSolution, $"{rootNamespace}.WebApi");
+        var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
+        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, apiProject);
@@ -389,9 +470,9 @@ internal class CreateSolutionCommand : SynchronousCommand
 
     private void CreateConsoleSolution(SolutionInfo solution, string rootNamespace)
     {
-        var consoleProject = solution.AddProject("console", "console", "src", $"{rootNamespace}.ConsoleUi");
-        var apiProject = solution.AddProject("api", "classlib", "src", $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", "src", $"{rootNamespace}.UnitTests");
+        var consoleProject = solution.AddProject("console", "console", SourceDirNameInSolution, $"{rootNamespace}.ConsoleUi");
+        var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
+        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(consoleProject, apiProject);

@@ -29,6 +29,9 @@ public class SolutionInfo
 		};
 
 		Projects.Add(project);
+
+		project.ParentSolution = this;
+		
 		return project;
 	}
 
