@@ -1,4 +1,5 @@
 
+
 namespace Benday.SolutionUtil.Api;
 
 public class ProjectInfo
@@ -9,6 +10,8 @@ public class ProjectInfo
 	public string ProjectName { get; set; } = string.Empty;
 
 	public List<string> PackageReferences { get; set; } = new();
+    public FileInfo? Path { get; set; }
+
 
     internal void AddPackageReference(string packageName)
     {

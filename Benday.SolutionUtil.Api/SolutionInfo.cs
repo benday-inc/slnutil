@@ -1,4 +1,8 @@
 
+using System.Diagnostics;
+
+using Benday.CommandsFramework;
+
 namespace Benday.SolutionUtil.Api;
 
 public class SolutionInfo
@@ -6,8 +10,9 @@ public class SolutionInfo
 	public string Name { get; set; } = string.Empty;
 	public List<ProjectInfo> Projects { get; set; } = new();
 	public List<ProjectReference> ProjectReferences { get; set; } = new();
+    public FileInfo? Path { get; set; }
 
-	public SolutionInfo()
+    public SolutionInfo()
 	{
 		Projects = new List<ProjectInfo>();
 		ProjectReferences = new List<ProjectReference>();
@@ -43,6 +48,5 @@ public class SolutionInfo
     {
         AddProjectReference(fromProject.ShortName, toProject.ShortName);
     }
-
 }
 
