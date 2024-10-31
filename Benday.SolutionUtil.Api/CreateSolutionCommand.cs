@@ -81,6 +81,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         returnValue.Add("mvc", "ASP.NET MVC");
         returnValue.Add("console", "Console Application");
         returnValue.Add("commands", "Console Application with Benday.CommandsFramework");
+        returnValue.Add("maui", ".NET Maui Application with xUnit tests");
 
         return returnValue;
     }
@@ -139,6 +140,10 @@ internal class CreateSolutionCommand : SynchronousCommand
         {
             CreateConsoleSolution(solution, rootNamespace);
             AddCommands(solution);
+        }
+        else if (solutionType == "maui")
+        {
+            CreateMauiSolution(solution, rootNamespace);
         }
         else
         {
@@ -252,6 +257,8 @@ internal class CreateSolutionCommand : SynchronousCommand
             CreateProject(project, projectDirInfo);
         }
 
+        WriteProjectProperties(solution);
+
         WriteLine("Creating project references...");
 
         foreach (var projectReference in solution.ProjectReferences)
@@ -268,11 +275,10 @@ internal class CreateSolutionCommand : SynchronousCommand
         WriteLine("Adding projects to solution...");
 
         AddProjectsToSolution(solution, solutionDirInfo);
+        
         AddPackageReferences(solution, solutionDirInfo);
 
-        WriteDefaultFiles(solution);
-
-        WriteProjectProperties(solution);
+        WriteDefaultFiles(solution);        
 
         WriteLine("Writing default files for solution...");
         solution.WriteDefaultFiles();
@@ -563,6 +569,27 @@ internal class CreateSolutionCommand : SynchronousCommand
         solution.AddProjectReference(consoleProject, apiProject);
 
         unitTestProject.AddPackageReference(PackageName_FluentAssertions);
+    }
+
+    private void CreateMauiSolution(SolutionInfo solution, string rootNamespace)
+    {
+        var mauiProject = solution.AddProject("maui", "maui", SourceDirNameInSolution, $"{rootNamespace}.Ui");
+        mauiProject.IsPrimaryProject = true;
+
+        mauiProject.AddDefaultFile("MauiProgram.cs", GetTemplateFile("maui-mauiprogram-cs"));
+
+        var apiProject = solution.AddProject("api", "mauilib", SourceDirNameInSolution, $"{rootNamespace}.Api");
+        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+
+        solution.AddProjectReference(unitTestProject, apiProject);
+        solution.AddProjectReference(mauiProject, apiProject);
+
+        unitTestProject.AddPackageReference(PackageName_FluentAssertions);
+
+        apiProject.AddProjectProperty("TargetFrameworks", "net8;net8.0-android;net8.0-ios;net8.0-maccatalyst");
+
+        mauiProject.AddPackageReference("CommunityToolkit.Maui");
+        apiProject.AddPackageReference("CommunityToolkit.Maui");
     }
 
 }
