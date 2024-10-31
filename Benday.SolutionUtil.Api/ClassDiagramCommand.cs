@@ -55,7 +55,36 @@ public class ClassDiagramCommand : SynchronousCommand
     {
         try
         {
-            return assembly.GetTypes();
+            var assemblyLocation = assembly.Location;
+
+            
+
+            if (assemblyLocation == null)
+            {
+                return assembly.GetTypes();
+            }
+            else
+            {
+                var assemblyDir = Path.GetDirectoryName(assemblyLocation);
+
+                if (assemblyDir == null)
+                {
+                    return assembly.GetTypes();
+                }
+                else
+                {
+                    string nugetCachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
+
+                    AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+                    {
+                        var result = TryToResolveDependency(args, assemblyLocation, nugetCachePath);
+
+                        return result;
+                    };
+
+                    return assembly.GetTypes();
+                }
+            }
         }
         catch (ReflectionTypeLoadException ex)
         {
@@ -83,6 +112,111 @@ public class ClassDiagramCommand : SynchronousCommand
                 return returnValue.ToArray();
             }
         }
+    }
+
+    private static Assembly? TryToResolveDependency(ResolveEventArgs args, string assemblyLocation, string nugetCachePath)
+    {
+        // Parse the assembly name being requested
+        var assemblyInfo = new AssemblyName(args.Name);
+
+        if (assemblyInfo == null)
+        {
+            return null;
+        }
+
+        var assemblyName = assemblyInfo.Name;
+        var assemblyPath = Path.Combine(assemblyLocation, assemblyName + ".dll");
+
+        // Check if the assembly exists in the hint path
+        if (File.Exists(assemblyPath))
+        {
+            // Load and return the assembly from the specified path
+            return Assembly.LoadFrom(assemblyPath);
+        }
+        else if (assemblyInfo != null && string.IsNullOrEmpty(assemblyInfo.Name) == false)
+        {
+            string packageName = assemblyInfo.Name.ToLowerInvariant();
+            string version = assemblyInfo.Version?.ToString() ?? "";
+
+            var packagePath = Path.Combine(nugetCachePath, packageName);
+
+            if (Directory.Exists(packagePath) == false && Directory.Exists(nugetCachePath) == false)
+            {
+                return null;
+            }
+            else if (Directory.Exists(packagePath) == false)
+            {
+                var dllToFind = packageName + ".dll";
+
+                // find matching files in the nuget cache
+                var dllFiles = Directory.GetFiles(nugetCachePath, dllToFind, SearchOption.AllDirectories);
+
+                if (dllFiles.Length == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    // find all the files that have "netstandard2.0" in the path
+                    var netStandardDirs = dllFiles.Where(x => x.Contains("netstandard2.0")).ToArray();
+
+                    if (netStandardDirs.Length == 0)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        // sort the directories reverse alphabetically
+                        Array.Sort(netStandardDirs, (x, y) => string.Compare(y, x, StringComparison.Ordinal));
+
+                        // find the first directory that has a .dll file with the same name as the assembly
+                        foreach (var matchingDll in netStandardDirs)
+                        {
+                            if (File.Exists(matchingDll))
+                            {
+                                return Assembly.LoadFrom(matchingDll);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                assemblyPath = Path.Combine(packagePath, version, "lib", "netstandard2.0", packageName + ".dll");
+
+                // If the assembly exists in the NuGet cache, load and return it
+                if (File.Exists(assemblyPath))
+                {
+                    return Assembly.LoadFrom(assemblyPath);
+                }
+                else
+                {
+                    // find any directory in the packagepath named netstandard2.0
+                    var netStandardDirs = Directory.GetDirectories(packagePath, "netstandard2.0", SearchOption.AllDirectories);
+
+                    // sort the directories reverse alphabetically
+                    Array.Sort(netStandardDirs, (x, y) => string.Compare(y, x, StringComparison.Ordinal));
+
+                    // find the first directory that has a .dll file with the same name as the assembly
+                    foreach (var netStandardDir in netStandardDirs)
+                    {
+                        var dllFiles = Directory.GetFiles(netStandardDir, "*.dll", SearchOption.AllDirectories);
+
+                        foreach (var dllFile in dllFiles)
+                        {
+                            var dllFilename = Path.GetFileName(dllFile);
+
+                            if (dllFilename.Equals(assemblyInfo.Name + ".dll", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                return Assembly.LoadFrom(dllFile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     protected override void OnExecute()
@@ -117,11 +251,7 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             foreach (var type in types)
             {
-                if (MatchesFilter(type, filterByNamespace, filterByTypeNames, typeNameExactMatch) == false)
-                {
-                    continue;
-                }
-
+               
                 if (type.BaseType != null)
                 {
                     if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
@@ -173,44 +303,69 @@ public class ClassDiagramCommand : SynchronousCommand
 
     private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames, bool typeNameExactMatch)
     {
+        var returnValue = true;
+
         if (type == null)
         {
             return false;
         }
 
+        if (type.IsNotPublic == true)
+        {
+            WriteLine($"Skipping {type.FullName} because it is not public.");
+
+            returnValue = false;
+        }
+
         if (type.IsNestedPrivate == true)
         {
-            return false;
+            WriteLine($"Skipping {type.FullName} because it is nested private.");
+
+            returnValue = false;
         }
 
         if (string.IsNullOrWhiteSpace(type.Name) == true)
         {
-            return false;
+            WriteLine($"Skipping {type.FullName} because it has no name.");
+
+            returnValue = false;
         }
 
         if (MatchesNamespaceFilter(type, filterByNamespace) == false)
         {
-            return false;
+            WriteLine($"Skipping {type.FullName} because it does not match namespace filter '{filterByNamespace}'.");
+            returnValue = false;
         }
 
         if (filterByTypeNames.IsNullOrEmpty() == true)
         {
-            return true;
+            // no filter
         }
         else if (typeNameExactMatch == true &&
             filterByTypeNames.Contains(type.Name.ToLower()) == false)
         {
-            return false;
+            WriteLine($"Skipping {type.FullName} because it does not match type name filter '{string.Join(",", filterByTypeNames)}'.");
+
+            returnValue = false;
         }
         else if (typeNameExactMatch == false &&
             filterByTypeNames.Any(x => type.Name.ToLower().Contains(x)) == false)
         {
-            return false;
+            WriteLine($"Skipping {type.FullName} because it does not match type name filter '{string.Join(",", filterByTypeNames)}'.");
+
+            returnValue = false;
+        }
+
+        if (returnValue == true)
+        {
+            // WriteLine($"Including {type.FullName}.");
         }
         else
         {
-            return true;
+            WriteLine($"Excluding {type.FullName}.");
         }
+
+        return returnValue;
     }
 
     private bool MatchesNamespaceFilter(Type type, string filterByNamespace)
@@ -257,7 +412,11 @@ public class ClassDiagramCommand : SynchronousCommand
         }
         else if (OperatingSystem.IsWindows())
         {
-            System.Diagnostics.Process.Start(outputFilename);
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(outputFilename)
+                {
+                    UseShellExecute = true
+                });
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -339,14 +498,23 @@ classDiagram
         var properties = type.GetProperties();
         var methods = type.GetMethods();
 
+        var className = GetName(type);
 
-
-        if (HasDisplayableMethodsAndProperties(properties, methods) == false)
+        if (className.StartsWith("<") == true)
         {
+            WriteLine($"Skipping {type.FullName} because it starts with an unprintable character.");
+
+            return;
+        }
+        else if (
+            HasDisplayableMethodsAndProperties(properties, methods) == false)
+        {
+            WriteLine($"Skipping {type.FullName} because it has no displayable methods or properties.");
+
             return;
         }
 
-        builder.AppendLine($"class {GetName(type)} {{");
+        builder.AppendLine($"class {className} {{");
 
         if (type.IsInterface == true)
         {
@@ -393,6 +561,10 @@ classDiagram
         {
             return false;
         }
+        else if (properties.Length > 0)
+        {
+            return true;
+        }
         else
         {
             bool hasDisplayable = false;
@@ -423,6 +595,21 @@ classDiagram
         if (type.IsGenericType == true)
         {
             var name = type.Name;
+
+            if (name.StartsWith("<") == true)
+            {
+                var fullName = type.FullName;
+
+                // get everything after the last period
+                var lastPeriodIndex = fullName.LastIndexOf('.');
+
+                if (lastPeriodIndex > 0)
+                {
+                    name = fullName.Substring(lastPeriodIndex + 1);
+                }
+
+                return name;
+            }
 
             var backtickIndex = name.IndexOf('`');
 
