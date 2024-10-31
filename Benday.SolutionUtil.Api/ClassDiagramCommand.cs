@@ -88,7 +88,7 @@ public class ClassDiagramCommand : SynchronousCommand
     protected override void OnExecute()
     {
         var filename = Arguments.GetPathToFile(Constants.ArgumentNameFilename, true);
-        
+
         filename = Path.GetFullPath(filename);
 
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
@@ -182,7 +182,7 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             return false;
         }
-        
+
         if (string.IsNullOrWhiteSpace(type.Name) == true)
         {
             return false;
@@ -326,7 +326,7 @@ classDiagram
 
         WriteLine();
         WriteLine();
-        
+
         WriteLine($"Wrote class diagram to:");
         WriteLine(outputFilename);
     }
@@ -336,6 +336,16 @@ classDiagram
 
     private void AddTypeToDiagram(StringBuilder builder, Type type)
     {
+        var properties = type.GetProperties();
+        var methods = type.GetMethods();
+
+
+
+        if (HasDisplayableMethodsAndProperties(properties, methods) == false)
+        {
+            return;
+        }
+
         builder.AppendLine($"class {GetName(type)} {{");
 
         if (type.IsInterface == true)
@@ -347,14 +357,10 @@ classDiagram
             builder.AppendLine($"    {ABSTRACT_TAG}");
         }
 
-        var properties = type.GetProperties();
-
         foreach (var property in properties)
         {
             builder.AppendLine($"    +{GetName(property.PropertyType)} {property.Name}");
         }
-
-        var methods = type.GetMethods();
 
         foreach (var method in methods)
         {
@@ -380,6 +386,37 @@ classDiagram
 
         builder.AppendLine("}");
     }
+
+    private bool HasDisplayableMethodsAndProperties(PropertyInfo[] properties, MethodInfo[] methods)
+    {
+        if (properties.Length == 0 && methods.Length == 0)
+        {
+            return false;
+        }
+        else
+        {
+            bool hasDisplayable = false;
+
+            foreach (var method in methods)
+            {
+                if (IsPropertyMethod(method) == true)
+                {
+                    continue;
+                }
+
+                if (IsSystemObjectMethod(method) == true)
+                {
+                    continue;
+                }
+
+                hasDisplayable = true;
+                break;
+            }
+
+            return hasDisplayable;
+        }
+    }
+
 
     private string GetName(Type type)
     {

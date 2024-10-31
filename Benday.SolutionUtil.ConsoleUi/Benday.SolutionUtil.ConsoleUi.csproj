@@ -17,9 +17,11 @@
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
     <AssemblyVersion>2.15.0</AssemblyVersion>
-    <Version>2.15.0</Version>
+    <Version>2.16.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+      v2.16 - Class diagram bug fix for empty classes.
+      v2.15 - Generate solutions and projects for .NET Core Console, Web, Web API, and .NET MAUI.
       v2.14 - Generate class diagrams for an assembly.
       v2.13 - Added xml formatter command that allows recursive file processing.
       v2.12 - Command to update or increment package version number and assembly version number.
