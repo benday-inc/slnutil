@@ -48,6 +48,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | cleanreferences | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
 | createsolution | Create a solution and projects |
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
+| devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files in a folder tree. |
 | formatxml | Formats XML files |
 | getconnectionstring | Get database connection string in appsettings.json. |
@@ -116,6 +117,13 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | dbcontextname | Optional | String | Name of the EF Core DbContext class. |
 | namespace | Optional | String | Root namespace of the EF Core migrations DLL. |
 | verbose | Optional | Boolean | Output results as comma-separated values |
+## devtreeclean
+**Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
+| keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 ## findsolutions
 **Find solution files in a folder tree.**
 ### Arguments

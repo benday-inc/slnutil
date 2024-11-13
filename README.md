@@ -26,7 +26,7 @@ YouTube: https://www.youtube.com/@_benday
 * Bulk rename files and folders
 * Edit json from the command line
 * Set the connection string in appsettings.json form the command line
-* And more...
+* And lots more...
 
 ## Suggestions, Problems, or Bugs?
 
@@ -48,6 +48,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [cleanreferences](#cleanreferences) | Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives. |
 | [createsolution](#createsolution) | Create a solution and projects |
 | [deployefmigrations](#deployefmigrations) | Deploy EF Core Migrations from DLL binaries. |
+| [devtreeclean](#devtreeclean) | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | [findsolutions](#findsolutions) | Find solution files in a folder tree. |
 | [formatxml](#formatxml) | Formats XML files |
 | [getconnectionstring](#getconnectionstring) | Get database connection string in appsettings.json. |
@@ -116,6 +117,13 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | dbcontextname | Optional | String | Name of the EF Core DbContext class. |
 | namespace | Optional | String | Root namespace of the EF Core migrations DLL. |
 | verbose | Optional | Boolean | Output results as comma-separated values |
+## <a name="devtreeclean"></a> devtreeclean
+**Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
+| keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 ## <a name="findsolutions"></a> findsolutions
 **Find solution files in a folder tree.**
 ### Arguments

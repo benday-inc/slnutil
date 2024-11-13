@@ -21,6 +21,7 @@
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
       v2.16 - Restored the devtreeclean command which had been accidentally removed.
+      v2.15 - You don't wanna know. It was a mess.
       v2.14 - Generate class diagrams for an assembly.
       v2.13 - Added xml formatter command that allows recursive file processing.
       v2.12 - Command to update or increment package version number and assembly version number.
