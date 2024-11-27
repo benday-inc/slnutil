@@ -257,7 +257,13 @@ public class ClassDiagramCommand : SynchronousCommand
         }
         else if (OperatingSystem.IsWindows())
         {
-            System.Diagnostics.Process.Start(outputFilename);
+            var process = new System.Diagnostics.Process();
+            process.StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = outputFilename,
+                UseShellExecute = true
+            };
+            process.Start();
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -334,9 +340,15 @@ classDiagram
     public const string ABSTRACT_TAG = @"&lt;&lt;abstract&gt;&gt;";
     public const string INTERFACE_TAG = @"&lt;&lt;interface&gt;&gt;";
 
-    private void AddTypeToDiagram(StringBuilder builder, Type type)
+    private void AddTypeToDiagram(StringBuilder document, Type type)
     {
-        builder.AppendLine($"class {GetName(type)} {{");
+        var builder = new StringBuilder();
+
+        // I need to build the class diagram content before deciding what the 
+        // class diagram starting syntax should be.  That's why i'm not writing 
+        // this to the document yet.
+        //
+        // Deliberately not writing this line --> builder.AppendLine($"class {GetName(type)} {{");
 
         if (type.IsInterface == true)
         {
@@ -376,9 +388,19 @@ classDiagram
             {
                 builder.AppendLine($"    +{method.Name}() {GetReturnTypeSafe(method)}");
             }
-        }
+        }        
 
-        builder.AppendLine("}");
+        // add content to the diagram
+        if (builder.Length == 0)
+        {
+            document.AppendLine($"class {GetName(type)}");
+            document.AppendLine();
+        }
+        else { 
+            document.AppendLine($"class {GetName(type)} {{");
+            document.AppendLine(builder.ToString());
+            document.AppendLine("}");
+        }
     }
 
     private string GetName(Type type)

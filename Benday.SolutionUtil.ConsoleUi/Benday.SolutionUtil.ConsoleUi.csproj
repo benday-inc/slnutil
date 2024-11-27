@@ -16,22 +16,23 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.16.0</AssemblyVersion>
-    <Version>2.16.0</Version>
+    <AssemblyVersion>2.17.0</AssemblyVersion>
+    <Version>2.17.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
-      v2.16 - Restored the devtreeclean command which had been accidentally removed.
-      v2.15 - You don't wanna know. It was a mess.
-      v2.14 - Generate class diagrams for an assembly.
-      v2.13 - Added xml formatter command that allows recursive file processing.
-      v2.12 - Command to update or increment package version number and assembly version number.
-      v2.11 - Added support for setting values as json boolean in via setjsonvalue.
-      v2.10 - Fixed bug in setprojectproperty command where values were not updated if the property already existed.
-      v2.9 - Added assembly info viewer.
-      v2.8 - Added option to devtreeclean to keep git repositories when cleaning a directory tree.
-      v2.7 - Added wildcard reference command.
-      v2.6 - Updated nuget package to include Benday.CommandsFramework v3.2.0.
-      v2.5 - Updated jsontoclasses to add support for hyphens in json property names.</PackageReleaseNotes>
+  v2.17 - Fixing bugs in class diagram generator
+  v2.16 - Restored the devtreeclean command which had been accidentally removed.
+  v2.15 - You don't wanna know. It was a mess.
+  v2.14 - Generate class diagrams for an assembly.
+  v2.13 - Added xml formatter command that allows recursive file processing.
+  v2.12 - Command to update or increment package version number and assembly version number.
+  v2.11 - Added support for setting values as json boolean in via setjsonvalue.
+  v2.10 - Fixed bug in setprojectproperty command where values were not updated if the property already existed.
+  v2.9 - Added assembly info viewer.
+  v2.8 - Added option to devtreeclean to keep git repositories when cleaning a directory tree.
+  v2.7 - Added wildcard reference command.
+  v2.6 - Updated nuget package to include Benday.CommandsFramework v3.2.0.
+  v2.5 - Updated jsontoclasses to add support for hyphens in json property names.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\bdc_mark_128_128.png">
