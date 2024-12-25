@@ -50,33 +50,12 @@ public class FormatXmlCommand : SynchronousCommand
         var recursive = Arguments.GetBooleanValue(Constants.ArgumentNameRecursive);
         var writeToFile = Arguments.GetBooleanValue(Constants.ArgumentNameWriteToFile);
 
-        filepath = CommandFrameworkUtilities.GetPathToSourceFile(filepath, false);
-
-        var fileName = Path.GetFileName(filepath);
-
-
-        string everythingAfterStarInclusive = filepath;
-
-        var hasWildcard = fileName.Contains("*");
-
-        if (hasWildcard == false)
-        {
-            everythingAfterStarInclusive =
-                fileName.Substring(fileName.IndexOf("*"));
-        }
-
-        var dirpath = Path.GetDirectoryName(everythingAfterStarInclusive);
-
-        if (Directory.Exists(dirpath) == false)
-        {
-            throw new KnownException($"Directory '{dirpath}' does not exist for file '{filepath}'.");
-        }
-
-        if (hasWildcard == true)
+        var target = new TargetFileInfo(filepath);
+        
+        if (target.HasWildcard == true)
         {
             var files = Directory.GetFiles(
-                dirpath,
-                fileName,
+                target.DirectoryPath, target.FileName,
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
             if (files.Length == 0)

@@ -97,7 +97,11 @@
     "create-maui-demo": {
       "commandName": "Project",
       "commandLineArgs": "create /rootdir:/Users/benday/code/temp/20241031 maui-demo Benday.Demo1"
+    },
+    "format-xml-with-wildcard": {
+      "commandName": "Project",
+      "commandLineArgs": "formatxml /recursive /write ./*.xml",
+      "workingDirectory": "/Users/benday/code/repos/PowerpointUtil/pptx-research"
     }
-    
   }
 }
