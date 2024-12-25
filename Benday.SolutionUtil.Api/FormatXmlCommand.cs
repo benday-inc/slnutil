@@ -54,9 +54,18 @@ public class FormatXmlCommand : SynchronousCommand
 
         var fileName = Path.GetFileName(filepath);
 
+
+        string everythingAfterStarInclusive = filepath;
+
         var hasWildcard = fileName.Contains("*");
-        
-        var dirpath = Path.GetDirectoryName(filepath);
+
+        if (hasWildcard == false)
+        {
+            everythingAfterStarInclusive =
+                fileName.Substring(fileName.IndexOf("*"));
+        }
+
+        var dirpath = Path.GetDirectoryName(everythingAfterStarInclusive);
 
         if (Directory.Exists(dirpath) == false)
         {
@@ -66,8 +75,8 @@ public class FormatXmlCommand : SynchronousCommand
         if (hasWildcard == true)
         {
             var files = Directory.GetFiles(
-                dirpath, 
-                fileName, 
+                dirpath,
+                fileName,
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
             if (files.Length == 0)

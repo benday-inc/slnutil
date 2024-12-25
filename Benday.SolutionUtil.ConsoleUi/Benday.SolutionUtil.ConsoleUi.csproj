@@ -16,10 +16,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.17.0</AssemblyVersion>
-    <Version>2.17.0</Version>
+    <AssemblyVersion>2.18.0</AssemblyVersion>
+    <Version>2.18.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+  v2.18 - Fixing bugs in formatxml command
   v2.17 - Fixing bugs in class diagram generator
   v2.16 - Restored the devtreeclean command which had been accidentally removed.
   v2.15 - You don't wanna know. It was a mess.
@@ -45,7 +46,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="4.3.0" />
+    <PackageReference Include="Benday.CommandsFramework" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Benday.SolutionUtil.Api\Benday.SolutionUtil.Api.csproj" />
