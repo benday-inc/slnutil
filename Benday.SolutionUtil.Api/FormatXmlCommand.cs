@@ -25,9 +25,10 @@ public class FormatXmlCommand : SynchronousCommand
         var args = new ArgumentCollection();
 
         args.AddString(Constants.ArgumentNameFilename)
-            .AsRequired()
+            .AsNotRequired()
             .FromPositionalArgument(1)
-            .WithDescription("Path to file or wildcard to files");
+            .WithDescription("Path to file or wildcard to files")
+            .WithDefaultValue("*.xml");
 
         args.AddBoolean(Constants.ArgumentNameRecursive)
             .AsNotRequired()
@@ -46,18 +47,47 @@ public class FormatXmlCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
+        WriteLine("Starting...");
+
         var filepath = Arguments.GetStringValue(Constants.ArgumentNameFilename);
+
+        WriteLine($"Filepath value: {filepath}");
+
+        var containsWildcard = filepath.Contains("*");
+
+        WriteLine($"Contains wildcard: {containsWildcard}");
+
+
         var recursive = Arguments.GetBooleanValue(Constants.ArgumentNameRecursive);
+
         var writeToFile = Arguments.GetBooleanValue(Constants.ArgumentNameWriteToFile);
 
-        var target = new TargetFileInfo(filepath);
-        
-        if (target.HasWildcard == true)
-        {
-            var files = Directory.GetFiles(
-                target.DirectoryPath, target.FileName,
-                recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        WriteLine($"Formatting '{filepath}'...");
+        WriteLine($"Recursive: {recursive}");
+        WriteLine($"Write to file: {writeToFile}");
 
+
+
+        if (containsWildcard == true)
+        {
+            var isPathRooted = Path.IsPathRooted(filepath);
+
+            string directoryPath;
+
+            if (isPathRooted == false)
+            {
+                directoryPath = Environment.CurrentDirectory;
+            }
+            else
+            {
+                directoryPath = Path.GetDirectoryName(filepath) ?? 
+                    throw new KnownException($"Could not get directory path from '{filepath}'.");
+            }
+
+            var files = Directory.GetFiles(
+                directoryPath, filepath,
+                recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+         
             if (files.Length == 0)
             {
                 throw new KnownException($"No files found matching '{filepath}'.");
@@ -70,6 +100,8 @@ public class FormatXmlCommand : SynchronousCommand
         }
         else
         {
+            var target = new TargetFileInfo(filepath);
+
             FormatFile(filepath, writeToFile);
         }
     }

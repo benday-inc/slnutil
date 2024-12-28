@@ -10,6 +10,7 @@ public class TargetFileInfo
 
         if (HasWildcard == true)
         {
+            Console.WriteLine($"OriginalValue has wildcard: {OriginalValue}");
             var indexOfStar = OriginalValue.IndexOf("*");
 
             var beforeStar = 
@@ -27,12 +28,16 @@ public class TargetFileInfo
         }
         else
         {
+            Console.WriteLine($"OriginalValue has no wildcard: {OriginalValue}");
             FileName = Path.GetFileName(OriginalValue);
             DirectoryPath = Path.GetDirectoryName(OriginalValue) ?? string.Empty;
             IsPathRooted = Path.IsPathRooted(DirectoryPath);
             DirectoryPath = Path.GetFullPath(DirectoryPath);
         }
         
+        Console.WriteLine($"DirectoryPath: {DirectoryPath}");
+        Console.WriteLine($"FileName: {FileName}");
+        Console.WriteLine($"IsPathRooted: {IsPathRooted}");        
     }
 
     public bool IsPathRooted { get; set; }

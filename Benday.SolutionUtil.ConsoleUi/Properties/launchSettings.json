@@ -102,6 +102,11 @@
       "commandName": "Project",
       "commandLineArgs": "formatxml /recursive /write ./*.xml",
       "workingDirectory": "/Users/benday/code/repos/PowerpointUtil/pptx-research"
+    },
+    "formatxml-no-wildcard": {
+      "commandName": "Project",
+      "commandLineArgs": "formatxml /recursive /write",
+      "workingDirectory": "/Users/benday/code/repos/PowerpointUtil/pptx-research"
     }
   }
 }
