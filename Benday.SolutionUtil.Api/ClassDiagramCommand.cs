@@ -493,8 +493,10 @@ classDiagram
     public const string ABSTRACT_TAG = @"&lt;&lt;abstract&gt;&gt;";
     public const string INTERFACE_TAG = @"&lt;&lt;interface&gt;&gt;";
 
-    private void AddTypeToDiagram(StringBuilder builder, Type type)
+    private void AddTypeToDiagram(StringBuilder document, Type type)
     {
+        
+
         var properties = type.GetProperties();
         var methods = type.GetMethods();
 
@@ -514,7 +516,14 @@ classDiagram
             return;
         }
 
-        builder.AppendLine($"class {className} {{");
+
+        var builder = new StringBuilder();
+
+        // I need to build the class diagram content before deciding what the 
+        // class diagram starting syntax should be.  That's why i'm not writing 
+        // this to the document yet.
+        //
+        // Deliberately not writing this line --> builder.AppendLine($"class {GetName(type)} {{");
 
         if (type.IsInterface == true)
         {
@@ -552,7 +561,18 @@ classDiagram
             }
         }
 
-        builder.AppendLine("}");
+        // add content to the diagram
+        if (builder.Length == 0)
+        {
+            document.AppendLine($"class {GetName(type)}");
+            document.AppendLine();
+        }
+        else
+        {
+            document.AppendLine($"class {GetName(type)} {{");
+            document.AppendLine(builder.ToString());
+            document.AppendLine("}");
+        }
     }
 
     private bool HasDisplayableMethodsAndProperties(PropertyInfo[] properties, MethodInfo[] methods)
@@ -598,7 +618,7 @@ classDiagram
 
             if (name.StartsWith("<") == true)
             {
-                var fullName = type.FullName;
+                var fullName = type.FullName ?? string.Empty;
 
                 // get everything after the last period
                 var lastPeriodIndex = fullName.LastIndexOf('.');
