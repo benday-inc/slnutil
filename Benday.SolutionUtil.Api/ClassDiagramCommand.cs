@@ -412,11 +412,13 @@ public class ClassDiagramCommand : SynchronousCommand
         }
         else if (OperatingSystem.IsWindows())
         {
-            System.Diagnostics.Process.Start(
-                new System.Diagnostics.ProcessStartInfo(outputFilename)
-                {
-                    UseShellExecute = true
-                });
+            var process = new System.Diagnostics.Process();
+            process.StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = outputFilename,
+                UseShellExecute = true
+            };
+            process.Start();
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -495,7 +497,7 @@ classDiagram
 
     private void AddTypeToDiagram(StringBuilder document, Type type)
     {
-        
+
 
         var properties = type.GetProperties();
         var methods = type.GetMethods();
