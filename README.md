@@ -90,6 +90,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | filename | Required | String | Path to assembly that you want a class diagram for. |
 | hideinheritance | Optional | Boolean | Hide inheritance relationships. |
 | typenamesmatchexact | Optional | Boolean | Exact match for type names.  Default is contains. |
+| localonly | Optional | Boolean | Only show methods and properties that are declared locally. Don't show inherited members. |
 | typenames | Optional | String | Show types that exist in this comma separated list. Default search is contains match that matches by substring. |
 ## <a name="cleanreferences"></a> cleanreferences
 **Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.**
@@ -138,7 +139,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
-| filename | Required | String | Path to file or wildcard to files |
+| filename | Optional | String | Path to file or wildcard to files |
 | recursive | Optional | Boolean | Apply to matching files recursively |
 | write | Optional | Boolean | Write changes back to the file |
 ## <a name="getconnectionstring"></a> getconnectionstring
