@@ -74,6 +74,10 @@
       "commandName": "Project",
       "commandLineArgs": "classdiagram /Users/benday/code/benday-inc/XamlUtil/XamlUtil.ConsoleUi/bin/Debug/net8.0/Benday.CommandsFramework.dll"
     },
+    "classdiagram-cosmosdb": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram C:\\code\\benday-inc\\Benday.CosmosDb\\Benday.CosmosDb\\bin\\Debug\\net8.0\\Benday.CosmosDb.dll"
+    },
     "classdiagram-filter-by-typename-exact": {
       "commandName": "Project",
       "commandLineArgs": "classdiagram /typenames:IOwnedItem,owneditembase /typenamesmatchexact /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
