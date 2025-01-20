@@ -90,6 +90,12 @@
       "commandName": "Project",
       "commandLineArgs": "classdiagram /namespace:domainmodel /hideinheritance /Users/benday/code/repos/PowerpointUtil/cross-platform/PowerpointUtil.Api/bin/Debug/net8.0/PowerpointUtil.Api.dll"
     },
+    "classdiagram-controllers": {
+      "commandName": "Project",
+      "commandLineArgs": "classdiagram /namespace:controller /localonly Benday.Cms.WebUi.dll",
+      "workingDirectory": "/Users/benday/code/repos/slidespeaker-cms/Benday.Cms/src/Benday.Cms.WebUi/bin/Debug/net9.0"
+    },
+
     "create-commands": {
       "commandName": "Project",
       "commandLineArgs": "create /rootdir:/Users/benday/code/temp/20241031 commands Benday.Test123"

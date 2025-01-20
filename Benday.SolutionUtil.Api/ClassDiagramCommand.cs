@@ -42,6 +42,12 @@ public class ClassDiagramCommand : SynchronousCommand
             .WithDescription("Exact match for type names.  Default is contains.")
             .WithDefaultValue(false);
 
+        args.AddBoolean(Constants.ArgumentNameOnlyDeclaredLocally)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Only show methods and properties that are declared locally. Don't show inherited members.")
+            .WithDefaultValue(false);
+
         args.AddString(Constants.ArgumentsFilterByTypeNames)
             .AsNotRequired()
             .AllowEmptyValue()
@@ -56,8 +62,6 @@ public class ClassDiagramCommand : SynchronousCommand
         try
         {
             var assemblyLocation = assembly.Location;
-
-            
 
             if (assemblyLocation == null)
             {
@@ -228,6 +232,7 @@ public class ClassDiagramCommand : SynchronousCommand
         var filterByNamespace = Arguments.GetStringValue(Constants.ArgumentsFilterByNamespace);
         var typeNameFilterValue = Arguments.GetStringValue(Constants.ArgumentsFilterByTypeNames);
         var typeNameExactMatch = Arguments.GetBooleanValue(Constants.ArgumentsFilterByTypeNamesModeExact);
+        var onlyDeclaredLocally = Arguments.GetBooleanValue(Constants.ArgumentNameOnlyDeclaredLocally);
 
         var filterByTypeNames = typeNameFilterValue.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
@@ -251,7 +256,7 @@ public class ClassDiagramCommand : SynchronousCommand
         {
             foreach (var type in types)
             {
-               
+
                 if (type.BaseType != null)
                 {
                     if (MatchesFilter(type.BaseType, filterByNamespace, filterByTypeNames, typeNameExactMatch) == true &&
@@ -283,7 +288,7 @@ public class ClassDiagramCommand : SynchronousCommand
                 continue;
             }
 
-            AddTypeToDiagram(builder, type);
+            AddTypeToDiagram(builder, type, onlyDeclaredLocally);
         }
 
         var tempDir = System.IO.Path.GetTempPath();
@@ -495,11 +500,11 @@ classDiagram
     public const string ABSTRACT_TAG = @"&lt;&lt;abstract&gt;&gt;";
     public const string INTERFACE_TAG = @"&lt;&lt;interface&gt;&gt;";
 
-    private void AddTypeToDiagram(StringBuilder document, Type type)
+    private void AddTypeToDiagram(StringBuilder document, Type type, bool onlyDeclaredLocally = false)
     {
-
-
-        var properties = type.GetProperties();
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        .Where(p => p.GetMethod != null && (p.GetMethod.IsPublic || p.GetMethod.IsFamily))
+        .ToArray();
         var methods = type.GetMethods();
 
         var className = GetName(type);
@@ -538,11 +543,35 @@ classDiagram
 
         foreach (var property in properties)
         {
-            builder.AppendLine($"    +{GetName(property.PropertyType)} {property.Name}");
+            // skip if property isn't declared on this class
+            if (onlyDeclaredLocally == true && property.DeclaringType != type)
+            {
+                continue;
+            }
+
+            var propertyVisibility = "+";
+
+            if (property.GetMethod != null)
+            {
+                if (property.GetMethod.IsFamily == true)
+                {
+                    propertyVisibility = "#";
+                }
+            }
+
+            var propertyTypeName = GetPropertyTypeSafe(property);
+
+            builder.AppendLine($"    {propertyVisibility}{propertyTypeName} {property.Name}");
         }
 
         foreach (var method in methods)
         {
+            // skip if method isn't declared on this class
+            if (onlyDeclaredLocally == true && method.DeclaringType != type)
+            {
+                continue;
+            }
+
             if (IsPropertyMethod(method) == true)
             {
                 continue;
@@ -553,13 +582,17 @@ classDiagram
                 continue;
             }
 
+            var methodVisibility = method.IsPublic ? "+" : "-";
+
+            methodVisibility = method.IsFamily ? "#" : methodVisibility;
+
             if (method.IsAbstract == true)
             {
-                builder.AppendLine($"    +{method.Name}() {GetReturnTypeSafe(method)}*");
+                builder.AppendLine($"    {methodVisibility}{method.Name}() {GetReturnTypeSafe(method)}*");
             }
             else
             {
-                builder.AppendLine($"    +{method.Name}() {GetReturnTypeSafe(method)}");
+                builder.AppendLine($"    {methodVisibility}{method.Name}() {GetReturnTypeSafe(method)}");
             }
         }
 
@@ -694,6 +727,18 @@ classDiagram
         try
         {
             return GetName(method.ReturnType);
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
+    private string GetPropertyTypeSafe(PropertyInfo property)
+    {
+        try
+        {
+            return GetName(property.PropertyType);
         }
         catch (Exception)
         {

@@ -50,6 +50,7 @@ public static class Constants
     public const string CommandArgumentNameSetJsonValue = "setjsonvalue";
     public const string CommandArgumentNameAssemblyInfo = "assemblyinfo";
     public const string CommandArgumentNameListPackagesLegacy = "listpackages-oldstyle";
+    public const string ArgumentNameOnlyDeclaredLocally = "localonly";
 
     public const string CommandArgumentNameReplaceToken = "replacetoken";
     public const string ArgumentNameToken = "token";

@@ -17,9 +17,10 @@
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
     <AssemblyVersion>2.18.0</AssemblyVersion>
-    <Version>2.18.0</Version>
+    <Version>2.19.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+  v2.19 - Bug fixes
   v2.18 - Fixing bugs in formatxml command
   v2.17 - Fixing bugs in class diagram generator
   v2.16 - Restored the devtreeclean command which had been accidentally removed.
