@@ -36,6 +36,10 @@ public class BulkRenameCommand : SynchronousCommand
             .AsRequired()
             .WithDescription("Replacement value");
 
+        args.AddString(Constants.ArgumentNamePrefix)
+            .AsNotRequired()
+            .WithDescription("Prefix all matching values with this value");
+
         args.AddBoolean(Constants.ArgumentNamePreview)
             .AsNotRequired()
             .AllowEmptyValue()
@@ -74,20 +78,35 @@ public class BulkRenameCommand : SynchronousCommand
         var recursive = Arguments.GetBooleanValue(
             Constants.ArgumentNameRecursive);
 
-        Rename(sourceDir, fromValue, toValue, preview, recursive);
+        var prefixMode = Arguments.HasValue(
+            Constants.ArgumentNamePrefix);
+
+        if (prefixMode == true)
+        {
+            var prefix = Arguments.GetStringValue(
+                Constants.ArgumentNamePrefix);
+
+            Rename(sourceDir, fromValue, toValue, preview, recursive, prefix);
+        }
+        else
+        {
+            Rename(sourceDir, fromValue, toValue, preview, recursive);
+        }
     }
 
-    private void Rename(string sourceDir, string fromValue, string toValue, bool preview, bool recursive)
+    private void Rename(string sourceDir, string fromValue, string toValue, bool preview, bool recursive, 
+        string? prefix = null)
     {
         WriteLine($"Starting rename...");
         var dir = new DirectoryInfo(sourceDir);
-        RenameFiles(fromValue, toValue, preview, dir, recursive);
-        RenameSubdirectories(fromValue, toValue, preview, dir, recursive);
+        RenameFiles(fromValue, toValue, preview, dir, recursive, prefix);
+        RenameSubdirectories(fromValue, toValue, preview, dir, recursive, prefix);
         WriteLine($"Rename complete.");
-    }
+    }    
 
     private void RenameSubdirectories(
-        string fromValue, string toValue, bool preview, DirectoryInfo dir, bool recursive)
+        string fromValue, string toValue, bool preview, DirectoryInfo dir, bool recursive,
+        string? prefix = null)
     {
         WriteLine($"Starting rename of subdirectories...");
         var searchOption = SearchOption.TopDirectoryOnly;
@@ -105,6 +124,11 @@ public class BulkRenameCommand : SynchronousCommand
         foreach (var item in dirs)
         {
             toName = item.Name.Replace(fromValue, toValue);
+
+            if (prefix != null)
+            {
+                toName = $"{prefix}{toName}";
+            }
 
             if (item.Parent is null)
             {
@@ -132,7 +156,9 @@ public class BulkRenameCommand : SynchronousCommand
         WriteLine($"Completed rename of subdirectories.");
     }
 
-    private void RenameFiles(string fromValue, string toValue, bool preview, DirectoryInfo dir, bool recursive)
+    private void RenameFiles(
+        string fromValue, string toValue, bool preview, DirectoryInfo dir,
+        bool recursive, string? prefix = null)
     {
         WriteLine($"Starting rename of files...");
 
@@ -151,6 +177,11 @@ public class BulkRenameCommand : SynchronousCommand
         foreach (var item in files)
         {
             toFilename = item.Name.Replace(fromValue, toValue);
+
+            if (prefix != null)
+            {
+                toFilename = $"{prefix}{toFilename}";
+            }
 
             if (item.DirectoryName is null)
             {

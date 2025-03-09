@@ -38,6 +38,7 @@ public static class Constants
     public const string ArgumentNamePackageNameFilter = "filter";
     public const string ArgumentNameRecursive = "recursive";
     public const string ArgumentNameWriteToFile = "write";
+    public const string ArgumentNamePrefix = "prefix";
     public const string ArgumentNameFromValue = "from";
     public const string ArgumentNameToValue = "to";
     public const string CommandArgumentNameToBase64String = "base64";
