@@ -79,6 +79,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | rootdir | Optional | String | Starting directory for the rename operation |
 | from | Required | String | String to search for and replace |
 | to | Required | String | Replacement value |
+| prefix | Optional | String | Prefix all matching values with this value |
 | preview | Optional | Boolean | Preview changes |
 | recursive | Optional | Boolean | Recurse the directory tree |
 ## classdiagram
