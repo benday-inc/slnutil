@@ -148,7 +148,11 @@ public class SetFrameworkVersionCommand : SynchronousCommand
         }
         else
         {
-            targetFrameworkElement.Value = frameworkVersion;
+            var currentValue = targetFrameworkElement.Value;
+
+            var newFrameworkVersion = Utilities.GetFrameworkVersion(currentValue, frameworkVersion);
+
+            targetFrameworkElement.Value = newFrameworkVersion;
 
             var settings = new XmlWriterSettings
             {
@@ -160,7 +164,7 @@ public class SetFrameworkVersionCommand : SynchronousCommand
 
             doc.Save(writer);
 
-            WriteLine($"Updated project '{pathToProjectFile}' framework version to '{frameworkVersion}'.");
+            WriteLine($"Updated project '{pathToProjectFile}' framework version from '{currentValue}' to '{newFrameworkVersion}'.");
         }
     }    
 }

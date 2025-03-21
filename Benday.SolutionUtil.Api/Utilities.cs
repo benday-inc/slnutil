@@ -158,4 +158,42 @@ public static class Utilities
             return $"{tokens[0]}.*";
         }        
     }
+
+
+    /// <summary>
+    /// Returns the framework version to use for a given target version. Checks if the current version has a target for Windows and preserves the target while updating the framework.
+    /// </summary>
+    /// <param name="currentVersion">Current value</param>
+    /// <param name="targetVersion">Target value</param>
+    /// <returns>Returns the updated version</returns>    
+    public static string GetFrameworkVersion(string currentVersion, string targetVersion)
+    {
+        currentVersion = currentVersion.Trim();
+        targetVersion = targetVersion.Trim();
+
+        if (string.IsNullOrEmpty(currentVersion) == true)
+        {
+            return targetVersion;
+        }
+        else if (targetVersion.Contains('-') == true)
+        {
+            return targetVersion;
+        }
+        else if (currentVersion.Contains('-') == true)
+        {
+            var currentVersionTokens = currentVersion.Split('-');
+            if (currentVersionTokens.Length > 0)
+            {
+                return $"{targetVersion}-{currentVersionTokens[1]}";
+            }
+            else
+            {
+                return targetVersion;
+            }
+        }
+        else
+        {
+            return targetVersion;
+        }
+    }
 }
