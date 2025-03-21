@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -16,10 +16,12 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.20.0</AssemblyVersion>
-    <Version>2.20.0</Version>
+    <AssemblyVersion>2.21.0</AssemblyVersion>
+    <Version>2.21.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
-    <PackageReleaseNotes>v2.20 - Added prefix option to bulk rename command
+    <PackageReleaseNotes>
+v2.21 - Modified set framework version command to more gracefully handle OS-specific targeting. Adding net8.0 and net9.0 to target frameworks.
+v2.20 - Added prefix option to bulk rename command
 v2.19 - Bug fixes; Support in class diagram for protected members; Class diagram option for showing locally defined members
 v2.18 - Fixing bugs in formatxml command
 v2.17 - Fixing bugs in class diagram generator
