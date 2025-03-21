@@ -36,6 +36,7 @@ public static class Constants
     public const string ArgumentNameFrameworkVersion = "version";
     public const string ArgumentNamePreview = "preview";
     public const string ArgumentNamePackageNameFilter = "filter";
+    public const string ArgumentNamePackageVersion = "version";
     public const string ArgumentNameRecursive = "recursive";
     public const string ArgumentNameWriteToFile = "write";
     public const string ArgumentNamePrefix = "prefix";
@@ -51,6 +52,7 @@ public static class Constants
     public const string CommandArgumentNameSetJsonValue = "setjsonvalue";
     public const string CommandArgumentNameAssemblyInfo = "assemblyinfo";
     public const string CommandArgumentNameListPackagesLegacy = "listpackages-oldstyle";
+    public const string CommandArgumentNameSetPackageVersion = "setpackageversion";
     public const string ArgumentNameOnlyDeclaredLocally = "localonly";
 
     public const string CommandArgumentNameReplaceToken = "replacetoken";

@@ -9,12 +9,12 @@ using Benday.XmlUtilities;
 
 namespace Benday.SolutionUtil.Api;
 
-[Command(Name = Constants.CommandArgumentNameMakeReferenceUseWildcard,
+[Command(Name = Constants.CommandArgumentNameSetPackageVersion,
     IsAsync = false,
-    Description = "Changes package references in a C# project file to use wildcard version rather than fixed version number.")]
-public class WildcardReferencesCommand : SynchronousCommand
+    Description = "Changes NuGet package references in a C# project file to a new value.")]
+public class SetPackageVersionCommand : SynchronousCommand
 {
-    public WildcardReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
+    public SetPackageVersionCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
     {
 
@@ -32,9 +32,13 @@ public class WildcardReferencesCommand : SynchronousCommand
             .AsNotRequired().AllowEmptyValue().WithDescription("Preview changes only");
 
         args.AddString(Constants.ArgumentNamePackageNameFilter)
-            .AsRequired()
+            .AsNotRequired()
             .WithDescription("Filter package by name. If package name starts with this value, it gets updated.")
             .WithDefaultValue(string.Empty);
+
+        args.AddString(Constants.ArgumentNamePackageVersion)
+            .AsRequired()
+            .WithDescription("Package version to reference");            
 
         return args;
     }
@@ -44,6 +48,12 @@ public class WildcardReferencesCommand : SynchronousCommand
 
     protected override void OnExecute()
     {
+        var targetVersionValue = Arguments.GetStringValue(Constants.ArgumentNamePackageVersion);
+
+        targetVersionValue = targetVersionValue.Trim();
+
+        WriteLine($"Setting package version to '{targetVersionValue}'.");
+
         if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
             _SolutionPath = Arguments[Constants.ArgumentNameSolutionPath].Value;
@@ -82,12 +92,12 @@ public class WildcardReferencesCommand : SynchronousCommand
             else
             {
                 var projects = ParseProjects(projectsAsString);
-                UpdateReferences(projects);
+                UpdateReferences(projects, targetVersionValue);
             }
         }
     }
 
-    private void UpdateReferences(List<string> projectPaths)
+    private void UpdateReferences(List<string> projectPaths, string targetVersionValue)
     {
         var previewMode = Arguments.GetBooleanValue(Constants.ArgumentNamePreview);
 
@@ -129,9 +139,7 @@ public class WildcardReferencesCommand : SynchronousCommand
                     continue;
                 }
 
-                var version = packageRef.AttributeValue("Version");
-
-                var wildcardVersion = Utilities.PackageVersionNumberToWildcard(version);
+                var version = packageRef.AttributeValue("Version");                
 
                 if (previewMode == true)
                 {
@@ -141,11 +149,11 @@ public class WildcardReferencesCommand : SynchronousCommand
                         wroteProjectName = true;
                     }
 
-                    WriteLine($"\t{include} - '{version}' -> '{wildcardVersion}'");
+                    WriteLine($"\t{include} - '{version}' -> '{targetVersionValue}'");
                 }
                 else
                 {
-                    packageRef.SetAttributeValue("Version", wildcardVersion);
+                    packageRef.SetAttributeValue("Version", targetVersionValue);
 
                     hasChanges = true;
 
@@ -155,7 +163,7 @@ public class WildcardReferencesCommand : SynchronousCommand
                         wroteProjectName = true;
                     }
 
-                    WriteLine($"\t{include} - '{version}' -> '{wildcardVersion}'");
+                    WriteLine($"\t{include} - '{version}' -> '{targetVersionValue}'");
                 }
             }
 

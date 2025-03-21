@@ -59,6 +59,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [setconnectionstring](#setconnectionstring) | Set database connection string in appsettings.json. |
 | [setframework](#setframework) | Set the target framework version on all projects. |
 | [setjsonvalue](#setjsonvalue) | Set a string value in a json file. |
+| [setpackageversion](#setpackageversion) | Changes NuGet package references in a C# project file to a new value. |
 | [setprojectproperty](#setprojectproperty) | Set a project property value on all projects. |
 | [setprojectversion](#setprojectversion) | Set the assembly and nuget package version property value on a project. |
 | [base64](#base64) | Encodes a string value as a base 64 string. |
@@ -205,6 +206,15 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | increment-int | Optional | Boolean | Increment the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | increment-minor-version | Optional | Boolean | Increment the minor version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | bool | Optional | Boolean | Set value into the json as boolean |
+## <a name="setpackageversion"></a> setpackageversion
+**Changes NuGet package references in a C# project file to a new value.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution file to use |
+| preview | Optional | Boolean | Preview changes only |
+| filter | Optional | String | Filter package by name. If package name starts with this value, it gets updated. |
+| version | Required | String | Package version to reference |
 ## <a name="setprojectproperty"></a> setprojectproperty
 **Set a project property value on all projects.**
 ### Arguments
@@ -248,4 +258,4 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution file to use |
 | preview | Optional | Boolean | Preview changes only |
-| filter | Optional | String | Filter package by name. If package name starts with this value, it gets updated. |
+| filter | Required | String | Filter package by name. If package name starts with this value, it gets updated. |
