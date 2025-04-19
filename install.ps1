@@ -3,13 +3,19 @@
 param([Parameter(HelpMessage='Uninstall before installing')]
     [ValidateNotNullOrEmpty()]
     [switch]
-    $reinstall)
+    $reinstall,
+    [ValidateNotNullOrEmpty()]
+    [switch]
+    $skipBuild)
 
 if ($reinstall -eq $true)
 {
     &.\uninstall.ps1
 }
 
-dotnet build
+if ($skipBuild -eq $false)
+{
+    dotnet build
+}
 
-dotnet tool install --global --add-source .\Benday.SolutionUtil.ConsoleUi\bin\Debug slnutil
+dotnet tool install --global --add-source .\Benday.SolutionUtil.ConsoleUi\bin\Debug slnutil --ignore-failed-sources

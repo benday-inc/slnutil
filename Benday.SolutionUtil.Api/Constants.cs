@@ -54,7 +54,7 @@ public static class Constants
     public const string CommandArgumentNameListPackagesLegacy = "listpackages-oldstyle";
     public const string CommandArgumentNameSetPackageVersion = "setpackageversion";
     public const string ArgumentNameOnlyDeclaredLocally = "localonly";
-
+    
     public const string CommandArgumentNameReplaceToken = "replacetoken";
     public const string ArgumentNameToken = "token";
     public const string ArgumentNameIncrementInt32Value = "increment-int";

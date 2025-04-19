@@ -1,5 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -42,7 +45,17 @@ internal class CreateSolutionCommand : SynchronousCommand
                 "This is the root namespace for the solution.  For example: Benday.SampleApp")
             .FromPositionalArgument(2);
 
+        args.AddBoolean(Constants.ArgumentNameVerbose).AsNotRequired().AllowEmptyValue().WithDefaultValue(false);
+
         return args;
+    }
+
+    private bool Verbose
+    {
+        get
+        {
+            return Arguments.GetBooleanValue(Constants.ArgumentNameVerbose);
+        }
     }
 
     protected override void DisplayUsage()
@@ -547,20 +560,26 @@ internal class CreateSolutionCommand : SynchronousCommand
         return solution.Path;
     }
 
+    /// <summary>
+    /// Run the process. Prints any error text from stderr. If Verbose is true, outputs the output of the command from stdout.
+    /// </summary>
+    /// <param name="startInfo"></param>
+    /// <exception cref="KnownException"></exception>
     private void RunProcess(ProcessStartInfo startInfo)
     {
-        var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Could not start process.");
+        var process = new ProcessRunner(startInfo);
+        
+        process.Run();
 
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
+        if (process.IsError == true)
         {
-            // read error output
-            var errorOutput = process.StandardError.ReadToEnd();
+            WriteLine(process.ErrorText);
 
-            WriteLine(errorOutput);
-
-            throw new KnownException($"Error creating solution.  Exit code was {process.ExitCode}.");
+            throw new KnownException($"Error creating solution.");
+        }
+        else if (Verbose == true)
+        {
+            WriteLine(process.OutputText);
         }
     }
 
