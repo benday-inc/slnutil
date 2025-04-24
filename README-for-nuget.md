@@ -62,6 +62,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | setpackageversion | Changes NuGet package references in a C# project file to a new value. |
 | setprojectproperty | Set a project property value on all projects. |
 | setprojectversion | Set the assembly and nuget package version property value on a project. |
+| sortpropertygroup | Sorts the elements in a property group for a csproj file. |
 | base64 | Encodes a string value as a base 64 string. |
 | touch | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
@@ -232,6 +233,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | project | Required | String | Project name to update. |
 | increment | Optional | Boolean | Increment the minor value. |
 | value | Optional | String | Value for the property. |
+## sortpropertygroup
+**Sorts the elements in a property group for a csproj file.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| project | Optional | String | Project file to edit. If this value is not supplied, the tool looks for a csproj file in the current directory. |
 ## base64
 **Encodes a string value as a base 64 string.**
 ### Arguments
