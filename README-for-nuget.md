@@ -110,6 +110,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
 | type | Required | String | Type of solution to create. Valid values are: webapi, mvc, console, commands, maui, maui-demo |
 | namespace | Required | String | This is the root namespace for the solution.  For example: Benday.SampleApp |
+| verbose | Optional | Boolean | verbose |
 ## deployefmigrations
 **Deploy EF Core Migrations from DLL binaries.**
 ### Arguments
@@ -128,6 +129,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
 | keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
+| keepnodemodules | Optional | Boolean | If true, skips delete of node_modules folders. Default value is false. |
 ## findsolutions
 **Find solution files in a folder tree.**
 ### Arguments
