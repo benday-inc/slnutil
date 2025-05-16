@@ -21,12 +21,14 @@ public static class Constants
     public const string ArgumentsFilterByTypeNamesModeExact = "typenamesmatchexact";
     public const string ArgumentNameRootDirectory = "rootdir";
     public const string ArgumentNameKeepGitRepo = "keepgit";
+    public const string ArgumentNameKeepNodeModules = "keepnodemodules";
     public const string ArgumentNameBinariesDirectory = "binariesdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
     public const string ArgumentNameSkipReferences = "skipreferences";
     public const string ArgumentNameListProjects = "listprojects";
     public const string ArgumentNameWriteToClipboard = "toclipboard";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
+    public const string CommandArgumentNameSortProjectGroup = "sortpropertygroup";
     public const string CommandArgumentNameMakeReferenceUseWildcard = "wildcardreference";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNameProjectName = "project";

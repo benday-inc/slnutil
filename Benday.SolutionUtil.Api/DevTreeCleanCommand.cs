@@ -27,6 +27,12 @@ public class DevTreeCleanCommand : SynchronousCommand
             .WithDescription("If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders.")
             .WithDefaultValue(true);
 
+        args.AddBoolean(Constants.ArgumentNameKeepNodeModules)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("If true, skips delete of node_modules folders. Default value is false.")
+            .WithDefaultValue(false);
+
         return args;
     }
 
@@ -44,6 +50,8 @@ public class DevTreeCleanCommand : SynchronousCommand
             throw new KnownException($"Starting directory '{rootDir}' does not exist.");
         }
 
+        var keepNodeModules = Arguments.GetBooleanValue(Constants.ArgumentNameKeepNodeModules);
+
         bool keepGit = false;
 
         if (Arguments.GetBooleanValue(Constants.ArgumentNameKeepGitRepo) == true)
@@ -52,10 +60,10 @@ public class DevTreeCleanCommand : SynchronousCommand
             keepGit = true;
         }
 
-        CleanDirectory(rootDir, keepGit);
+        CleanDirectory(rootDir, keepGit, keepNodeModules);
     }
 
-    public void CleanDirectory(string fromDir, bool keepGit)
+    public void CleanDirectory(string fromDir, bool keepGit, bool keepNodeModules)
     {
         DirectoryInfo dirInfo = new DirectoryInfo(fromDir);
 
@@ -66,6 +74,13 @@ public class DevTreeCleanCommand : SynchronousCommand
         foreach (var dir in allDirs)
         {
             string dirFullNameToLower = dir.FullName.ToLower();
+
+            if (keepNodeModules == true &&
+                dirFullNameToLower.EndsWith($"{pathSeparator}node_modules") == true ||
+                dirFullNameToLower.Contains($"{pathSeparator}node_modules") == true)
+            {
+                continue;
+            }
 
             if (keepGit == false &&
                 dirFullNameToLower.EndsWith($"{pathSeparator}.git") == true ||
