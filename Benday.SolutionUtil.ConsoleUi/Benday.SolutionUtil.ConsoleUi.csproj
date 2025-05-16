@@ -21,8 +21,7 @@
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
 v2.24 - Added option to devtreeclean to preserve node_modules directories.
-v2.23.1 - Added command to sort the values in the first PropertyGroup of a csproj file.
-v2.23 - Fixing bugs related to Process.Start() timeouts and stream reading in CreateSolutionCommand.
+v2.23 - Added command to sort the values in the first PropertyGroup of a csproj file; Fixing bugs related to Process.Start() timeouts and stream reading in CreateSolutionCommand.
 v2.22 - Added set package version command to update NuGet package versions in project files using optional package name filtering.
 v2.21 - Modified set framework version command to more gracefully handle OS-specific targeting. Adding net8.0 and net9.0 to target frameworks.
 v2.20 - Added prefix option to bulk rename command
