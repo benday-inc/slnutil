@@ -65,6 +65,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | sortpropertygroup | Sorts the elements in a property group for a csproj file. |
 | base64 | Encodes a string value as a base 64 string. |
 | touch | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
+| updatebicepversions | Reads bicep file or files and updates the api versions to latest. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 | wildcardreference | Changes package references in a C# project file to use wildcard version rather than fixed version number. |
 ## assemblyinfo
@@ -253,6 +254,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | filename | Required | String | Path to file |
+## updatebicepversions
+**Reads bicep file or files and updates the api versions to latest.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Name of the bicep file, if you want to update just one file. |
+| previewversions | Optional | Boolean | Allow preview versions for resources. |
+| preview | Optional | Boolean | Do not save changes only preview the changes. |
 ## validateconnectionstring
 **Validate that specified connection string can connect to SQL Server.**
 ### Arguments
