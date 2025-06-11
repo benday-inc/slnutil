@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using Benday.CommandsFramework;
@@ -26,6 +27,12 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
             .FromPositionalArgument(1)
             .WithDescription("Name of the bicep file, if you want to update just one file.");
 
+        args.AddBoolean(Constants.ArgumentNameAllowPreviewVersions)
+            .AsNotRequired()
+            .WithDefaultValue(false)
+            .AllowEmptyValue()
+            .WithDescription("Allow preview versions for resources.");
+
         args.AddBoolean(Constants.ArgumentNamePreview)
             .AsNotRequired()
             .WithDefaultValue(false)
@@ -38,6 +45,10 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
     protected override async Task OnExecute()
     {
         var preview = Arguments.GetBooleanValue(Constants.ArgumentNamePreview);
+        var allowPreviewVersions = Arguments.GetBooleanValue(Constants.ArgumentNameAllowPreviewVersions);
+
+        WriteLine($"Preview mode: {preview}");
+        WriteLine($"Allow preview versions: {allowPreviewVersions}");
 
         string? filename = null;
 
@@ -65,21 +76,27 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
 
             foreach (var file in bicepFiles)
             {
-                await UpdateBicepFile(file, preview);
+                await UpdateBicepFile(file, preview, allowPreviewVersions);
             }
         }
         else
         {
-            await UpdateBicepFile(filename, preview);
+            await UpdateBicepFile(filename, preview, allowPreviewVersions);
         }
     }
 
-    static async Task<string?> GetLatestApiVersion(string providerNamespace, string resourceType)
+    private Task<string?> GetLatestApiVersion(string providerNamespace, string resourceType, bool allowPreviewVersions)
     {
+
+        string args;
+
+
+        args = $"provider show --namespace Microsoft.App --query \"resourceTypes[?resourceType=='jobs'].apiVersions\" -o json";
+
         var startInfo = new ProcessStartInfo
         {
             FileName = "az",
-            Arguments = $"provider show --namespace {providerNamespace} --query \"resourceTypes[?resourceType=='{resourceType}'].apiVersions[0]\" -o tsv",
+            Arguments = args,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -96,11 +113,44 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
                 $"Error running command: {process.ErrorText}");
         }
 
-        return process.OutputText.Trim();
+        var apiVersions = DeserializeApiVersions(process.OutputText);
+        if (apiVersions.Count == 0)
+        {
+            WriteLine($"No API versions found for {providerNamespace}/{resourceType}");
+            return Task.FromResult<string?>(null);
+        }
+        else
+        {
+            // Sort the API versions in descending order
+            apiVersions.Sort((a, b) => string.Compare(b, a, StringComparison.Ordinal));
+            // If allowPreviewVersions is false, filter out preview versions
+            if (!allowPreviewVersions)
+            {
+                apiVersions = apiVersions.Where(v => !v.Contains("preview", StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            // Return the latest API version
+            var latestApiVersion = apiVersions.FirstOrDefault();
+            if (latestApiVersion == null)
+            {
+                WriteLine($"No valid API versions found for {providerNamespace}/{resourceType}");
+                return Task.FromResult<string?>(null);
+            }
+            else
+            {
+                WriteLine($"Latest API version for {providerNamespace}/{resourceType} is {latestApiVersion}");
+                return Task.FromResult<string?>(latestApiVersion);
+            }
+        }
+    }
+
+    private List<string> DeserializeApiVersions(string json)
+    {
+        var outer = JsonSerializer.Deserialize<List<List<string>>>(json);
+        return outer?.FirstOrDefault() ?? new List<string>();
     }
 
 
-    private async Task UpdateBicepFile(string file, bool preview)
+    private async Task UpdateBicepFile(string file, bool preview, bool allowPreviewVersions)
     {
         WriteLine($"Checking bicep file: {file}...");
 
@@ -121,7 +171,7 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
             var providerNamespace = resourceType.Split('/')[0];
             var resourceTypeName = resourceType.Split('/')[1];
 
-            var latestApiVersion = await GetLatestApiVersion(providerNamespace, resourceTypeName);
+            var latestApiVersion = await GetLatestApiVersion(providerNamespace, resourceTypeName, allowPreviewVersions);
             if (latestApiVersion == null)
             {
                 WriteLine($"Could not find latest API version for {resourceType}");

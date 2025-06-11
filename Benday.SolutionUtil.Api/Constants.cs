@@ -38,6 +38,7 @@ public static class Constants
     public const string ArgumentNamePathOnly = "pathonly";
     public const string ArgumentNameFrameworkVersion = "version";
     public const string ArgumentNamePreview = "preview";
+    public const string ArgumentNameAllowPreviewVersions = "previewversions";
     public const string ArgumentNamePackageNameFilter = "filter";
     public const string ArgumentNamePackageVersion = "version";
     public const string ArgumentNameRecursive = "recursive";
