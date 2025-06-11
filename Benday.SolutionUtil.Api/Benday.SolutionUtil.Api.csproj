@@ -12,7 +12,7 @@
   
   <ItemGroup>
     <PackageReference Include="Benday.CommandsFramework" Version="4.4.0" />
-    <PackageReference Include="Benday.Common" Version="8.0.0" />
+    <PackageReference Include="Benday.Common" Version="9.3.0" />
     <PackageReference Include="Benday.JsonUtilities" Version="5.0.0" />
     <PackageReference Include="Benday.XmlUtilities" Version="5.5.0" />
 
