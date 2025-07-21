@@ -63,6 +63,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [setprojectproperty](#setprojectproperty) | Set a project property value on all projects. |
 | [setprojectversion](#setprojectversion) | Set the assembly and nuget package version property value on a project. |
 | [sortpropertygroup](#sortpropertygroup) | Sorts the elements in a property group for a csproj file. |
+| [sortreferences](#sortreferences) | Sorts the references in an item group for a csproj file. |
 | [base64](#base64) | Encodes a string value as a base 64 string. |
 | [touch](#touch) | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | [updatebicepversions](#updatebicepversions) | Reads bicep file or files and updates the api versions to latest. |
@@ -238,6 +239,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | value | Optional | String | Value for the property. |
 ## <a name="sortpropertygroup"></a> sortpropertygroup
 **Sorts the elements in a property group for a csproj file.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| project | Optional | String | Project file to edit. If this value is not supplied, the tool looks for a csproj file in the current directory. |
+## <a name="sortreferences"></a> sortreferences
+**Sorts the references in an item group for a csproj file.**
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |

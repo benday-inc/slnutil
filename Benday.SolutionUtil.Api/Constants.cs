@@ -30,6 +30,7 @@ public static class Constants
     public const string ArgumentNameWriteToClipboard = "toclipboard";
     public const string CommandArgumentNameCleanReferences = "cleanreferences";
     public const string CommandArgumentNameSortProjectGroup = "sortpropertygroup";
+    public const string CommandArgumentNameSortReferences = "sortreferences";
     public const string CommandArgumentNameMakeReferenceUseWildcard = "wildcardreference";
     public const string ArgumentNameSolutionPath = "solutionpath";
     public const string ArgumentNameProjectName = "project";

@@ -16,10 +16,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.25.0</AssemblyVersion>
-    <Version>2.25.0</Version>
+    <AssemblyVersion>2.26.0</AssemblyVersion>
+    <Version>2.26.0</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+v2.26 - Added command to sort references in a csproj file.
 v2.25 - Added utility to check versions in bicep files and update to latest.
 v2.24 - Added option to devtreeclean to preserve node_modules directories.
 v2.23 - Added command to sort the values in the first PropertyGroup of a csproj file; Fixing bugs related to Process.Start() timeouts and stream reading in CreateSolutionCommand.
