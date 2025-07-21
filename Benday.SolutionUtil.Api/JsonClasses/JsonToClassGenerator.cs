@@ -1,9 +1,9 @@
+using System.Drawing;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Pluralize.NET;
-using System.Drawing;
 
 namespace Benday.SolutionUtil.Api.JsonClasses;
 
@@ -16,8 +16,14 @@ public class JsonToClassGenerator
 
     public void Parse(string json, string rootClass = "RootClass")
     {
-        // deserialize json
-        var result = JsonNode.Parse(json);
+        var options = new JsonDocumentOptions
+        {
+            CommentHandling = JsonCommentHandling.Skip, // or JsonCommentHandling.Allow
+            AllowTrailingCommas = true // optional: also allow trailing commas
+        };
+
+        // deserialize json with comment support
+        var result = JsonNode.Parse(json, null, options);
 
         if (result is null)
         {
@@ -54,14 +60,7 @@ public class JsonToClassGenerator
         }
     }
 
-    private class ArrayDataTypeInfo
-    {
-        public bool IsScalar { get; set; }
-        public JsonValueKind Kind { get; set; }
-        public string ProposedDataType { get; set; } = string.Empty;
-        public bool IsEmpty { get; set; }
-    }
-
+    
     private ArrayDataTypeInfo GetArrayElementDataType(JsonArray itemValueAsArray)
     {
         var returnValue = new ArrayDataTypeInfo();

@@ -25,43 +25,62 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
     {
         var args = new ArgumentCollection();
 
+        args.AddFile(
+            Constants.ArgumentNameFilename)
+            .AsNotRequired()
+            .WithDescription("Optional: file source for the JSON to convert to C# classes.")
+            .FromPositionalArgument(1);
+
         return args;
     }
 
 
     protected override void OnExecute()
     {
-        string json = GetJsonUsingFiles();
+        string json;
 
-        if (string.IsNullOrWhiteSpace(json) == true)
+        var fileSourceHasValue = Arguments.HasValue(Constants.ArgumentNameFilename);
+
+        if (fileSourceHasValue == true)
         {
-            throw new KnownException("Input does not contain any text.");
+            var sourceFile = Arguments.GetPathToFile(Constants.ArgumentNameFilename, true);
+
+            json = File.ReadAllText(sourceFile);
         }
         else
         {
-            var generator = new JsonToClassGenerator();
+            json = GetJsonUsingFiles();
+        }
 
-            generator.Parse(json);
-            generator.GenerateClasses();
-
-            if (generator.GeneratedClasses.Count == 0)
+        if (string.IsNullOrWhiteSpace(json) == true)
             {
-                throw new KnownException("Input does not contain any classes.");
+                throw new KnownException("Input does not contain any text.");
             }
             else
             {
-                var code = new StringBuilder();
+                var generator = new JsonToClassGenerator();
 
-                foreach (var key in generator.GeneratedClasses.Keys)
+                generator.Parse(json);
+                generator.GenerateClasses();
+
+                if (generator.GeneratedClasses.Count == 0)
                 {
-                    // WriteLine($"Generated class: {key}");
-                    code.AppendLine(generator.GeneratedClasses[key]);
-                    code.AppendLine();
+                    throw new KnownException("Input does not contain any classes.");
                 }
+                else
+                {
+                    var code = new StringBuilder();
 
-                WriteClasesAndOpen(code.ToString());
+                    foreach (var key in generator.GeneratedClasses.Keys)
+                    {
+                        // WriteLine($"Generated class: {key}");
+                        code.AppendLine(generator.GeneratedClasses[key]);
+                        code.AppendLine();
+                    }
+
+                    WriteClasesAndOpen(code.ToString());
+                }
             }
-        }
     }
 
     private void WriteClasesAndOpen(string code)
