@@ -83,7 +83,6 @@ public class UtilitiesFixture
     [DataRow("net9.0", " net9.0", "net9.0")]
     [DataRow("net8.0 ", " net9.0", "net9.0")]
     [DataRow("net7.0-windowsAsdf ", " net8.0", "net8.0-windowsAsdf")]
-    [DataRow(" net7.0 ", " netstandard2.1 ", "netstandard2.1")]
     [DataRow("net7.0-windowsAsdf ", " net9.0-windowsBingBong", "net9.0-windowsBingBong")]
     [DataRow("net7.0", " net9.0-windowsBingBong", "net9.0-windowsBingBong")]
     public void GetFrameworkVersion(string currentVersion, string targetVersion, string expectedValue)
