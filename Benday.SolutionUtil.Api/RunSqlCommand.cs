@@ -1,4 +1,5 @@
 using Benday.CommandsFramework;
+using Benday.CommandsFramework.DataFormatting;
 using Benday.Common;
 using Microsoft.Data.SqlClient;
 
@@ -31,12 +32,19 @@ public class RunSqlCommand : SynchronousCommand
             .AsNotRequired()
             .WithDescription("Path to SQL file to execute");
 
+        args.AddBoolean(Constants.ArgumentNameDisplayResults)
+            .AsNotRequired()
+            .WithDefaultValue(false)
+            .AllowEmptyValue()
+            .WithDescription("Display results of query (for SELECT statements)");
+
         return args;
     }
 
     protected override void OnExecute()
     {
         var connectionString = Arguments.GetStringValue(Constants.ArgumentNameConnectionString);
+        var displayResults = Arguments.GetBooleanValue(Constants.ArgumentNameDisplayResults);
         
         var hasSqlCommand = Arguments.HasValue(Constants.ArgumentNameSqlQuery);
         var hasSqlFile = Arguments.HasValue(Constants.ArgumentNameSqlFile);
@@ -68,11 +76,11 @@ public class RunSqlCommand : SynchronousCommand
             sqlToExecute = File.ReadAllText(sqlFilePath);
         }
 
-        ExecuteSql(connectionString, sqlToExecute);
+        ExecuteSql(connectionString, sqlToExecute, displayResults);
     }
 
     private void ExecuteSql(
-        string connectionString, string sql)
+        string connectionString, string sql, bool displayResults)
     {
         try
         {
@@ -92,17 +100,25 @@ public class RunSqlCommand : SynchronousCommand
 
                 using var command = new SqlCommand(batch, connection);
                 
-                WriteLine("Executing batch...");
-                
-                var affectedRows = command.ExecuteNonQuery();
-                
-                if (affectedRows >= 0)
+                if (displayResults)
                 {
-                    WriteLine($"Affected rows: {affectedRows}");
+                    WriteLine("Executing batch and displaying results...");
+                    ExecuteAndDisplayResults(command);
                 }
                 else
                 {
-                    WriteLine("Command executed successfully.");
+                    WriteLine("Executing batch...");
+
+                    var affectedRows = command.ExecuteNonQuery();
+                    
+                    if (affectedRows >= 0)
+                    {
+                        WriteLine($"Affected rows: {affectedRows}");
+                    }
+                    else
+                    {
+                        WriteLine("Command executed successfully.");
+                    }
                 }
             }
 
@@ -115,6 +131,49 @@ public class RunSqlCommand : SynchronousCommand
             WriteLine($"Error: {ex.Message}");
             throw new KnownException($"SQL execution failed: {ex.Message}");
         }
+    }
+
+    private bool IsSelectQuery(string sql)
+    {
+        var trimmed = sql.Trim();
+        return trimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase) ||
+               trimmed.StartsWith("WITH", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ExecuteAndDisplayResults(SqlCommand command)
+    {
+        using var reader = command.ExecuteReader();
+        
+        var formatter = new TableFormatter();
+        
+        // Add column headers
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            formatter.AddColumn(reader.GetName(i));
+        }
+
+        // Add data rows
+        while (reader.Read())
+        {
+            var values = new string[reader.FieldCount];
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.IsDBNull(i))
+                {
+                    values[i] = "NULL";
+                }
+                else
+                {
+                    values[i] = reader.GetValue(i)?.ToString() ?? string.Empty;
+                }
+            }
+            formatter.AddData(values);
+        }
+
+        // Display the formatted table
+        WriteLine(string.Empty);
+        WriteLine(formatter.FormatTable());
+        WriteLine(string.Empty);
     }
 
     private string[] SplitSqlBatches(string sql)

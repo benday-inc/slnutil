@@ -91,5 +91,6 @@ public static class Constants
     public const string ArgumentNameConnectionString = "connectionstring";
     public const string ArgumentNameSqlQuery = "query";
     public const string ArgumentNameSqlFile = "sqlfile";
+    public const string ArgumentNameDisplayResults = "display";
 
 }

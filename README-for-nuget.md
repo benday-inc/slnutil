@@ -192,6 +192,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | connectionstring | Required | String | Connection string to the database |
 | query | Optional | String | SQL query to execute |
 | sqlfile | Optional | String | Path to SQL file to execute |
+| display | Optional | Boolean | Display results of query (for SELECT statements) |
 ## setconnectionstring
 **Set database connection string in appsettings.json.**
 ### Arguments
