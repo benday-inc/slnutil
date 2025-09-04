@@ -55,7 +55,7 @@ v2.5 - Updated jsontoclasses to add support for hyphens in json property names.<
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="4.4.0" />
+    <PackageReference Include="Benday.CommandsFramework" Version="4.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Benday.SolutionUtil.Api\Benday.SolutionUtil.Api.csproj" />
