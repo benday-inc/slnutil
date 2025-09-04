@@ -61,6 +61,7 @@ public static class Constants
     public const string ArgumentNameOnlyDeclaredLocally = "localonly";
     
     public const string CommandArgumentNameReplaceToken = "replacetoken";
+    public const string CommandArgumentNameRunSql = "runsql";
     public const string ArgumentNameToken = "token";
     public const string ArgumentNameIncrementInt32Value = "increment-int";
     public const string ArgumentNameIncrementMinorVersionValue = "increment-minor-version";
@@ -86,5 +87,9 @@ public static class Constants
 
     public const string ArgumentNameDbContextName = "dbcontextname";
     public const string ArgumentNameMigrationsNamespace = "namespace";
+
+    public const string ArgumentNameConnectionString = "connectionstring";
+    public const string ArgumentNameSqlQuery = "query";
+    public const string ArgumentNameSqlFile = "sqlfile";
 
 }

@@ -56,6 +56,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | listpackages-oldstyle | Lists packages referenced in legacy style packages.config files. |
 | listsolutionprojects | Gets list of projects in a solution. |
 | replacetoken | Replace token in file. |
+| runsql | Execute SQL command or SQL script file against a database. |
 | setconnectionstring | Set database connection string in appsettings.json. |
 | setframework | Set the target framework version on all projects. |
 | setjsonvalue | Set a string value in a json file. |
@@ -161,6 +162,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
+| filename | Optional | String | Optional: file source for the JSON to convert to C# classes. |
 ## listpackages-oldstyle
 **Lists packages referenced in legacy style packages.config files.**
 ### Arguments
@@ -182,6 +184,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | filename | Required | String | Path to file |
 | token | Required | String | Token to replace |
 | value | Required | String | String value to set |
+## runsql
+**Execute SQL command or SQL script file against a database.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| connectionstring | Required | String | Connection string to the database |
+| query | Optional | String | SQL query to execute |
+| sqlfile | Optional | String | Path to SQL file to execute |
 ## setconnectionstring
 **Set database connection string in appsettings.json.**
 ### Arguments

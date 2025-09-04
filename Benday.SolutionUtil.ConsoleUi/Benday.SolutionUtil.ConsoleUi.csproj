@@ -16,10 +16,12 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <AssemblyVersion>2.27.0</AssemblyVersion>
-    <Version>2.27.0</Version>
+    <TheVersion>2.28.0</TheVersion>
+    <AssemblyVersion>$(TheVersion)</AssemblyVersion>
+    <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+v2.28 - Adding run sql command to execute SQL commands or SQL script files against a SQL Server database;
 v2.27 - Adding support for json comments to JsonToClasses command;
 v2.26 - Added command to sort references in a csproj file.
 v2.25 - Added utility to check versions in bicep files and update to latest.
