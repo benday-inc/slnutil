@@ -55,6 +55,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [classesfromjson](#classesfromjson) | Create C# classes from JSON with serialization attributes for System.Text.Json. |
 | [listpackages-oldstyle](#listpackages-oldstyle) | Lists packages referenced in legacy style packages.config files. |
 | [listsolutionprojects](#listsolutionprojects) | Gets list of projects in a solution. |
+| [printfile](#printfile) | Reads a text file and prints it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues. |
 | [replacetoken](#replacetoken) | Replace token in file. |
 | [runsql](#runsql) | Execute SQL command or SQL script file against a database. |
 | [setconnectionstring](#setconnectionstring) | Set database connection string in appsettings.json. |
@@ -176,6 +177,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution to examine. If this value is not supplied, the tool searches for a sln file automatically. |
 | pathonly | Optional | Boolean | Only show the project paths. Don't show the framework versions. |
+## <a name="printfile"></a> printfile
+**Reads a text file and prints it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| input | Required | String | Path to the text file to read and print. |
 ## <a name="replacetoken"></a> replacetoken
 **Replace token in file.**
 ### Arguments
