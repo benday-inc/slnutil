@@ -31,6 +31,12 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
             .WithDescription("Optional: file source for the JSON to convert to C# classes.")
             .FromPositionalArgument(1);
 
+        args.AddBoolean("clipboard")
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Optional: read JSON from clipboard instead of a file or console input.")
+            .WithDefaultValue(false);
+
         return args;
     }
 
@@ -40,8 +46,17 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         string json;
 
         var fileSourceHasValue = Arguments.HasValue(Constants.ArgumentNameFilename);
+        var clipboardSourceHasValue = Arguments.GetBooleanValue("clipboard");
+        if (clipboardSourceHasValue == true)
+        {
+            json = GetTextFromClipboard();
 
-        if (fileSourceHasValue == true)
+            if (string.IsNullOrWhiteSpace(json) == true)
+            {
+                throw new KnownException("Clipboard does not contain any text.");
+            }
+        }
+        else if (fileSourceHasValue == true)
         {
             var sourceFile = Arguments.GetPathToFile(Constants.ArgumentNameFilename, true);
 
@@ -53,37 +68,111 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         }
 
         if (string.IsNullOrWhiteSpace(json) == true)
+        {
+            throw new KnownException("Input does not contain any text.");
+        }
+        else
+        {
+            var generator = new JsonToClassGenerator();
+
+            generator.Parse(json);
+            generator.GenerateClasses();
+
+            if (generator.GeneratedClasses.Count == 0)
             {
-                throw new KnownException("Input does not contain any text.");
+                throw new KnownException("Input does not contain any classes.");
             }
             else
             {
-                var generator = new JsonToClassGenerator();
+                var code = new StringBuilder();
 
-                generator.Parse(json);
-                generator.GenerateClasses();
-
-                if (generator.GeneratedClasses.Count == 0)
+                foreach (var key in generator.GeneratedClasses.Keys)
                 {
-                    throw new KnownException("Input does not contain any classes.");
+                    // WriteLine($"Generated class: {key}");
+                    code.AppendLine(generator.GeneratedClasses[key]);
+                    code.AppendLine();
                 }
-                else
-                {
-                    var code = new StringBuilder();
 
-                    foreach (var key in generator.GeneratedClasses.Keys)
-                    {
-                        // WriteLine($"Generated class: {key}");
-                        code.AppendLine(generator.GeneratedClasses[key]);
-                        code.AppendLine();
-                    }
-
-                    WriteClasesAndOpen(code.ToString());
-                }
+                WriteClassesAndOpen(code.ToString());
             }
+        }
     }
 
-    private void WriteClasesAndOpen(string code)
+    private string GetTextFromClipboard()
+    {
+        if (OperatingSystem.IsWindows() == true)
+        {
+            return GetFromClipboardWindows();
+        }
+        else if (OperatingSystem.IsMacOS() == true)
+        {
+            return GetFromClipboardMacOs();
+        }
+        else
+        {
+            throw new KnownException("Clipboard reading is not supported on this OS.");
+        }
+    }
+
+    private string GetFromClipboardWindows()
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "powershell.exe",
+            Arguments = "-command \"Get-Clipboard\"",
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        var runner = new ProcessRunner(startInfo);
+
+        runner.Run();
+
+        if (runner.IsError == true)
+        {
+            throw new KnownException($"Error reading from clipboard: {runner.ErrorText}");
+        }
+        else if (runner.IsTimeout == true)
+        {
+            throw new KnownException("Timeout reading from clipboard.");
+        }
+        else
+        {
+            return runner.OutputText.Trim();
+        }
+    }
+
+    private string GetFromClipboardMacOs()
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "/usr/bin/pbpaste",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        var runner = new ProcessRunner(startInfo);
+
+        runner.Run();
+
+        if (runner.IsError == true)
+        {
+            throw new KnownException($"Error reading from clipboard: {runner.ErrorText}");
+        }
+        else if (runner.IsTimeout == true)
+        {
+            throw new KnownException("Timeout reading from clipboard.");
+        }
+        else
+        {
+            return runner.OutputText.Trim();
+        }
+    }
+
+    private void WriteClassesAndOpen(string code)
     {
         string tempDir = GetTempDirForApp();
 
@@ -212,72 +301,5 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         return tempDir;
     }
 
-    private string GetJsonFromConsole()
-    {
-        // Console.Clear();
-        WriteLine("Paste in the JSON string: ");
 
-        /*
-                byte[] inputBuffer = new byte[1024];
-                Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
-                Console.SetIn(new StreamReader(inputStream, Console.InputEncoding, false, inputBuffer.Length));
-                var strInput = Console.ReadLine();
-
-                return strInput;
-        */
-
-        string password = string.Empty; // this will hold the password as it's being typed.
-
-        int emptyLineCount = 0;
-        int lineCountToExit = 4;
-
-        var LINE_RESET = "\f\u001bc\x1b[3J";
-
-        if (OperatingSystem.IsWindows() == true)
-        {
-            LINE_RESET = "\r";
-        }
-
-        long readCount = 0;
-
-        while (true)
-        {
-            readCount++;
-            var key = System.Console.ReadKey(true);
-            if (key.Key == ConsoleKey.Enter)
-            {
-                emptyLineCount++;
-
-                if (emptyLineCount >= lineCountToExit)
-                {
-                    break;
-                }
-
-                if (emptyLineCount > 0)
-                {
-                    Console.Write(LINE_RESET);
-                    Console.SetCursorPosition(0, 1);
-                    Console.Write($"Found {emptyLineCount} blank lines. Press Enter {(lineCountToExit - emptyLineCount)} more times to exit...");
-                }
-
-                password += Environment.NewLine;
-            }
-            else
-            {
-                emptyLineCount = 0;
-
-                password += key.KeyChar;
-
-                if (readCount % 100 == 0)
-                {
-                    Console.Write(LINE_RESET);
-                    Console.SetCursorPosition(0, 1);
-                    Console.Write($"Reading...                                                                                  ");
-                }
-            }
-        }
-
-        return password;
-
-    }
 }
