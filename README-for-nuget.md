@@ -165,6 +165,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | --- | --- | --- | --- |
 | filename | Optional | String | Optional: file source for the JSON to convert to C# classes. |
 | clipboard | Optional | Boolean | Optional: read JSON from clipboard instead of a file or console input. |
+| innerclasses | Optional | Boolean | Optional: generate inner classes for nested JSON objects. |
 ## listpackages-oldstyle
 **Lists packages referenced in legacy style packages.config files.**
 ### Arguments
