@@ -206,6 +206,12 @@ public class JsonToClassGenerator
 
         if (element.ValueKind == JsonValueKind.String)
         {
+            // check if the string is a valid date time
+            if (DateTime.TryParse(element.GetString(), out _))
+            {
+                return "DateTime";
+            }
+
             return "string";
         }
         else if (element.ValueKind == JsonValueKind.Number)
@@ -278,7 +284,7 @@ public class JsonToClassGenerator
                     {
                         sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }} = string.Empty;");
                     }
-                    else if (prop.Value.DataType == "int" || prop.Value.DataType == "bool")
+                    else if (prop.Value.DataType == "int" || prop.Value.DataType == "bool" || prop.Value.DataType == "DateTime")
                     {
                         sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }}");
                     }
