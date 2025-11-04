@@ -37,6 +37,12 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
             .WithDescription("Optional: read JSON from clipboard instead of a file or console input.")
             .WithDefaultValue(false);
 
+        args.AddBoolean("innerclasses")
+          .AsNotRequired()
+          .AllowEmptyValue()
+          .WithDescription("Optional: generate inner classes for nested JSON objects.")
+          .WithDefaultValue(false);
+
         return args;
     }
 
@@ -47,6 +53,7 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
 
         var fileSourceHasValue = Arguments.HasValue(Constants.ArgumentNameFilename);
         var clipboardSourceHasValue = Arguments.GetBooleanValue("clipboard");
+        var generateAsInnerClasses = Arguments.GetBooleanValue("innerclasses");
         if (clipboardSourceHasValue == true)
         {
             json = GetTextFromClipboard();
@@ -75,7 +82,9 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         {
             var generator = new JsonToClassGenerator();
 
-            generator.Parse(json);
+            var rootClassName = "RootClass";
+
+            generator.Parse(json, rootClassName);
             generator.GenerateClasses();
 
             if (generator.GeneratedClasses.Count == 0)
@@ -86,16 +95,75 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
             {
                 var code = new StringBuilder();
 
-                foreach (var key in generator.GeneratedClasses.Keys)
+                if (generateAsInnerClasses == false)
                 {
-                    // WriteLine($"Generated class: {key}");
-                    code.AppendLine(generator.GeneratedClasses[key]);
+                    foreach (var key in generator.GeneratedClasses.Keys)
+                    {
+                        // WriteLine($"Generated class: {key}");
+                        code.AppendLine(generator.GeneratedClasses[key]);
+                        code.AppendLine();
+                    }
+                }
+                else
+                {
+                    var rootClassCode = generator.GeneratedClasses[rootClassName];
+
+                    var reader = new StringReader(rootClassCode);
+
+                    string[] rootCodeLines = GetAllLines(reader);
+
+                    var allRootCodeLinesExceptLast = rootCodeLines.Take(rootCodeLines.Length - 1);
+
+                    foreach (var line in allRootCodeLinesExceptLast)
+                    {
+                        code.AppendLine(line);
+                    }
+                    
                     code.AppendLine();
+                    foreach (var key in generator.GeneratedClasses.Keys.Where(k => k != rootClassName))
+                    {
+                        var classCode = generator.GeneratedClasses[key];
+                        code.AppendLine();
+                        code.AppendLine(Indent(classCode));
+                        code.AppendLine();
+                    }
+
+                    code.AppendLine("}"); // close root class
                 }
 
                 WriteClassesAndOpen(code.ToString());
             }
         }
+    }
+
+    private string Indent(string classCode)
+    {
+        var reader = new StringReader(classCode);
+
+        var lines = GetAllLines(reader);
+
+        var builder = new StringBuilder();
+
+        foreach (var line in lines)
+        {
+            builder.AppendLine($"    {line}");
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private string[] GetAllLines(StringReader reader)
+    {
+        var lines = new List<string>();
+
+        string? line = null;
+
+        while ((line = reader.ReadLine()) != null)
+        {
+            lines.Add(line);
+        }
+
+        return lines.ToArray();
     }
 
     private string GetTextFromClipboard()
