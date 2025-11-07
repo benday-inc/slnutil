@@ -81,10 +81,14 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
         else
         {
             var generator = new JsonToClassGenerator();
+            
+            generator.InnerClassMode = generateAsInnerClasses;
 
             var rootClassName = "RootClass";
 
-            generator.Parse(json, rootClassName);
+            generator.RootClassName = rootClassName;
+
+            generator.Parse(json);
             generator.GenerateClasses();
 
             if (generator.GeneratedClasses.Count == 0)

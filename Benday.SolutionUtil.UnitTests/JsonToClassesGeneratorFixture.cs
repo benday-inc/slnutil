@@ -165,13 +165,16 @@ public partial class JsonToClassesGeneratorFixture
         var fromJson = GetSimpleClassAsJson();
 
         var expectedClassCount = 1;
+        var expectedClassName = "ThingyThing";
         var expectedClassNames = new List<string>()
         {
-            "ThingyThing"
+            expectedClassName
         };
 
+        SystemUnderTest.RootClassName = expectedClassName;
+
         // act
-        SystemUnderTest.Parse(fromJson, "ThingyThing");
+        SystemUnderTest.Parse(fromJson);
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
@@ -408,7 +411,9 @@ public partial class JsonToClassesGeneratorFixture
             "ThingyThing"
         };
 
-        SystemUnderTest.Parse(fromJson, "Person");
+        SystemUnderTest.RootClassName = "Person";
+
+        SystemUnderTest.Parse(fromJson);
 
         Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
 
@@ -502,8 +507,10 @@ public partial class JsonToClassesGeneratorFixture
             "ThingyThing"
         };
 
+        SystemUnderTest.RootClassName = "Person";
+
         // act
-        SystemUnderTest.Parse(fromJson, "Person");
+        SystemUnderTest.Parse(fromJson);
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
@@ -530,8 +537,10 @@ public partial class JsonToClassesGeneratorFixture
             "ThingyThing"
         };
 
+        SystemUnderTest.RootClassName = "Person";
+
         // act
-        SystemUnderTest.Parse(fromJson, "Person");
+        SystemUnderTest.Parse(fromJson);
 
         // assert
         Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");

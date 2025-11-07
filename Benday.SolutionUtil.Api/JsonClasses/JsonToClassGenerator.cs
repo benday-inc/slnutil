@@ -14,7 +14,9 @@ public class JsonToClassGenerator
 
     }
 
-    public void Parse(string json, string rootClass = "RootClass")
+    public string RootClassName { get; set; } = "RootClass";
+
+    public void Parse(string json)
     {
         var options = new JsonDocumentOptions
         {
@@ -33,15 +35,18 @@ public class JsonToClassGenerator
         {
             var array = (JsonArray)result;
 
-            PopulateFromArray(array, rootClass);
+            PopulateFromArray(array, RootClassName);
         }
         else if (result is JsonObject)
         {
             var element = (JsonObject)result;
 
-            PopulateFromJsonObject(element, rootClass);
+            PopulateFromJsonObject(element, RootClassName);
         }
     }
+
+
+
     private void PopulateFromArray(JsonArray array, string className)
     {
         foreach (var item in array)
@@ -138,7 +143,7 @@ public class JsonToClassGenerator
                 toClass.AddProperty(
                     originalKey,
                     formattedKey,
-                    formattedKey
+                    GetClassNameForPropertyDataType(formattedKey)
                 );
 
                 PopulateFromJsonObject((JsonObject)item.Value, formattedKey);
@@ -184,6 +189,18 @@ public class JsonToClassGenerator
                     toClass.AddProperty(originalKey, formattedKey, GetTypeName(item));
                 }
             }
+        }
+    }
+
+    private string GetClassNameForPropertyDataType(string formattedKey)
+    {
+        if (InnerClassMode == false)
+        {
+            return formattedKey;
+        }
+        else
+        {
+            return formattedKey + "InnerType";
         }
     }
 
@@ -240,21 +257,46 @@ public class JsonToClassGenerator
 
     private ClassInfo AddClass(string className)
     {
-        if (Classes.ContainsKey(className) == false)
+        if (InnerClassMode == true && className != RootClassName)
         {
-            var temp = new ClassInfo()
+            className = className + "InnerType";
+
+            if (Classes.ContainsKey(className) == false)
             {
-                Name = className
-            };
+                var temp = new ClassInfo()
+                {
+                    Name = className
+                };
 
-            Classes.Add(className, temp);
+                Classes.Add(className, temp);
 
-            return temp;
+                return temp;
+            }
+            else
+            {
+                return Classes[className];
+            }
         }
-        else
+        else 
         {
-            return Classes[className];
+            if (Classes.ContainsKey(className) == false)
+            {
+                var temp = new ClassInfo()
+                {
+                    Name = className
+                };
+
+                Classes.Add(className, temp);
+
+                return temp;
+            }
+            else
+            {
+                return Classes[className];
+            }
         }
+         
+
     }
 
     public void GenerateClasses()
@@ -359,7 +401,5 @@ public class JsonToClassGenerator
 
     public Dictionary<string, ClassInfo> Classes { get; set; } = new();
     public Dictionary<string, string> GeneratedClasses { get; set; } = new();
-
-    
-
+    public bool InnerClassMode { get; internal set; }
 }
