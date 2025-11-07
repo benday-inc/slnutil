@@ -268,29 +268,33 @@ public class JsonToClassGenerator
 
             foreach (var prop in item.Value.Properties)
             {
+                var propValueName = CleanPropertyValueName(prop);
+
+
+
                 sb.AppendLine($"    [JsonPropertyName(\"{prop.Value.JsonName}\")]");
 
                 if (prop.Value.IsArray == true && (prop.Value.DataType == "string" || prop.Value.DataType == "int"))
                 {
-                    sb.AppendLine($"    public {prop.Value.DataType}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
+                    sb.AppendLine($"    public {prop.Value.DataType}[] {propValueName.Capitalize()} {{ get; set; }} = new {prop.Value.DataType}[0];");
                 }
                 else if (prop.Value.IsArray == true)
                 {
-                    sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {prop.Value.Name.Capitalize()} {{ get; set; }} = new {prop.Value.DataType.Capitalize()}[0];");
+                    sb.AppendLine($"    public {prop.Value.DataType.Capitalize()}[] {propValueName.Capitalize()} {{ get; set; }} = new {prop.Value.DataType.Capitalize()}[0];");
                 }
                 else
                 {
                     if (prop.Value.DataType == "string")
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }} = string.Empty;");
+                        sb.AppendLine($"    public {prop.Value.DataType} {propValueName.Capitalize()} {{ get; set; }} = string.Empty;");
                     }
                     else if (prop.Value.DataType == "int" || prop.Value.DataType == "bool" || prop.Value.DataType == "DateTime")
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType} {prop.Value.Name.Capitalize()} {{ get; set; }}");
+                        sb.AppendLine($"    public {prop.Value.DataType} {propValueName.Capitalize()} {{ get; set; }}");
                     }
                     else
                     {
-                        sb.AppendLine($"    public {prop.Value.DataType.Capitalize()} {prop.Value.Name.Capitalize()} {{ get; set; }} = new();");
+                        sb.AppendLine($"    public {prop.Value.DataType.Capitalize()} {propValueName.Capitalize()} {{ get; set; }} = new();");
                     }
                 }
 
@@ -303,7 +307,59 @@ public class JsonToClassGenerator
         }
     }
 
+    private string CleanPropertyValueName(KeyValuePair<string, PropertyInfo> prop)
+    {
+        var name = prop.Value.Name;
+   
+        var cleanedName = name;
+
+        var isNumber = int.TryParse(name, out var parsedNumber);
+
+        if (isNumber == true && parsedNumber >= 0)
+        {
+            cleanedName = "Val_" + parsedNumber;
+        }
+        else if (isNumber == true && parsedNumber < 0)
+        {
+            cleanedName = "Val_Minus_" + Math.Abs(parsedNumber).ToString();
+        }
+        
+        if (char.IsDigit(cleanedName[0]))
+        {
+            cleanedName = "Val_" + cleanedName;
+        }
+
+        if (IsCSharpReservedWord(cleanedName))
+        {
+            cleanedName = "Val_" + cleanedName;
+        }
+
+        cleanedName = Utilities.RemoveCharToPascalCase('-', cleanedName);
+
+        return cleanedName;
+    }
+
+    private bool IsCSharpReservedWord(string word)
+    {
+        var reservedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked",
+            "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else",
+            "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for",
+            "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
+            "long", "namespace", "new", "null", "object", "operator", "out", "override", "params",
+            "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
+            "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true",
+            "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual",
+            "void", "volatile", "while"
+        };
+
+        return reservedWords.Contains(word);
+    }
+
     public Dictionary<string, ClassInfo> Classes { get; set; } = new();
     public Dictionary<string, string> GeneratedClasses { get; set; } = new();
+
+    
 
 }

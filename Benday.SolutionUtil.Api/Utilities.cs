@@ -70,11 +70,11 @@ public static class Utilities
     }
     public static string JsonNameToCsharpName(string input)
     {
-        var returnValue = RemoveUnderscoreToPascalCase('_', input);
+        var returnValue = RemoveCharToPascalCase('_', input);
 
-        returnValue = RemoveUnderscoreToPascalCase(' ', returnValue);
+        returnValue = RemoveCharToPascalCase(' ', returnValue);
 
-        returnValue = RemoveUnderscoreToPascalCase('-', returnValue);
+        // returnValue = RemoveUnderscoreToPascalCase('-', returnValue);
 
         return returnValue;
     }
@@ -111,7 +111,7 @@ public static class Utilities
         }
     }
 
-    public static string RemoveUnderscoreToPascalCase(char replaceCharacter, string fromValue)
+    public static string RemoveCharToPascalCase(char replaceCharacter, string fromValue)
     {
         if (fromValue == null)
         {
