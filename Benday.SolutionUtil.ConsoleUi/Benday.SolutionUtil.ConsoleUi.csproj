@@ -11,8 +11,9 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>benday</Authors>
     <PackageProjectUrl>https://github.com/benday-inc/slnutil.git</PackageProjectUrl>
-    <Copyright>2025</Copyright>
+    <Copyright>© 2025 Benjamin Day Consulting, Inc.</Copyright>
     <RepositoryUrl>https://github.com/benday-inc/slnutil.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
@@ -20,8 +21,10 @@
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
+    <PackageTags>dotnet;cli;tool;solution;project;csproj;sln;slnx;nuget;utility;developer-tools</PackageTags>
+    <ToolCommandName>slnutil</ToolCommandName>
     <PackageReleaseNotes>
-v2.32 - Added support for slnx files; Modified create solution command to no longer install FluentAssertions library;
+v2.32 - Added support for .net10; Added support for slnx files; Modified create solution command to no longer install FluentAssertions library;
 v2.31 - Modified classes from json command to 1) detect DateTime property values 2) optionally generate inner classes instead of separate classes;
 v2.30 - Added clipboard option to classes from json command to read JSON from clipboard instead of a file or console input;
 v2.29 - Added printfile command to read a text file and print it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues.;
