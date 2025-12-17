@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -16,11 +16,12 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <TheVersion>2.31.0</TheVersion>
+    <TheVersion>2.32.0</TheVersion>
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageReleaseNotes>
+v2.32 - Added support for slnx files; Modified create solution command to no longer install FluentAssertions library;
 v2.31 - Modified classes from json command to 1) detect DateTime property values 2) optionally generate inner classes instead of separate classes;
 v2.30 - Added clipboard option to classes from json command to read JSON from clipboard instead of a file or console input;
 v2.29 - Added printfile command to read a text file and print it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues.;

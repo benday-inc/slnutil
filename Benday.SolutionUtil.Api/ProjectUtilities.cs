@@ -32,16 +32,22 @@ public static class ProjectUtilities
 
     public static string? FindSolution(string startingDirectory)
     {
-        var solutionFile = Directory.GetFiles(startingDirectory, "*.sln", SearchOption.AllDirectories).FirstOrDefault();
+        // Prefer .slnx files over .sln files
+        var solutionFile = Directory.GetFiles(startingDirectory, "*.slnx", SearchOption.AllDirectories).FirstOrDefault();
 
         if (string.IsNullOrEmpty(solutionFile) == false)
         {
             return solutionFile;
         }
-        else
+
+        solutionFile = Directory.GetFiles(startingDirectory, "*.sln", SearchOption.AllDirectories).FirstOrDefault();
+
+        if (string.IsNullOrEmpty(solutionFile) == false)
         {
-            solutionFile = FindSolutionInParentFolders(startingDirectory);
+            return solutionFile;
         }
+
+        solutionFile = FindSolutionInParentFolders(startingDirectory);
 
         return solutionFile;
     }
@@ -61,16 +67,22 @@ public static class ProjectUtilities
         }
         else
         {
-            var solution = dir.Parent.GetFiles("*.sln").FirstOrDefault();
+            // Prefer .slnx files over .sln files
+            var solution = dir.Parent.GetFiles("*.slnx").FirstOrDefault();
 
             if (solution != null)
             {
                 return solution.FullName;
             }
-            else
+
+            solution = dir.Parent.GetFiles("*.sln").FirstOrDefault();
+
+            if (solution != null)
             {
-                return FindSolutionInParentFolders(dir.Parent);
+                return solution.FullName;
             }
+
+            return FindSolutionInParentFolders(dir.Parent);
         }
     }
 
