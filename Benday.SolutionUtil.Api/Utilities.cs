@@ -74,7 +74,7 @@ public static class Utilities
 
         returnValue = RemoveCharToPascalCase(' ', returnValue);
 
-        // returnValue = RemoveUnderscoreToPascalCase('-', returnValue);
+        returnValue = RemoveCharToPascalCase('-', returnValue);
 
         return returnValue;
     }
