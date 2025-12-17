@@ -14,7 +14,7 @@ namespace Benday.SolutionUtil.Api;
     Description = "Create a solution and projects")]
 internal class CreateSolutionCommand : SynchronousCommand
 {
-    public const string PackageName_FluentAssertions = "FluentAssertions";
+    public const string PackageName_Benday_Common_Testing = "Benday.Common.Testing";
     public const string SourceDirNameInSolution = "src";
     public const string TestDirNameInSolution = "test";
 
@@ -597,8 +597,8 @@ internal class CreateSolutionCommand : SynchronousCommand
         solution.AddProjectReference(integrationTestsProject, webProject);
         solution.AddProjectReference(webProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_FluentAssertions);
-        integrationTestsProject.AddPackageReference(PackageName_FluentAssertions);
+        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
+        integrationTestsProject.AddPackageReference(PackageName_Benday_Common_Testing);
     }
 
     private void CreateWebApiSolution(SolutionInfo solution, string rootNamespace)
@@ -615,8 +615,8 @@ internal class CreateSolutionCommand : SynchronousCommand
         solution.AddProjectReference(integrationTestsProject, webProject);
         solution.AddProjectReference(webProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_FluentAssertions);
-        integrationTestsProject.AddPackageReference(PackageName_FluentAssertions);
+        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
+        integrationTestsProject.AddPackageReference(PackageName_Benday_Common_Testing);
     }
 
 
@@ -631,7 +631,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(consoleProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_FluentAssertions);
+        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
     }
 
     private void CreateMauiSolution(SolutionInfo solution, string rootNamespace)
@@ -647,7 +647,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(mauiProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_FluentAssertions);
+        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
 
         apiProject.AddProjectProperty("TargetFrameworks", "net8;net8.0-android;net8.0-ios;net8.0-maccatalyst");
 
