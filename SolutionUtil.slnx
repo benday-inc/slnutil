@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="install.ps1" />
+    <File Path="install.sh" />
+    <File Path="README-for-nuget.md" />
+    <File Path="README.md" />
+    <File Path="uninstall.ps1" />
+    <File Path="uninstall.sh" />
+  </Folder>
+  <Project Path="Benday.SolutionUtil.Api/Benday.SolutionUtil.Api.csproj" />
+  <Project Path="Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj" />
+  <Project Path="Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj" />
+</Solution>
