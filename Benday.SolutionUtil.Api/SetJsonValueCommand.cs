@@ -38,7 +38,8 @@ public class SetJsonValueCommand : SynchronousCommand
             .WithDescription("Fourth level json property name to set");
 
         args.AddString(Constants.ArgumentNameValue)
-            .AsRequired()
+            .AsNotRequired()
+            .WithDefaultValue(string.Empty)
             .WithDescription("String value to set");
 
         args.AddBoolean(Constants.ArgumentNameIncrementInt32Value)
@@ -52,6 +53,12 @@ public class SetJsonValueCommand : SynchronousCommand
             .AllowEmptyValue()
             .WithDescription(
                 $"Increment the minor version of the existing value or use the '/{Constants.ArgumentNameValue}' as the value if it does not exist or isn't an integer.");
+
+        args.AddBoolean(Constants.ArgumentNameIncrementPatchVersionValue)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription(
+                $"Increment the patch version of the existing value or use the '/{Constants.ArgumentNameValue}' as the value if it does not exist or isn't an integer.");
 
         args.AddBoolean(Constants.ArgumentNameSetValueAsBoolean)
             .AsNotRequired()
@@ -89,6 +96,15 @@ public class SetJsonValueCommand : SynchronousCommand
         WriteLine($"Using '{configFilename}'...");
 
         var setAsBoolean = Arguments.GetBooleanValue(Constants.ArgumentNameSetValueAsBoolean);
+        var incrementMinorVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementMinorVersionValue);
+        var incrementPatchVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementPatchVersionValue);
+
+        if (incrementMinorVersionValue == true &&
+            incrementPatchVersionValue == true)
+        {
+            throw new KnownException(
+                $"You cannot specify both '/{Constants.ArgumentNameIncrementMinorVersionValue}' and '/{Constants.ArgumentNameIncrementPatchVersionValue}' at the same time.");
+        }
 
         var newValue = Arguments.GetStringValue(Constants.ArgumentNameValue);
         var level1 = Arguments.GetStringValue(Constants.ArgumentNameLevel1);
@@ -177,6 +193,7 @@ public class SetJsonValueCommand : SynchronousCommand
     {
         var incrementInt32Value = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementInt32Value);
         var incrementMinorVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementMinorVersionValue);
+        var incrementPatchVersionValue = Arguments.GetBooleanValue(Constants.ArgumentNameIncrementPatchVersionValue);
 
         if (incrementInt32Value == true)
         {
@@ -216,6 +233,37 @@ public class SetJsonValueCommand : SynchronousCommand
                     else
                     {
                         WriteLine($"Warning: Could not increment minor version value in '{currentValue}' as int. Setting value to '{newValue}'.");
+                    }
+                }
+            }
+        }
+        else if (incrementPatchVersionValue == true)
+        {
+            if (string.IsNullOrEmpty(currentValue) == false)
+            {
+                var tokens = currentValue.Split('.');
+
+                if (tokens.Length < 3)
+                {
+                    WriteLine($"Warning: Could not find patch version value in '{currentValue}'. Setting value to '{newValue}'.");
+                }
+                else
+                {
+                    var patchVersionAsString = tokens[2];
+
+                    if (Int32.TryParse(patchVersionAsString, out var valueAsInt) == true)
+                    {
+                        valueAsInt++;
+
+                        tokens[2] = valueAsInt.ToString();
+
+                        var returnValue = string.Join(".", tokens);
+
+                        return returnValue;
+                    }
+                    else
+                    {
+                        WriteLine($"Warning: Could not increment patch version value in '{currentValue}' as int. Setting value to '{newValue}'.");
                     }
                 }
             }
