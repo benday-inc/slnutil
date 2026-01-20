@@ -1,0 +1,80 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          cache: true
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+
+      - name: Restore ConsoleUi
+        run: dotnet restore Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj
+
+      - name: Restore UnitTests
+        run: dotnet restore Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj
+
+      - name: Build ConsoleUi (Release)
+        run: dotnet build Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj --configuration Release --no-restore
+
+      - name: Test (Release)
+        run: dotnet test Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Pack ConsoleUi
+        run: dotnet pack Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj --no-build --configuration Release --output ./artifacts
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./artifacts/*.nupkg
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: nuget-deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          include-prerelease: true
+
+      - name: Push to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "Error: NUGET_API_KEY secret is not set"
+            exit 1
+          fi
+          dotnet nuget push *.nupkg -k "$NUGET_API_KEY" -s https://api.nuget.org/v3/index.json --skip-duplicate
