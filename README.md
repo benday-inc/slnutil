@@ -235,9 +235,10 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | level2 | Optional | String | Second level json property name to set |
 | level3 | Optional | String | Third level json property name to set |
 | level4 | Optional | String | Fourth level json property name to set |
-| value | Required | String | String value to set |
+| value | Optional | String | String value to set |
 | increment-int | Optional | Boolean | Increment the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | increment-minor-version | Optional | Boolean | Increment the minor version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
+| increment-patch-version | Optional | Boolean | Increment the patch version of the existing value or use the '/value' as the value if it does not exist or isn't an integer. |
 | bool | Optional | Boolean | Set value into the json as boolean |
 ## <a name="setpackageversion"></a> setpackageversion
 **Changes NuGet package references in a C# project file to a new value.**
