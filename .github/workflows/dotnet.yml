@@ -36,8 +36,11 @@ jobs:
       - name: Build ConsoleUi (Release)
         run: dotnet build Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj --configuration Release --no-restore
 
+      - name: Build UnitTests (Release)
+        run: dotnet build Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj --configuration Release --no-restore
+
       - name: Test (Release)
-        run: dotnet test Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj --configuration Release --no-build --verbosity normal
+        run: dotnet test Benday.SolutionUtil.UnitTests/Benday.SolutionUtil.UnitTests.csproj --configuration Release --verbosity normal
 
       - name: Pack ConsoleUi
         run: dotnet pack Benday.SolutionUtil.ConsoleUi/Benday.SolutionUtil.ConsoleUi.csproj --no-build --configuration Release --output ./artifacts
