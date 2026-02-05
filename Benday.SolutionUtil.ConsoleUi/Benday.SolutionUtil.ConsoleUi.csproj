@@ -17,13 +17,14 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <TheVersion>2.33</TheVersion>
+    <TheVersion>2.34</TheVersion>
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageTags>dotnet;cli;tool;solution;project;csproj;sln;slnx;nuget;utility;developer-tools</PackageTags>
     <ToolCommandName>slnutil</ToolCommandName>
     <PackageReleaseNotes>
+v2.34 - Modified find solutions command to also find .slnx files;
 v2.33 - Modified SetJsonValueCommand to allow incrementing patch version numbers;
 v2.32.1 - Updated dependencies to fix security vulnerabilities;
 v2.32 - Added support for .net10; Added support for slnx files; Modified create solution command to no longer install FluentAssertions library;

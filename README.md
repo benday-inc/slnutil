@@ -56,7 +56,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [createsolution](#createsolution) | Create a solution and projects |
 | [deployefmigrations](#deployefmigrations) | Deploy EF Core Migrations from DLL binaries. |
 | [devtreeclean](#devtreeclean) | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
-| [findsolutions](#findsolutions) | Find solution files in a folder tree. |
+| [findsolutions](#findsolutions) | Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis. |
 | [formatxml](#formatxml) | Formats XML files |
 | [getconnectionstring](#getconnectionstring) | Get database connection string in appsettings.json. |
 | [classesfromjson](#classesfromjson) | Create C# classes from JSON with serialization attributes for System.Text.Json. |
@@ -143,14 +143,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 | keepnodemodules | Optional | Boolean | If true, skips delete of node_modules folders. Default value is false. |
 ## <a name="findsolutions"></a> findsolutions
-**Find solution files in a folder tree.**
+**Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis.**
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
-| rootdir | Required | String | Path to start search from |
+| rootdir | Optional | String | Path to start search from.  Defaults to current directory. |
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
-| skipreferences | Optional | Boolean | Output results as comma-separated values |
+| skipreferences | Optional | Boolean | Skip checking project references when listing projects in solutions |
 ## <a name="formatxml"></a> formatxml
 **Formats XML files**
 ### Arguments

@@ -4,7 +4,9 @@ using System.Text;
 using Benday.CommandsFramework;
 
 namespace Benday.SolutionUtil.Api;
-[Command(Name = Constants.CommandArgumentNameFindSolutions, Description = "Find solution files in a folder tree.")]
+[Command(Name = Constants.CommandArgumentNameFindSolutions, 
+    Description = "Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis."
+)]
 public class FindSolutionsCommand : SynchronousCommand
 {
 
@@ -18,8 +20,11 @@ public class FindSolutionsCommand : SynchronousCommand
     {
         var args = new ArgumentCollection();
 
-        args.AddString(Constants.ArgumentNameRootDirectory).
-            WithDescription("Path to start search from");
+        args.AddString(Constants.ArgumentNameRootDirectory)
+            .AsNotRequired()
+            .WithDescription("Path to start search from.  Defaults to current directory.")
+            .WithDefaultValue(Directory.GetCurrentDirectory());
+
 
         args.AddBoolean(Constants.ArgumentNameListProjects)
             .AsNotRequired()
@@ -34,7 +39,7 @@ public class FindSolutionsCommand : SynchronousCommand
         args.AddBoolean(Constants.ArgumentNameSkipReferences)
             .AsNotRequired()
             .AllowEmptyValue()
-            .WithDescription("Output results as comma-separated values");
+            .WithDescription("Skip checking project references when listing projects in solutions");
 
         return args;
     }
@@ -81,8 +86,9 @@ public class FindSolutionsCommand : SynchronousCommand
 
     internal string[] GetResults(string rootDir)
     {
-        var solutions = Directory.GetFiles(
-            rootDir, "*.sln", SearchOption.AllDirectories);
+        var solutions = Directory.GetFiles(rootDir, "*.sln", SearchOption.AllDirectories)
+            .Concat(Directory.GetFiles(rootDir, "*.slnx", SearchOption.AllDirectories))
+            .ToArray();
 
         return solutions;
     }
