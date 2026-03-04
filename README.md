@@ -45,6 +45,8 @@ YouTube: https://www.youtube.com/@_benday
 The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to the command prompt and type  
 `dotnet tool install slnutil -g`
 
+## GUI Option
+> **Prefer a graphical interface?** Run `slnutil gui` to launch the slnutil GUI — a point-and-click interface for all the same functionality without the command line.
 
 ## Commands
 | Command Name | Description |
