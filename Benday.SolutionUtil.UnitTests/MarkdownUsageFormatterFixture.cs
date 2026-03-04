@@ -172,8 +172,7 @@ public class MarkdownUsageFormatterFixture
 
         Console.WriteLine($"Misc directory: {dirInfo.FullName}");
 
-        Assert.IsTrue(Directory.Exists(pathToDir), "Could not locate directory at '{0}' -- '{1}'.",
-            pathToDir, new DirectoryInfo(pathToDir).FullName);
+        Assert.IsTrue(Directory.Exists(pathToDir), $"Could not locate directory at '{pathToDir}' -- '{new DirectoryInfo(pathToDir).FullName}'.");
 
         return dirInfo.FullName;
     }
