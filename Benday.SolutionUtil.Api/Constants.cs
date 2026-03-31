@@ -8,6 +8,7 @@ public static class Constants
     public const string CommandArgumentNameClassDiagram = "classdiagram";
     public const string CommandArgumentNameTouchFile = "touch";
     public const string CommandArgumentNameFormatXml = "formatxml";
+    public const string CommandArgumentNameFormatJson = "formatjson";
     public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
     public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
