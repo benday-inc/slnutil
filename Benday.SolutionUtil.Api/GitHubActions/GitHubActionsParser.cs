@@ -98,4 +98,20 @@ public class GitHubActionsParser
 
         return result.ToArray();
     }
+
+    public GitHubActionVersionInfo[] GetAllActionsThatNeedUpdates(bool cleanup = false)
+    {
+        if (_infoProvider == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot get actions that need updates because no IGitHubActionsInfoProvider was provided.");
+        }
+
+        var actions = GetAllActions();
+        var versions = GetAllActionsWithLatestInfo();
+
+        var result = versions.Where(v => v.NeedsUpgrade(cleanup)).ToArray();
+
+        return result;
+    }
 }
