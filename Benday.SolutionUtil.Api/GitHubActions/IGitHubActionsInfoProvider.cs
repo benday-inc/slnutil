@@ -2,5 +2,5 @@ namespace Benday.SolutionUtil.Api.GitHubActions;
 
 public interface IGitHubActionsInfoProvider
 {
-    GitHubActionInfo? GetLatestActionInfo(string owner, string actionName);
+    Task<GitHubActionInfo?> GetLatestActionInfoAsync(string owner, string actionName);
 }

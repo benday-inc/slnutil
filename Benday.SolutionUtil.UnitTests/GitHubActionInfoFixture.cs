@@ -12,22 +12,6 @@ public class GitHubActionInfoFixture : TestClassBase
 
     }
 
-    private readonly GitHubActionInfo? _SystemUnderTest;
-
-    private GitHubActionInfo SystemUnderTest
-    {
-        get
-        {
-            if (_SystemUnderTest == null)
-            {
-                // _SystemUnderTest = new GitHubActionInfo();
-                AssertThat.Fail("System under test was not initialized");
-            }
-
-            return _SystemUnderTest;
-        }
-    }
-
     [Fact]
     public void Constructor_InitializesPropertiesFromString()
     {

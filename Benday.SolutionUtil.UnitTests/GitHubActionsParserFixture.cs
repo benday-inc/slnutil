@@ -70,7 +70,7 @@ public class GitHubActionsParserFixture : TestClassBase
     }
 
     [Fact]
-    public void GetAllActionsWithLatestInfo()
+    public async Task GetAllActionsWithLatestInfo()
     {
         // arrange
         var testYaml = base.GetSampleFileText("github-actions-sample.yml");
@@ -84,7 +84,7 @@ public class GitHubActionsParserFixture : TestClassBase
 
         var mock = result.GetRequiredMock<IGitHubActionsInfoProvider>();
 
-        mock.Setup(m => m.GetLatestActionInfo(It.IsAny<string>(), It.IsAny<string>()))
+        mock.Setup(m => m.GetLatestActionInfoAsync(It.IsAny<string>(), It.IsAny<string>()))
                     .Returns<string, string>((ownerName, actionName) =>
                     {
                         var versionNumber = actionName switch
@@ -98,7 +98,9 @@ public class GitHubActionsParserFixture : TestClassBase
                             _ => throw new InvalidOperationException($"Unexpected action name: {actionName}")
                         };
 
-                        return new GitHubActionInfo($"{ownerName}/{actionName}@v{versionNumber}");
+                        var temp = new GitHubActionInfo($"{ownerName}/{actionName}@v{versionNumber}");
+
+                        return Task.FromResult<GitHubActionInfo?>(temp);
                     });
 
         _SystemUnderTest = result.Instance;
@@ -116,7 +118,7 @@ public class GitHubActionsParserFixture : TestClassBase
         var expected = ConvertToVersionInfo(expectedInitialValues);
 
         // act
-        var actual = SystemUnderTest.GetAllActionsWithLatestInfo();
+        var actual = await SystemUnderTest.GetAllActionsWithLatestInfoAsync();
 
         // assert
         AssertThat.IsNotNull(actual, "GetAllActionsWithLatestInfo() returned null.");
@@ -127,7 +129,7 @@ public class GitHubActionsParserFixture : TestClassBase
     }
 
     [Fact]
-    public void GetAllActionsThatNeedUpdates()
+    public async Task GetAllActionsThatNeedUpdates()
     {
         // arrange
         var testYaml = base.GetSampleFileText("github-actions-sample.yml");
@@ -141,7 +143,7 @@ public class GitHubActionsParserFixture : TestClassBase
 
         var mock = result.GetRequiredMock<IGitHubActionsInfoProvider>();
 
-        mock.Setup(m => m.GetLatestActionInfo(It.IsAny<string>(), It.IsAny<string>()))
+        mock.Setup(m => m.GetLatestActionInfoAsync(It.IsAny<string>(), It.IsAny<string>()))
                     .Returns<string, string>((ownerName, actionName) =>
                     {
                         var versionNumber = actionName switch
@@ -155,7 +157,9 @@ public class GitHubActionsParserFixture : TestClassBase
                             _ => throw new InvalidOperationException($"Unexpected action name: {actionName}")
                         };
 
-                        return new GitHubActionInfo($"{ownerName}/{actionName}@v{versionNumber}");
+                        var temp = new GitHubActionInfo($"{ownerName}/{actionName}@v{versionNumber}");
+
+                        return Task.FromResult<GitHubActionInfo?>(temp);
                     });
 
         _SystemUnderTest = result.Instance;
@@ -167,7 +171,7 @@ public class GitHubActionsParserFixture : TestClassBase
         };
 
         // act
-        var actual = SystemUnderTest.GetAllActionsThatNeedUpdates();
+        var actual = await SystemUnderTest.GetAllActionsThatNeedUpdatesAsync();
 
         // assert
         AssertThat.IsNotNull(actual, "GetAllActionsThatNeedUpdates() returned null.");

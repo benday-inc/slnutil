@@ -79,7 +79,7 @@ public class GitHubActionsParser
         return lines.ToArray();
     }
 
-    public GitHubActionVersionInfo[] GetAllActionsWithLatestInfo()
+    public async Task<GitHubActionVersionInfo[]> GetAllActionsWithLatestInfoAsync()
     {
         if (_infoProvider == null)
         {
@@ -92,14 +92,14 @@ public class GitHubActionsParser
 
         foreach (var action in actions)
         {
-            var latestInfo = _infoProvider.GetLatestActionInfo(action.Owner, action.Name);
+            var latestInfo = await _infoProvider.GetLatestActionInfoAsync(action.Owner, action.Name);
             result.Add(new GitHubActionVersionInfo(action, latestInfo));
         }
 
         return result.ToArray();
     }
 
-    public GitHubActionVersionInfo[] GetAllActionsThatNeedUpdates(bool cleanup = false)
+    public async Task<GitHubActionVersionInfo[]> GetAllActionsThatNeedUpdatesAsync(bool cleanup = false)
     {
         if (_infoProvider == null)
         {
@@ -108,7 +108,7 @@ public class GitHubActionsParser
         }
 
         var actions = GetAllActions();
-        var versions = GetAllActionsWithLatestInfo();
+        var versions = await GetAllActionsWithLatestInfoAsync();
 
         var result = versions.Where(v => v.NeedsUpgrade(cleanup)).ToArray();
 
