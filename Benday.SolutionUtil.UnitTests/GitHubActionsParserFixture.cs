@@ -181,6 +181,68 @@ public class GitHubActionsParserFixture : TestClassBase
         AssertAreEqual(expected, actual);
     }
 
+    [Fact]
+    public async Task UpdateYamlAsync()
+    {
+        // arrange
+        var testYaml = base.GetSampleFileText("github-actions-sample.yml");
+
+        AssertThatString.IsNotNullOrEmpty(testYaml, "Test YAML file is null or empty.");
+
+        var result = MockUtility.Build<GitHubActionsParser>()
+            .UsingConstructor(typeof(string), typeof(IGitHubActionsInfoProvider))
+            .WithValue(testYaml)
+            .Build();
+
+        var mock = result.GetRequiredMock<IGitHubActionsInfoProvider>();
+
+        var expected = new GitHubActionVersionInfo[]
+        {
+            new(new GitHubActionInfo("actions/checkout@v6"), new GitHubActionInfo("actions/checkout@v7")),
+            new(new GitHubActionInfo("azure/login@v2"), new GitHubActionInfo("azure/login@v4"))
+        };
+
+        mock.Setup(m => m.GetLatestActionInfoAsync(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns<string, string>((ownerName, actionName) =>
+                    {
+                        var versionNumber = actionName switch
+                        {
+                            "checkout" => "7",
+                            "setup-dotnet" => "5",
+                            "upload-artifact" => "6",
+                            "download-artifact" => "4",
+                            "login" => "4",
+                            "webapps-deploy" => "3",
+                            _ => throw new InvalidOperationException($"Unexpected action name: {actionName}")
+                        };
+
+                        var temp = new GitHubActionInfo($"{ownerName}/{actionName}@v{versionNumber}");
+
+                        return Task.FromResult<GitHubActionInfo?>(temp);
+                    });
+
+        _SystemUnderTest = result.Instance;
+
+        // act
+        string actual = await SystemUnderTest.UpdateYamlAsync();
+
+        WriteLine("Updated YAML:");
+        WriteLine(actual);
+
+        // assert
+
+        // go through the expected actions and verify that the updated YAML contains the updated versions of those actions.
+        foreach (var expectedAction in expected)
+        {
+            var expectedVersionString = expectedAction.Latest?.ToString() ?? expectedAction.Current.ToString();
+
+            var containsExpectedVersion = actual.Contains(expectedVersionString);
+
+            AssertThatString.Contains(actual, expectedVersionString, 
+                $"Updated YAML does not contain expected version string: {expectedVersionString}");
+        }
+    }
+
     private GitHubActionVersionInfo[] ConvertToVersionInfo(GitHubActionInfo[] expectedInitialValues)
     {
         var result = new GitHubActionVersionInfo[expectedInitialValues.Length];
@@ -208,7 +270,7 @@ public class GitHubActionsParserFixture : TestClassBase
 
             AssertThat.AreEqual(expectedAction.Current.ToString(), actualAction.Current.ToString(), $"Current action at index {i} does not match.");
             AssertThat.AreEqual(expectedAction.Latest?.ToString(), actualAction.Latest?.ToString(), $"Latest action at index {i} does not match.");
-        }        
+        }
     }
 
     private void AssertAreEqual(GitHubActionInfo[] expected, GitHubActionInfo[] actual)

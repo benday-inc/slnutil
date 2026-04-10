@@ -114,4 +114,31 @@ public class GitHubActionsParser
 
         return result;
     }
+
+    public async Task<string> UpdateYamlAsync()
+    {
+        if (_infoProvider == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot update YAML because no IGitHubActionsInfoProvider was provided.");
+        }
+
+        var actionsToUpdate = await GetAllActionsThatNeedUpdatesAsync();
+
+        var updatedYaml = _yaml;
+
+        foreach (var actionInfo in actionsToUpdate)
+        {
+            if (actionInfo.Latest == null || actionInfo.Current == null || 
+                actionInfo.Current.ToString() == actionInfo.Latest.ToString())
+            {
+                continue;
+            }
+
+            updatedYaml = updatedYaml.Replace(actionInfo.Current.ToString(), actionInfo.Latest.ToString());
+        }
+
+        return updatedYaml;
+    }
+
 }
