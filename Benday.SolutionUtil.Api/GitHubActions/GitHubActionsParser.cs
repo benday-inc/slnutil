@@ -1,5 +1,7 @@
 using System;
 
+using Benday.CommandsFramework;
+
 namespace Benday.SolutionUtil.Api.GitHubActions;
 
 public class GitHubActionsParser
@@ -99,7 +101,8 @@ public class GitHubActionsParser
         return result.ToArray();
     }
 
-    public async Task<GitHubActionVersionInfo[]> GetAllActionsThatNeedUpdatesAsync(bool cleanup = false)
+    public async Task<GitHubActionVersionInfo[]> GetAllActionsThatNeedUpdatesAsync(
+        ITextOutputProvider? outputProvider = null, bool cleanup = false)
     {
         if (_infoProvider == null)
         {
@@ -110,12 +113,22 @@ public class GitHubActionsParser
         var actions = GetAllActions();
         var versions = await GetAllActionsWithLatestInfoAsync();
 
+        outputProvider?.WriteLine($"Found {versions.Length} actions with latest info.");
+
+        foreach (var item in versions)
+        {
+            var currentVersionString = item.Current?.ToString() ?? "null";
+            var latestVersionString = item.Latest?.ToString() ?? "null";
+
+            outputProvider?.WriteLine($"Action '{currentVersionString}' has latest version '{latestVersionString}'.");
+        }
+
         var result = versions.Where(v => v.NeedsUpgrade(cleanup)).ToArray();
 
         return result;
     }
 
-    public async Task<string> UpdateYamlAsync()
+    public async Task<string> UpdateYamlAsync(ITextOutputProvider? outputProvider = null, bool cleanup = false)
     {
         if (_infoProvider == null)
         {
@@ -123,7 +136,9 @@ public class GitHubActionsParser
                 "Cannot update YAML because no IGitHubActionsInfoProvider was provided.");
         }
 
-        var actionsToUpdate = await GetAllActionsThatNeedUpdatesAsync();
+        var actionsToUpdate = await GetAllActionsThatNeedUpdatesAsync(outputProvider, cleanup);
+
+        outputProvider?.WriteLine($"Found {actionsToUpdate.Length} actions that need updates.");
 
         var updatedYaml = _yaml;
 
@@ -135,7 +150,8 @@ public class GitHubActionsParser
                 continue;
             }
 
-            updatedYaml = updatedYaml.Replace(actionInfo.Current.ToString(), actionInfo.Latest.ToString());
+            updatedYaml = updatedYaml.Replace(actionInfo.Current.ToString(), actionInfo.Latest.ToStringForTagUpgrade());
+            outputProvider?.WriteLine($"Updated '{actionInfo.Current}' to '{actionInfo.Latest}'.");
         }
 
         return updatedYaml;

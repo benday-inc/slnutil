@@ -93,4 +93,20 @@ public class GitHubActionInfo
             Version?.ToLowerInvariant()
         );
     }
+
+    public string ToStringForTagUpgrade()
+    {
+        return $"{Owner}/{Name}@v{GetMajorVersion(Version)}";
+    }
+
+    private string GetMajorVersion(string version)
+    {
+        // strip leading 'v' or 'V', take everything before the first dot
+        var trimmed = version.TrimStart('v', 'V');
+        var dotIndex = trimmed.IndexOf('.');
+
+        var majorPart = dotIndex >= 0 ? trimmed.Substring(0, dotIndex) : trimmed;
+
+        return majorPart;
+    }
 }

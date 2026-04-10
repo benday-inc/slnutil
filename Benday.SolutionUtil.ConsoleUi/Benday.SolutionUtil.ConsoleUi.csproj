@@ -17,13 +17,14 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <TheVersion>2.36.0</TheVersion>
+    <TheVersion>2.37.0</TheVersion>
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageTags>dotnet;cli;tool;solution;project;csproj;sln;slnx;nuget;utility;developer-tools</PackageTags>
     <ToolCommandName>slnutil</ToolCommandName>
     <PackageReleaseNotes>
+v2.37 - Added updategithubactionsversions command to update GitHub Actions versions in workflow files;
 v2.36 - Added formatjson command to format JSON files;
 v2.35 - Added 'gui' support to launch a blazor UI for this command; Updated dependencies and minor bug fixes;
 v2.34 - Modified find solutions command to also find .slnx files;

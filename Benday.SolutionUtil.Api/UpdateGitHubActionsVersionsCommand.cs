@@ -49,10 +49,15 @@ public class UpdateGitHubActionsVersionsCommand : AsynchronousCommand
         var yaml = await File.ReadAllTextAsync(filename);
 
         using var httpClient = new HttpClient();
+
+        // could you add the required browser strings to the http client so that GitHub doesn't reject the requests?
+        // httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("slnutil");
+
         var infoProvider = new DefaultGitHubActionsInfoProvider(httpClient);
         var parser = new GitHubActionsParser(yaml, infoProvider);
 
-        var updatedYaml = await parser.UpdateYamlAsync();
+        var updatedYaml = await parser.UpdateYamlAsync(_OutputProvider);
 
         await File.WriteAllTextAsync(filename, updatedYaml);
 

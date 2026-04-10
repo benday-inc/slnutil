@@ -198,7 +198,7 @@ public class GitHubActionsParserFixture : TestClassBase
 
         var expected = new GitHubActionVersionInfo[]
         {
-            new(new GitHubActionInfo("actions/checkout@v6"), new GitHubActionInfo("actions/checkout@v7")),
+            new(new GitHubActionInfo("actions/checkout@v6"), new GitHubActionInfo("actions/checkout@v7.1.1")),
             new(new GitHubActionInfo("azure/login@v2"), new GitHubActionInfo("azure/login@v4"))
         };
 
@@ -207,9 +207,9 @@ public class GitHubActionsParserFixture : TestClassBase
                     {
                         var versionNumber = actionName switch
                         {
-                            "checkout" => "7",
+                            "checkout" => "7.1.1",
                             "setup-dotnet" => "5",
-                            "upload-artifact" => "6",
+                            "upload-artifact" => "7.0.1",
                             "download-artifact" => "4",
                             "login" => "4",
                             "webapps-deploy" => "3",
@@ -234,7 +234,7 @@ public class GitHubActionsParserFixture : TestClassBase
         // go through the expected actions and verify that the updated YAML contains the updated versions of those actions.
         foreach (var expectedAction in expected)
         {
-            var expectedVersionString = expectedAction.Latest?.ToString() ?? expectedAction.Current.ToString();
+            var expectedVersionString = expectedAction.Latest?.ToStringForTagUpgrade() ;
 
             var containsExpectedVersion = actual.Contains(expectedVersionString);
 

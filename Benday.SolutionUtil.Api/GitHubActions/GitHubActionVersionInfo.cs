@@ -25,15 +25,13 @@ public class GitHubActionVersionInfo
             return false;
         }
 
-        if (Current.VersionType == GitHubActionVersionType.MajorTag &&
-            Latest.VersionType == GitHubActionVersionType.MajorTag)
+        if (Current.VersionType == GitHubActionVersionType.MajorTag)
         {
             return GetMajorVersion(Current.Version) < GetMajorVersion(Latest.Version);
         }
 
         if (cleanup &&
-            Current.VersionType == GitHubActionVersionType.SpecificTag &&
-            Latest.VersionType == GitHubActionVersionType.MajorTag)
+            Current.VersionType == GitHubActionVersionType.SpecificTag)
         {
             return GetMajorVersion(Current.Version) < GetMajorVersion(Latest.Version);
         }
