@@ -14,7 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Benday.CommandsFramework" Version="4.*" />
-    <PackageReference Include="Benday.Common.Testing" Version="3.0.2-alpha" />
+    <PackageReference Include="Benday.Common.Testing" Version="3.0.4-alpha" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageReference Include="coverlet.collector" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
