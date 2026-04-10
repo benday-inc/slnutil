@@ -5,6 +5,7 @@ namespace Benday.SolutionUtil.Api.GitHubActions;
 public class GitHubActionsParser
 {
     private readonly string _yaml;
+    private readonly IGitHubActionsInfoProvider? _infoProvider;
 
     public GitHubActionsParser(string yaml)
     {
@@ -14,6 +15,16 @@ public class GitHubActionsParser
         }
 
         _yaml = yaml;
+    }
+
+    public GitHubActionsParser(string yaml, IGitHubActionsInfoProvider infoProvider) : this(yaml)
+    {
+        if (infoProvider == null)
+        {
+            throw new ArgumentNullException(nameof(infoProvider));
+        }
+
+        _infoProvider = infoProvider;
     }
 
     /// <summary>
@@ -66,5 +77,25 @@ public class GitHubActionsParser
         }
 
         return lines.ToArray();
+    }
+
+    public GitHubActionVersionInfo[] GetAllActionsWithLatestInfo()
+    {
+        if (_infoProvider == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot get actions with latest info because no IGitHubActionsInfoProvider was provided.");
+        }
+
+        var actions = GetAllActions();
+        var result = new List<GitHubActionVersionInfo>();
+
+        foreach (var action in actions)
+        {
+            var latestInfo = _infoProvider.GetLatestActionInfo(action.Owner, action.Name);
+            result.Add(new GitHubActionVersionInfo(action, latestInfo));
+        }
+
+        return result.ToArray();
     }
 }
