@@ -57,6 +57,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | findsolutions | Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis. |
+| formatjson | Formats JSON files |
 | formatxml | Formats XML files |
 | getconnectionstring | Get database connection string in appsettings.json. |
 | classesfromjson | Create C# classes from JSON with serialization attributes for System.Text.Json. |
@@ -76,6 +77,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | base64 | Encodes a string value as a base 64 string. |
 | touch | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | updatebicepversions | Reads bicep file or files and updates the api versions to latest. |
+| updategithubactionsversions | Reads a GitHub Actions YAML file and updates the action versions to latest. |
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 | wildcardreference | Changes package references in a C# project file to use wildcard version rather than fixed version number. |
 | snippetize | Reads a block of text from the clipboard and formats it for use in a VSCode snippet. |
@@ -151,6 +153,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
 | skipreferences | Optional | Boolean | Skip checking project references when listing projects in solutions |
+## formatjson
+**Formats JSON files**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to file or wildcard to files |
+| recursive | Optional | Boolean | Apply to matching files recursively |
+| write | Optional | Boolean | Write changes back to the file |
 ## formatxml
 **Formats XML files**
 ### Arguments
@@ -298,6 +308,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | filename | Optional | String | Name of the bicep file, if you want to update just one file. |
 | previewversions | Optional | Boolean | Allow preview versions for resources. |
 | preview | Optional | Boolean | Do not save changes only preview the changes. |
+## updategithubactionsversions
+**Reads a GitHub Actions YAML file and updates the action versions to latest.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Name of the GitHub Actions YAML file to update. |
 ## validateconnectionstring
 **Validate that specified connection string can connect to SQL Server.**
 ### Arguments

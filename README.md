@@ -8,7 +8,7 @@ A collection of utilities for working with .NET Solutions and Projects (.sln and
 Written by Benjamin Day  
 Pluralsight Author | Microsoft MVP | Scrum.org Professional Scrum Trainer  
 https://www.benday.com  
-https://www.honestcheetah.com  
+https://www.slidespeaker.ai  
 info@benday.com  
 YouTube: https://www.youtube.com/@_benday  
 
@@ -45,8 +45,6 @@ YouTube: https://www.youtube.com/@_benday
 The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to the command prompt and type  
 `dotnet tool install slnutil -g`
 
-## GUI Option
-> **Prefer a graphical interface?** Run `slnutil gui` to launch the slnutil GUI — a point-and-click interface for all the same functionality without the command line.
 
 ## Commands
 | Command Name | Description |
@@ -59,6 +57,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [deployefmigrations](#deployefmigrations) | Deploy EF Core Migrations from DLL binaries. |
 | [devtreeclean](#devtreeclean) | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
 | [findsolutions](#findsolutions) | Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis. |
+| [formatjson](#formatjson) | Formats JSON files |
 | [formatxml](#formatxml) | Formats XML files |
 | [getconnectionstring](#getconnectionstring) | Get database connection string in appsettings.json. |
 | [classesfromjson](#classesfromjson) | Create C# classes from JSON with serialization attributes for System.Text.Json. |
@@ -78,6 +77,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | [base64](#base64) | Encodes a string value as a base 64 string. |
 | [touch](#touch) | Modifies a file's date to current date time or creates a new empty file if it doesn't exist. |
 | [updatebicepversions](#updatebicepversions) | Reads bicep file or files and updates the api versions to latest. |
+| [updategithubactionsversions](#updategithubactionsversions) | Reads a GitHub Actions YAML file and updates the action versions to latest. |
 | [validateconnectionstring](#validateconnectionstring) | Validate that specified connection string can connect to SQL Server. |
 | [wildcardreference](#wildcardreference) | Changes package references in a C# project file to use wildcard version rather than fixed version number. |
 | [snippetize](#snippetize) | Reads a block of text from the clipboard and formats it for use in a VSCode snippet. |
@@ -153,6 +153,14 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
 | skipreferences | Optional | Boolean | Skip checking project references when listing projects in solutions |
+## <a name="formatjson"></a> formatjson
+**Formats JSON files**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Path to file or wildcard to files |
+| recursive | Optional | Boolean | Apply to matching files recursively |
+| write | Optional | Boolean | Write changes back to the file |
 ## <a name="formatxml"></a> formatxml
 **Formats XML files**
 ### Arguments
@@ -300,6 +308,12 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | filename | Optional | String | Name of the bicep file, if you want to update just one file. |
 | previewversions | Optional | Boolean | Allow preview versions for resources. |
 | preview | Optional | Boolean | Do not save changes only preview the changes. |
+## <a name="updategithubactionsversions"></a> updategithubactionsversions
+**Reads a GitHub Actions YAML file and updates the action versions to latest.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| filename | Optional | String | Name of the GitHub Actions YAML file to update. |
 ## <a name="validateconnectionstring"></a> validateconnectionstring
 **Validate that specified connection string can connect to SQL Server.**
 ### Arguments
