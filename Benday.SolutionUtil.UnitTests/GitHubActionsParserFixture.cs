@@ -60,11 +60,25 @@ public class GitHubActionsParserFixture : TestClassBase
         var actual = SystemUnderTest.GetAllActions();
         
         // assert
-        AssertThat.IsNotNull(actual, "GetAllActions() returned null.");
-        AssertThat.AreEqual(expected, actual, "GetAllActions() returned wrong value.");
-
+        AssertThat.IsNotNull(actual, "GetAllActions() returned null.");        
         AssertThat.AreEqual(expected.Length, actual.Length, "GetAllActions() returned wrong number of actions.");
+
+        AssertAreEqual(expected, actual);
 
     }
 
+    private void AssertAreEqual(GitHubActionInfo[] expected, GitHubActionInfo[] actual)
+    {
+        // sort both arrays by the string representation of the action info, so that we can compare them regardless of the order they were returned in.
+        var expectedSorted = expected.OrderBy(e => e.ToString()).ToArray();
+        var actualSorted = actual.OrderBy(a => a.ToString()).ToArray();
+
+        for (int i = 0; i < expectedSorted.Length; i++)
+        {
+            var expectedAction = expectedSorted[i];
+            var actualAction = actualSorted[i];
+
+            AssertThat.AreEqual(expectedAction.ToString(), actualAction.ToString(), $"Action at index {i} does not match.");
+        }
+    }
 }

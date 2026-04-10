@@ -16,9 +16,55 @@ public class GitHubActionsParser
         _yaml = yaml;
     }
 
+    /// <summary>
+    /// Gets all the GitHub actions used in the YAML file. This is done by looking for lines that start with searchFor and then parsing the action information from those lines. If a line cannot be parsed, it will be skipped. We don't want to fail the entire parsing process just because one line is malformed.
+    /// </summary>
+    /// <returns></returns>
     public GitHubActionInfo[] GetAllActions()
     {
-        throw new NotImplementedException();
+        var returnValues = new List<GitHubActionInfo>();
+
+        var lines = GetAllLines();
+        
+        PopulateMatchingLines(returnValues, lines, "uses:");
+        PopulateMatchingLines(returnValues, lines, "- uses:");
+
+        var uniqueValues = returnValues.DistinctBy(a => a.ToString());
+
+        return uniqueValues.ToArray();
     }
 
+    private static void PopulateMatchingLines(List<GitHubActionInfo> returnValues, string[] lines, string searchFor)
+    {
+        var usesLines = lines.Where(l => l.TrimStart().StartsWith(searchFor));
+
+        foreach (var line in usesLines)
+        {
+            var usesPart = line.TrimStart().Substring(searchFor.Length).Trim();
+
+            try
+            {
+                var actionInfo = new GitHubActionInfo(usesPart);
+                returnValues.Add(actionInfo);
+            }
+            catch (ArgumentException)
+            {
+                // if we can't parse it, then just skip it. We don't want to fail the entire parsing process just because one line is malformed.
+            }
+        }
+    }
+
+
+    private string[] GetAllLines()
+    {
+        var reader = new StringReader(_yaml);
+        var lines = new List<string>();
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            lines.Add(line);
+        }
+
+        return lines.ToArray();
+    }
 }
