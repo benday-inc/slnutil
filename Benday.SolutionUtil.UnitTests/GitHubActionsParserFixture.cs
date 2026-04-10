@@ -5,8 +5,6 @@ using Benday.SolutionUtil.Api.GitHubActions;
 
 using Xunit;
 
-using Xunit.Abstractions;
-
 namespace Benday.SolutionUtil.UnitTests;
 
 public class GitHubActionsParserFixture : TestClassBase
@@ -48,11 +46,24 @@ public class GitHubActionsParserFixture : TestClassBase
         var testYaml = base.GetSampleFileText("github-actions-sample.yml");
         _SystemUnderTest = new GitHubActionsParser(testYaml);
 
-        // act
-        // var actual = SystemUnderTest.GetAllActions();
-        AssertThat.Fail("Not implemented yet");
+        var expected = new GitHubActionInfo[]
+        {
+            new("actions/checkout@v6"),
+            new("actions/setup-dotnet@v5"),
+            new("actions/upload-artifact@v6"),
+            new("actions/download-artifact@v4"),
+            new("azure/login@v2"),
+            new("azure/webapps-deploy@v3")
+        };
 
+        // act
+        var actual = SystemUnderTest.GetAllActions();
+        
         // assert
+        AssertThat.IsNotNull(actual, "GetAllActions() returned null.");
+        AssertThat.AreEqual(expected, actual, "GetAllActions() returned wrong value.");
+
+        AssertThat.AreEqual(expected.Length, actual.Length, "GetAllActions() returned wrong number of actions.");
 
     }
 

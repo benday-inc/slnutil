@@ -3,7 +3,6 @@ using Benday.SolutionUtil.Api.JsonClasses;
 using Benday.SolutionUtil.UnitTests.SampleClassesForSerialization;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Benday.SolutionUtil.UnitTests;
 

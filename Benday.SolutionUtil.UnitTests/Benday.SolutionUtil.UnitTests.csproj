@@ -14,14 +14,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Benday.CommandsFramework" Version="4.*" />
-    <PackageReference Include="Benday.Common.Testing" Version="2.2.1" />
+    <PackageReference Include="Benday.Common.Testing" Version="3.0.2-alpha" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
     <PackageReference Include="coverlet.collector" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="xunit.v3.core" Version="3.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Benday.SolutionUtil.Api\Benday.SolutionUtil.Api.csproj" />
