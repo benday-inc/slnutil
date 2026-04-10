@@ -8,6 +8,7 @@ public static class Constants
     public const string CommandArgumentNameClassDiagram = "classdiagram";
     public const string CommandArgumentNameTouchFile = "touch";
     public const string CommandArgumentNameFormatXml = "formatxml";
+    public const string CommandArgumentNameFormatJson = "formatjson";
     public const string CommandArgumentNameDeployEfMigrations = "deployefmigrations";
     public const string CommandArgumentNameClassesFromJson = "classesfromjson";
     public const string CommandArgumentNameListSolutionProjects = "listsolutionprojects";
@@ -16,6 +17,7 @@ public static class Constants
     public const string CommandArgumentNameSetVersion = "setprojectversion";
     public const string CommandArgumentNameValidateConnectionString = "validateconnectionstring";
     public const string CommandArgumentNameUpdateBicepVersions = "updatebicepversions";
+    public const string CommandArgumentNameUpdateGitHubActionsVersions = "updategithubactionsversions";
     public const string CommandArgumentNameRename = "rename";
     public const string ArgumentsFilterByNamespace = "namespace";
     public const string ArgumentsFilterByTypeNames = "typenames";

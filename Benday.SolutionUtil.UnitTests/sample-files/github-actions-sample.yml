@@ -1,0 +1,119 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+# This workflow deploys to test and then production environments.
+# Required GitHub Environment Setup:
+# 1. "test" environment with secrets:
+#    - AZUREAPPSERVICE_CLIENTID_FFE13E1AD7C34D16A0C9FEC9FCFEDCA0
+#    - AZUREAPPSERVICE_TENANTID_FFE13E1AD7C34D16A0C9FEC9FCFEDCA0
+#    - AZUREAPPSERVICE_SUBSCRIPTIONID_FFE13E1AD7C34D16A0C9FEC9FCFEDCA0
+# 2. "production" environment with existing secrets (no changes needed)
+# 3. Azure App Service slots: 'test' slot for testing, 'Production' for production
+
+name: Build and deploy ASP.Net Core app to Azure Web App - wwwbenday-v5
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  WEBAPP_RESOURCE_GROUP: rg-wwwbenday-v5
+  WEBAPP_NAME: wwwbenday-v5
+
+
+jobs:
+  build:
+    runs-on: ubuntu-large # large-windows
+    permissions:
+      contents: read #This is required for actions/checkout
+    steps:
+      - uses: actions/checkout@v6
+      - name: List all environment variables
+        shell: pwsh
+        run: 'Get-ChildItem Env:'
+      
+      - name: Current directory
+        shell: pwsh
+        run: 'Get-Location'
+
+      - name: whats on disk?
+        shell: pwsh
+        run: 'Get-ChildItem -Recurse'
+
+      - name: what is env dotnet root?
+        shell: pwsh
+        run: "Write-Host '|${{env.DOTNET_ROOT}}|'"
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 'v10.0'
+          
+
+      
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+        working-directory: Benday.Cms
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o $GITHUB_WORKSPACE/myapp
+        working-directory: Benday.Cms/src/Benday.Cms.WebUi
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v6
+        with:
+          name: .net-app
+          path: ${{ github.workspace }}/myapp
+
+  deploy-to-test:
+    runs-on: ubuntu-large # large-windows
+    needs: build
+    environment: test
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZ_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZ_TENANT_ID }}
+          subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App (Test)
+        id: deploy-to-test
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          slot-name: 'test'
+          package: .
+
+  deploy-to-production:
+    runs-on: ubuntu-large # large-windows
+    needs: deploy-to-test
+    environment: production
+    permissions:
+      id-token: write #This is required for requesting the JWT
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZ_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZ_TENANT_ID }}
+          subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+
+      - name: Swap test slot to production
+        run: az webapp deployment slot swap --resource-group ${{ env.WEBAPP_RESOURCE_GROUP }} --name ${{ env.WEBAPP_NAME }} --slot test --target-slot production
+        
+      - name: Verify production deployment
+        run: |
+          echo "Slot swap completed successfully"
+          echo "Production URL: https://wwwbenday-v5.azurewebsites.net"
+          

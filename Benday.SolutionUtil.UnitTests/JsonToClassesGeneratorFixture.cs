@@ -1,15 +1,15 @@
+using Benday.Common.Testing;
 using Benday.SolutionUtil.Api.JsonClasses;
 using Benday.SolutionUtil.UnitTests.SampleClassesForSerialization;
 
+using Xunit;
+
 namespace Benday.SolutionUtil.UnitTests;
 
-[TestClass]
-public partial class JsonToClassesGeneratorFixture
+public partial class JsonToClassesGeneratorFixture : TestClassBase
 {
-    [TestInitialize]
-    public void OnTestInitialize()
+    public JsonToClassesGeneratorFixture(ITestOutputHelper output) : base(output)
     {
-        _SystemUnderTest = null;
     }
 
     private JsonToClassGenerator? _SystemUnderTest;
@@ -27,7 +27,7 @@ public partial class JsonToClassesGeneratorFixture
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateClasses_ArrayOfScalars()
     {
         // arrange
@@ -41,23 +41,23 @@ public partial class JsonToClassesGeneratorFixture
         // assert
         foreach (var item in SystemUnderTest.GeneratedClasses.Keys)
         {
-            Console.WriteLine($"{item}");
+            WriteLine($"{item}");
         }
 
-        Console.WriteLine($"** CLASSES **");
+        WriteLine($"** CLASSES **");
 
-        Console.WriteLine($"{SystemUnderTest.GeneratedClasses.Values.FirstOrDefault()}");
+        WriteLine($"{SystemUnderTest.GeneratedClasses.Values.FirstOrDefault()}");
     }
 
 
-    [TestMethod]
+    [Fact]
     public void Serialize_Simple()
     {
         // arrange
         string actual = GetSimpleClassAsJson();
 
         // assert
-        Console.WriteLine(actual);
+        WriteLine(actual);
     }
 
     private static string GetSimpleClassAsJson()
@@ -74,13 +74,13 @@ public partial class JsonToClassesGeneratorFixture
         return actual;
     }
 
-    [TestMethod]
+    [Fact]
     public void Serialize_Simple_Array()
     {
         string actual = GetSimpleClassArrayAsJson();
 
         // assert
-        Console.WriteLine(actual);
+        WriteLine(actual);
     }
 
     private static string GetSimpleClassArrayAsJson()
@@ -108,13 +108,13 @@ public partial class JsonToClassesGeneratorFixture
         return actual;
     }
 
-    [TestMethod]
+    [Fact]
     public void Serialize_Complex()
     {
         string actual = GetComplexClassAsJson();
 
         // assert
-        Console.WriteLine(actual);
+        WriteLine(actual);
     }
 
     private static string GetComplexClassAsJson()
@@ -130,13 +130,13 @@ public partial class JsonToClassesGeneratorFixture
         return actual;
     }
 
-    [TestMethod]
+    [Fact]
     public void Serialize_Complex_Array()
     {
         string actual = GetComplexClassArrayAsJson();
 
         // assert
-        Console.WriteLine(actual);
+        WriteLine(actual);
     }
 
     private static string GetComplexClassArrayAsJson()
@@ -158,7 +158,7 @@ public partial class JsonToClassesGeneratorFixture
         return actual;
     }
 
-    [TestMethod]
+    [Fact]
     public void ParseSimple_Single()
     {
         // arrange
@@ -177,16 +177,16 @@ public partial class JsonToClassesGeneratorFixture
         SystemUnderTest.Parse(fromJson);
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+        AssertThat.AreEqual(expectedClassCount, SystemUnderTest.Classes.Count, "Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+            AssertThat.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
 
         AssertAreEqual(GetClassInfoForThingy(),
             SystemUnderTest.Classes["ThingyThing"]);
     }
 
-    [TestMethod]
+    [Fact]
     public void ParseSimple_Single_ComplexClassName()
     {
         // arrange
@@ -194,7 +194,7 @@ public partial class JsonToClassesGeneratorFixture
 ""fine_tuning"": {
         ""is_allowed_to_fine_tune"": false,
         ""finetuning_state"": ""not_started"",
-        ""verification_attempts_count"": 0        
+        ""verification_attempts_count"": 0
       }
 }";
 
@@ -204,7 +204,7 @@ public partial class JsonToClassesGeneratorFixture
 
         expectedClassInfo.AddProperty("is_allowed_to_fine_tune", "IsAllowedToFineTune", "bool");
         expectedClassInfo.AddProperty("finetuning_state", "FinetuningState");
-        expectedClassInfo.AddProperty("verification_attempts_count", "VerificationAttemptsCount", "int");               
+        expectedClassInfo.AddProperty("verification_attempts_count", "VerificationAttemptsCount", "int");
 
         var expectedClassCount = 2;
         var expectedClassNames = new List<string>()
@@ -217,10 +217,10 @@ public partial class JsonToClassesGeneratorFixture
         SystemUnderTest.Parse(fromJson);
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+        AssertThat.AreEqual(expectedClassCount, SystemUnderTest.Classes.Count, "Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+            AssertThat.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
 
         AssertAreEqual(expectedClassInfo,
             SystemUnderTest.Classes["FineTuning"]);
@@ -230,9 +230,9 @@ public partial class JsonToClassesGeneratorFixture
     private void AssertAreEqual(ClassInfo expected,
         ClassInfo actual)
     {
-        Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
+        AssertThat.AreEqual(expected.Name, actual.Name, "Name");
 
-        Assert.AreEqual<int>(
+        AssertThat.AreEqual(
             expected.Properties.Count,
             actual.Properties.Count,
             $"Properties.Count on '{expected.Name}' is wrong.");
@@ -245,11 +245,17 @@ public partial class JsonToClassesGeneratorFixture
         Dictionary<string, PropertyInfo> actual,
         string className)
     {
-        var expectedKeys = expected.Keys;
-        var actualKeys = actual.Keys;
+        var expectedKeys = expected.Keys.ToList();
+        var actualKeys = actual.Keys.ToList();
 
-        CollectionAssert.AreEqual(expectedKeys, actualKeys,
-            $"Property key collections don't match on {className}.");
+        AssertThat.AreEqual(expectedKeys.Count, actualKeys.Count,
+            $"Property key count doesn't match on {className}.");
+
+        for (int i = 0; i < expectedKeys.Count; i++)
+        {
+            AssertThat.AreEqual(expectedKeys[i], actualKeys[i],
+                $"Property key at index {i} doesn't match on {className}.");
+        }
 
         foreach (var key in expectedKeys)
         {
@@ -261,12 +267,12 @@ public partial class JsonToClassesGeneratorFixture
         PropertyInfo expected,
         PropertyInfo actual)
     {
-        Assert.AreEqual<string>(expected.Name, actual.Name, "Name");
-        Assert.AreEqual<string>(expected.DataType, actual.DataType, "DataType");
-        Assert.AreEqual<bool>(expected.IsArray, actual.IsArray, "IsArray");
+        AssertThat.AreEqual(expected.Name, actual.Name, "Name");
+        AssertThat.AreEqual(expected.DataType, actual.DataType, "DataType");
+        AssertThat.AreEqual(expected.IsArray, actual.IsArray, "IsArray");
     }
 
-    [TestMethod]
+    [Fact]
     public void ParseSimple_Array()
     {
         // arrange
@@ -282,15 +288,15 @@ public partial class JsonToClassesGeneratorFixture
         SystemUnderTest.Parse(fromJson);
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+        AssertThat.AreEqual(expectedClassCount, SystemUnderTest.Classes.Count, "Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+            AssertThat.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
 
         AssertAreEqual(GetClassInfoForThingy("RootClass"), SystemUnderTest.Classes["RootClass"]);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateClasses_Simple()
     {
         // arrange
@@ -304,15 +310,15 @@ public partial class JsonToClassesGeneratorFixture
 
         SystemUnderTest.Parse(fromJson);
 
-        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+        AssertThat.AreEqual(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
 
         // act
         SystemUnderTest.GenerateClasses();
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount,
+        AssertThat.AreEqual(expectedClassCount,
             SystemUnderTest.GeneratedClasses.Count,
-            $"Generated class count is wrong");
+            "Generated class count is wrong");
 
         var actual = SystemUnderTest.GeneratedClasses["RootClass"];
 
@@ -332,7 +338,7 @@ public partial class JsonToClassesGeneratorFixture
     }
 
 
-    [TestMethod]
+    [Fact]
     public void GenerateClasses_Simple_ComplexNames()
     {
         // arrange
@@ -354,15 +360,15 @@ public partial class JsonToClassesGeneratorFixture
 
         SystemUnderTest.Parse(fromJson);
 
-        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+        AssertThat.AreEqual(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
 
         // act
         SystemUnderTest.GenerateClasses();
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount,
+        AssertThat.AreEqual(expectedClassCount,
             SystemUnderTest.GeneratedClasses.Count,
-            $"Generated class count is wrong");
+            "Generated class count is wrong");
 
         var actual = SystemUnderTest.GeneratedClasses["FineTuning"];
 
@@ -389,15 +395,15 @@ public partial class JsonToClassesGeneratorFixture
         var expectedLines = expected.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         var actualLines = actual.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
-        Assert.AreEqual<int>(expectedLines.Length, actualLines.Length, "Line count is wrong.");
+        AssertThat.AreEqual(expectedLines.Length, actualLines.Length, "Line count is wrong.");
 
         for (int i = 0; i < expectedLines.Length; i++)
         {
-            Assert.AreEqual<string>(expectedLines[i].Trim(), actualLines[i].Trim(), $"Line {i} is wrong.");
+            AssertThat.AreEqual(expectedLines[i].Trim(), actualLines[i].Trim(), $"Line {i} is wrong.");
         }
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateClasses_Complex()
     {
         // arrange
@@ -415,15 +421,15 @@ public partial class JsonToClassesGeneratorFixture
 
         SystemUnderTest.Parse(fromJson);
 
-        Assert.AreEqual<int>(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
+        AssertThat.AreEqual(0, SystemUnderTest.GeneratedClasses.Count, "GeneratedClasses should be empty.");
 
         // act
         SystemUnderTest.GenerateClasses();
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount,
+        AssertThat.AreEqual(expectedClassCount,
             SystemUnderTest.GeneratedClasses.Count,
-            $"Generated class count is wrong");
+            "Generated class count is wrong");
 
         var actual = SystemUnderTest.GeneratedClasses["Person"];
 
@@ -493,7 +499,7 @@ public partial class JsonToClassesGeneratorFixture
 
     }
 
-    [TestMethod]
+    [Fact]
     public void ParseComplex_Single()
     {
         // arrange
@@ -513,17 +519,17 @@ public partial class JsonToClassesGeneratorFixture
         SystemUnderTest.Parse(fromJson);
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+        AssertThat.AreEqual(expectedClassCount, SystemUnderTest.Classes.Count, "Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+            AssertThat.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
 
         AssertAreEqual(GetClassInfoForPerson(), SystemUnderTest.Classes["Person"]);
         AssertAreEqual(GetClassInfoForThingy(), SystemUnderTest.Classes["ThingyThing"]);
         AssertAreEqual(GetClassInfoForAddress(), SystemUnderTest.Classes["Address"]);
     }
 
-    [TestMethod]
+    [Fact]
     public void ParseComplex_Array()
     {
         // arrange
@@ -543,10 +549,10 @@ public partial class JsonToClassesGeneratorFixture
         SystemUnderTest.Parse(fromJson);
 
         // assert
-        Assert.AreEqual<int>(expectedClassCount, SystemUnderTest.Classes.Count, $"Class count is wrong");
+        AssertThat.AreEqual(expectedClassCount, SystemUnderTest.Classes.Count, "Class count is wrong");
 
         expectedClassNames.ForEach(name =>
-            Assert.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
+            AssertThat.IsTrue(SystemUnderTest.Classes.Keys.Contains(name), $"Class name '{name}' not found"));
 
         AssertAreEqual(GetClassInfoForPerson(), SystemUnderTest.Classes["Person"]);
         AssertAreEqual(GetClassInfoForThingy(), SystemUnderTest.Classes["ThingyThing"]);
