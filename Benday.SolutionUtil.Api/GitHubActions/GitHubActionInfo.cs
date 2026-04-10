@@ -8,6 +8,10 @@ public class GitHubActionInfo
     {
     }
 
+    public GitHubActionInfo()
+    {
+    }
+
 
     public string Owner { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

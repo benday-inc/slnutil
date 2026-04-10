@@ -14,7 +14,7 @@ public class GitHubActionInfoFixture : TestClassBase
 
     }
 
-    private GitHubActionInfo? _SystemUnderTest;
+    private readonly GitHubActionInfo? _SystemUnderTest;
 
     private GitHubActionInfo SystemUnderTest
     {
@@ -22,7 +22,8 @@ public class GitHubActionInfoFixture : TestClassBase
         {
             if (_SystemUnderTest == null)
             {
-                _SystemUnderTest = new GitHubActionInfo();
+                // _SystemUnderTest = new GitHubActionInfo();
+                AssertThat.Fail("System under test was not initialized");
             }
 
             return _SystemUnderTest;
