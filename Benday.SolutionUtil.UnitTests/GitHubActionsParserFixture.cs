@@ -49,7 +49,8 @@ public class GitHubActionsParserFixture : TestClassBase
         _SystemUnderTest = new GitHubActionsParser(testYaml);
 
         // act
-        var actual = SystemUnderTest.GetAllActions();
+        // var actual = SystemUnderTest.GetAllActions();
+        AssertThat.Fail("Not implemented yet");
 
         // assert
 
