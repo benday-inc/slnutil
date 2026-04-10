@@ -1,9 +1,14 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace Benday.SolutionUtil.Api.GitHubActions;
 
 public class GitHubActionInfo
 {
+    private static readonly Regex MajorTagPattern = new(@"^v\d+$", RegexOptions.IgnoreCase);
+    private static readonly Regex SpecificTagPattern = new(@"^v\d+\.\d+(\.\d+)*$", RegexOptions.IgnoreCase);
+    private static readonly Regex ShaPattern = new(@"^[0-9a-fA-F]{7,40}$");
+
     public GitHubActionInfo()
     {
     }
@@ -32,11 +37,38 @@ public class GitHubActionInfo
         Owner = nameParts[0];
         Name = nameParts[1];
         Version = parts[1];
+        VersionType = ResolveVersionType(Version);
     }
 
     public string Owner { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
+    public GitHubActionVersionType VersionType { get; set; } = GitHubActionVersionType.Unknown;
+
+    private static GitHubActionVersionType ResolveVersionType(string version)
+    {
+        if (string.IsNullOrEmpty(version))
+        {
+            return GitHubActionVersionType.Unknown;
+        }
+
+        if (MajorTagPattern.IsMatch(version))
+        {
+            return GitHubActionVersionType.MajorTag;
+        }
+
+        if (SpecificTagPattern.IsMatch(version))
+        {
+            return GitHubActionVersionType.SpecificTag;
+        }
+
+        if (ShaPattern.IsMatch(version))
+        {
+            return GitHubActionVersionType.Sha;
+        }
+
+        return GitHubActionVersionType.Branch;
+    }
 
     override public string ToString()
     {

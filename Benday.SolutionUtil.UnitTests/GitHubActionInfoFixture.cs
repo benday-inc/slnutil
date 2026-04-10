@@ -170,4 +170,94 @@ public class GitHubActionInfoFixture : TestClassBase
         // act & assert
         AssertThat.AreEqual(first.GetHashCode(), second.GetHashCode());
     }
+
+    [Fact]
+    public void VersionType_MajorTag_SingleDigit()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@v5");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.MajorTag, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_MajorTag_MultipleDigits()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@v12");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.MajorTag, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_SpecificTag_TwoPart()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@v5.1");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.SpecificTag, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_SpecificTag_ThreePart()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@v5.1.6");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.SpecificTag, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_Sha_Short()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@a5ac7e5");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.Sha, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_Sha_Full()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@a5ac7e51b28d7a44b5addd5ef1ef69cbfb6e4090");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.Sha, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_Branch_Main()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@main");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.Branch, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_Branch_Develop()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo("actions/setup-dotnet@develop");
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.Branch, actual.VersionType);
+    }
+
+    [Fact]
+    public void VersionType_DefaultConstructor_IsUnknown()
+    {
+        // arrange & act
+        var actual = new GitHubActionInfo();
+
+        // assert
+        AssertThat.AreEqual(GitHubActionVersionType.Unknown, actual.VersionType);
+    }
 }
