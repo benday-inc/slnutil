@@ -2,9 +2,11 @@
 using System.Text;
 
 using Benday.CommandsFramework;
+using Benday.CommandsFramework.DataFormatting;
 
 namespace Benday.SolutionUtil.Api;
-[Command(Name = Constants.CommandArgumentNameFindSolutions, 
+
+[Command(Name = Constants.CommandArgumentNameFindSolutions,
     Description = "Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis."
 )]
 public class FindSolutionsCommand : SynchronousCommand
@@ -143,47 +145,41 @@ public class FindSolutionsCommand : SynchronousCommand
         return returnValue.ToString();
     }
 
+
+
     private string ListSolutionProjects(string[] solutions, bool skipReferences)
     {
-        var returnValue = new StringBuilder();
+ 
+
+        var returnValue = new CsvWriter();
 
         // write header
-        returnValue.Append("solution-filename");
-        returnValue.Append(",");
-
-        returnValue.Append("project");
-        returnValue.Append(",");
-
-        returnValue.Append("reference-type");
-        returnValue.Append(",");
-
-        returnValue.Append("reference-target");
-        returnValue.Append(",");
-
-        returnValue.Append("outside-of-solution-root");
-        returnValue.Append(",");
-
-        returnValue.Append("reference-target-path");
-        returnValue.Append(",");
-
-        returnValue.Append("solution-path-depth");
-        returnValue.Append(",");
-
-        returnValue.Append("project-path-depth");
-        returnValue.Append(",");
-
-        returnValue.Append("solution-dir");
-        returnValue.Append(",");
-
-        returnValue.Append("project-dir");
-        returnValue.AppendLine();
-
+        returnValue.AddColumn("solution-filename");
+        
+        returnValue.AddColumn("project");
+        
+        returnValue.AddColumn("reference-type");
+        
+        returnValue.AddColumn("reference-target");
+        
+        returnValue.AddColumn("outside-of-solution-root");
+        
+        returnValue.AddColumn("reference-target-path");
+        
+        returnValue.AddColumn("solution-path-depth");
+        
+        returnValue.AddColumn("project-path-depth");
+        
+        returnValue.AddColumn("solution-dir");
+        
+        returnValue.AddColumn("project-dir");
+        
         foreach (var item in solutions)
         {
             AppendProjectInfo(returnValue, item, skipReferences);
         }
 
-        return returnValue.ToString();
+        return returnValue.ToCsvString();
     }
 
     private int GetPathDepth(string dirPath)
@@ -193,10 +189,10 @@ public class FindSolutionsCommand : SynchronousCommand
         return directories.Length;
     }
 
-    private void AppendProjectInfo(StringBuilder returnValue, string solutionPath, bool skipReferences)
+    private void AppendProjectInfo(CsvWriter returnValue, string solutionPath, bool skipReferences)
     {
         FileInfo solutionFileInfo = new FileInfo(solutionPath);
-        var solutionDir = solutionFileInfo.Directory ?? 
+        var solutionDir = solutionFileInfo.Directory ??
             throw new InvalidOperationException($"Solution file has a null directory.");
 
         var solutionPathDepth = GetPathDepth(solutionFileInfo.Directory.FullName);
@@ -249,7 +245,7 @@ public class FindSolutionsCommand : SynchronousCommand
         }
     }
 
-    private void AppendInfoForProjectWithReferences(StringBuilder returnValue,
+    private void AppendInfoForProjectWithReferences(CsvWriter returnValue,
         FileInfo solutionFileInfo,
         DirectoryInfo solutionDir,
         int solutionPathDepth,
@@ -258,18 +254,16 @@ public class FindSolutionsCommand : SynchronousCommand
     {
         foreach (var reference in references)
         {
-            returnValue.Append(solutionFileInfo.Name);
-            returnValue.Append(",");
+            var rowValues = new List<string>();
 
-            returnValue.Append(projectFileInfo.Name);
-            returnValue.Append(",");
+            rowValues.Add(solutionFileInfo.Name);
+
+            rowValues.Add(projectFileInfo.Name);
+            
 
             // reference stuff
-            returnValue.Append(reference.ReferenceType);
-            returnValue.Append(",");
-
-            returnValue.Append(Path.GetFileName(reference.ReferenceTarget));
-            returnValue.Append(",");            
+            rowValues.Add(reference.ReferenceType);
+            rowValues.Add(Path.GetFileName(reference.ReferenceTarget));
 
             if (projectFileInfo.Directory == null)
             {
@@ -278,115 +272,99 @@ public class FindSolutionsCommand : SynchronousCommand
 
             if (reference.ReferenceType == "project-ref")
             {
-                returnValue.Append(IsReferenceOutsideOfSolutionRoot(
+                rowValues.Add(IsReferenceOutsideOfSolutionRoot(
                     reference.ReferenceTarget,
                     solutionDir,
-                    projectFileInfo.Directory));
-                returnValue.Append(",");
+                    projectFileInfo.Directory).ToString());
             }
             else if (reference.ReferenceType == "binary-ref")
             {
-                returnValue.Append(IsReferenceOutsideOfSolutionRoot(
+                rowValues.Add(IsReferenceOutsideOfSolutionRoot(
                     reference.ReferenceTarget,
                     solutionDir,
-                    projectFileInfo.Directory));
-                returnValue.Append(",");
+                    projectFileInfo.Directory).ToString());
             }
             else
             {
-                returnValue.Append(false);
-                returnValue.Append(",");
+                rowValues.Add(false.ToString());
             }
 
-            returnValue.Append(reference.ReferenceTarget);
-            returnValue.Append(",");
-
+            rowValues.Add(reference.ReferenceTarget);
+            
             // file structure stuff
-            returnValue.Append(solutionPathDepth);
-            returnValue.Append(",");
+            rowValues.Add(solutionPathDepth.ToString());
+            rowValues.Add(GetPathDepth(projectFileInfo.Directory.FullName).ToString());
 
-            returnValue.Append(GetPathDepth(projectFileInfo.Directory.FullName));
-            returnValue.Append(",");
-
+            
             // solution stuff
-            returnValue.Append(solutionDir.FullName);
-            returnValue.Append(",");
+            rowValues.Add(solutionDir.FullName);
 
-            returnValue.Append(projectFileInfo.Directory.FullName);
-            returnValue.AppendLine();
+            rowValues.Add(projectFileInfo.Directory.FullName);
+
+            returnValue.AddRow(rowValues.ToArray());
         }
     }
 
-    private void AppendInfoForProjectNotFound(StringBuilder returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
+    private void AppendInfoForProjectNotFound(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
     {
-        returnValue.Append(solutionFileInfo.Name);
-        returnValue.Append(",");
+        var rowValues = new List<string>();
 
-        returnValue.Append(projectFileInfo.Name);
-        returnValue.Append(",");
-
+        rowValues.Add(solutionFileInfo.Name);
+        
+        rowValues.Add(projectFileInfo.Name);
+        
         // reference stuff
-        returnValue.Append("project-not-found");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
+        rowValues.Add("project-not-found");
+        
+        rowValues.Add("n/a");
+        
+        rowValues.Add("n/a");
+        
+        rowValues.Add("n/a");
+        
         // file structure stuff
-        returnValue.Append(solutionPathDepth);
-        returnValue.Append(",");
-
-        returnValue.Append(GetPathDepth(projectFileInfo.Directory!.FullName));
-        returnValue.Append(",");
-
+        rowValues.Add(solutionPathDepth.ToString());
+        
+        rowValues.Add(GetPathDepth(projectFileInfo.Directory!.FullName).ToString());
+        
         // solution stuff
-        returnValue.Append(solutionDir.FullName);
-        returnValue.Append(",");
+        rowValues.Add(solutionDir.FullName);
+        
+        rowValues.Add(projectFileInfo.Directory.FullName);
 
-        returnValue.Append(projectFileInfo.Directory.FullName);
-        returnValue.AppendLine();
+        returnValue.AddRow(rowValues.ToArray());
+        
     }
 
-    private void AppendInfoForProjectWithoutReferences(StringBuilder returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
+    private void AppendInfoForProjectWithoutReferences(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
     {
-        returnValue.Append(solutionFileInfo.Name);
-        returnValue.Append(",");
+        var rowValues = new List<string>();
 
-        returnValue.Append(projectFileInfo.Name);
-        returnValue.Append(",");
-
+        rowValues.Add(solutionFileInfo.Name);
+        
+        rowValues.Add(projectFileInfo.Name);
+        
         // reference stuff
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
-        returnValue.Append("n/a");
-        returnValue.Append(",");
-
+        rowValues.Add("n/a");
+        
+        rowValues.Add("n/a");
+        
+        rowValues.Add("n/a");
+        
+        rowValues.Add("n/a");
+        
         // file structure stuff
-        returnValue.Append(solutionPathDepth);
-        returnValue.Append(",");
-
-        returnValue.Append(GetPathDepth(projectFileInfo.Directory!.FullName));
-        returnValue.Append(",");
-
+        rowValues.Add(solutionPathDepth.ToString());
+        
+        rowValues.Add(GetPathDepth(projectFileInfo.Directory!.FullName).ToString());
+        
         // solution stuff
-        returnValue.Append(solutionDir.FullName);
-        returnValue.Append(",");
+        rowValues.Add(solutionDir.FullName);
+        
+        rowValues.Add(projectFileInfo.Directory.FullName);
 
-        returnValue.Append(projectFileInfo.Directory.FullName);
-        returnValue.AppendLine();
+        returnValue.AddRow(rowValues.ToArray());
+
     }
 
     private List<string> GetProjects(string solutionPath)
@@ -399,7 +377,7 @@ public class FindSolutionsCommand : SynchronousCommand
         startInfo.ArgumentList.Add("list");
         startInfo.RedirectStandardOutput = true;
 
-        var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Process.Start() returned a null.");;
+        var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Process.Start() returned a null."); ;
 
         process.WaitForExit();
 
