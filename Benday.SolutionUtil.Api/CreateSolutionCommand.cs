@@ -15,6 +15,12 @@ namespace Benday.SolutionUtil.Api;
 internal class CreateSolutionCommand : SynchronousCommand
 {
     public const string PackageName_Benday_Common_Testing = "Benday.Common.Testing";
+    public const string PackageName_Xunit = "xunit.v3";
+    public const string PackageName_Coverlet = "coverlet.collector";
+    public const string PackageName_Moq = "Moq";
+
+    public const string ProjectTypeForXunit = "console";
+
     public const string SourceDirNameInSolution = "src";
     public const string TestDirNameInSolution = "test";
 
@@ -543,7 +549,9 @@ internal class CreateSolutionCommand : SynchronousCommand
 
     private FileInfo CreateSolution(SolutionInfo solution, DirectoryInfo solutionDir)
     {
-        var solutionPath = Path.Combine(solutionDir.FullName, $"{solution.Name}.sln");
+        var solutionPathForSln = Path.Combine(solutionDir.FullName, $"{solution.Name}.sln");
+        var solutionPathForSlnx = Path.Combine(solutionDir.FullName, $"{solution.Name}.slnx");
+
 
         var startInfo = new ProcessStartInfo("dotnet", $"new sln -n {solution.Name}")
         {
@@ -555,7 +563,14 @@ internal class CreateSolutionCommand : SynchronousCommand
 
         RunProcess(startInfo);
 
-        solution.Path = new FileInfo(solutionPath);
+        if (File.Exists(solutionPathForSlnx) == true)
+        {
+            solution.Path = new FileInfo(solutionPathForSlnx);
+        }
+        else
+        {
+            solution.Path = new FileInfo(solutionPathForSln);
+        }        
 
         return solution.Path;
     }
@@ -589,16 +604,27 @@ internal class CreateSolutionCommand : SynchronousCommand
         webProject.IsPrimaryProject = true;
 
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
-        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
+        var unitTestProject = solution.AddProject("unittests", ProjectTypeForXunit, TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var integrationTestsProject = solution.AddProject("integrationtests", ProjectTypeForXunit, TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, webProject);
         solution.AddProjectReference(webProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
-        integrationTestsProject.AddPackageReference(PackageName_Benday_Common_Testing);
+        ConfigureXunitProject(unitTestProject);
+        ConfigureXunitProject(integrationTestsProject);
+    }
+
+    private void ConfigureXunitProject(ProjectInfo project)
+    {
+        project.AddDefaultFile("SampleXunitTestClass.cs", GetTemplateFile("xunit-sample-testclass"));
+
+        project.AddProjectProperty("OutputType", "exe");
+        project.AddPackageReference(PackageName_Benday_Common_Testing);
+        project.AddPackageReference(PackageName_Xunit);
+        project.AddPackageReference(PackageName_Coverlet);
+        project.AddPackageReference(PackageName_Moq);
     }
 
     private void CreateWebApiSolution(SolutionInfo solution, string rootNamespace)
@@ -607,16 +633,16 @@ internal class CreateSolutionCommand : SynchronousCommand
         webProject.IsPrimaryProject = true;
 
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
-        var integrationTestsProject = solution.AddProject("integrationtests", "xunit", TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
+        var unitTestProject = solution.AddProject("unittests", ProjectTypeForXunit, TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var integrationTestsProject = solution.AddProject("integrationtests", ProjectTypeForXunit, TestDirNameInSolution, $"{rootNamespace}.IntegrationTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, apiProject);
         solution.AddProjectReference(integrationTestsProject, webProject);
         solution.AddProjectReference(webProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
-        integrationTestsProject.AddPackageReference(PackageName_Benday_Common_Testing);
+        ConfigureXunitProject(unitTestProject);
+        ConfigureXunitProject(integrationTestsProject);
     }
 
 
@@ -626,12 +652,12 @@ internal class CreateSolutionCommand : SynchronousCommand
         consoleProject.IsPrimaryProject = true;
 
         var apiProject = solution.AddProject("api", "classlib", SourceDirNameInSolution, $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var unitTestProject = solution.AddProject("unittests", "classlib", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(consoleProject, apiProject);
 
-        unitTestProject.AddPackageReference(PackageName_Benday_Common_Testing);
+        ConfigureXunitProject(unitTestProject);
     }
 
     private void CreateMauiSolution(SolutionInfo solution, string rootNamespace)
@@ -642,7 +668,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         mauiProject.AddDefaultFile("MauiProgram.cs", GetTemplateFile("maui-mauiprogram-cs"));
 
         var apiProject = solution.AddProject("api", "mauilib", SourceDirNameInSolution, $"{rootNamespace}.Api");
-        var unitTestProject = solution.AddProject("unittests", "xunit", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
+        var unitTestProject = solution.AddProject("unittests", "classlib", TestDirNameInSolution, $"{rootNamespace}.UnitTests");
 
         solution.AddProjectReference(unitTestProject, apiProject);
         solution.AddProjectReference(mauiProject, apiProject);
@@ -653,6 +679,8 @@ internal class CreateSolutionCommand : SynchronousCommand
 
         mauiProject.AddPackageReference("CommunityToolkit.Maui");
         apiProject.AddPackageReference("CommunityToolkit.Maui");
+
+        ConfigureXunitProject(unitTestProject);
     }
 
 }

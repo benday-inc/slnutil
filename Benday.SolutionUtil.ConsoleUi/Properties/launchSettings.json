@@ -1,12 +1,24 @@
 {
   "profiles": {
-    "Benday.SolutionUtil.ConsoleUi": {
-      "commandName": "Project"
-    },
     "update github yaml": {
       "commandName": "Project",
       "commandLineArgs": "updategithubactionsversions",
       "workingDirectory": "/Users/benday/code/benday-inc/benday-cms/.github/workflows"
+    },
+    "findsolutions (.net core)": {
+      "commandName": "Project",
+      "commandLineArgs": "findsolutions /listprojects",
+      "workingDirectory": "C:\\code\\benday-inc\\slnutil"
+    },
+    "findsolutions (.net framework)": {
+      "commandName": "Project",
+      "commandLineArgs": "findsolutions /listprojects",
+      "workingDirectory": "C:\\code\\repos\\misc-201312\\Benday.MtmUtility"
+    },
+    "createsolution (console)": {
+      "commandName": "Project",
+      "commandLineArgs": "createsolution console Benday.Test123",
+      "workingDirectory": "C:\\code\\temp\\20260515_125154"
     }
   }
 }

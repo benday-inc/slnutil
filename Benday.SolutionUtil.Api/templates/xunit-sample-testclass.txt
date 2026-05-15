@@ -1,0 +1,27 @@
+using Benday.Common.Testing;
+using Xunit;
+
+namespace %%PROJECT_NAMESPACE%%;
+
+public class SampleXunitTestClass : TestClassBase
+{
+    public SampleXunitTestClass(ITestOutputHelper output) : base(output)
+    {
+
+    }
+
+    [Fact]
+    public void SampleTest1()
+    {
+        // arrange
+        var expected = 5;
+        var input1 = 2;
+        var input2 = 3;
+
+        // act
+        var actual = input1 + input2;
+
+        // assert
+        AssertThat.AreEqual(expected, actual, "The math is wrong");
+    }
+}
