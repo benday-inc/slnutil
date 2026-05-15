@@ -2,6 +2,7 @@
 using System.Text;
 
 using Benday.CommandsFramework;
+using Benday.Common;
 
 using Microsoft.IdentityModel.Tokens;
 namespace Benday.SolutionUtil.Api;
@@ -341,8 +342,8 @@ public class ClassDiagramCommand : SynchronousCommand
             WriteLine($"Skipping {type.FullName} because it does not match namespace filter '{filterByNamespace}'.");
             returnValue = false;
         }
-
-        if (filterByTypeNames.IsNullOrEmpty() == true)
+        
+        if (filterByTypeNames.Length == 0)
         {
             // no filter
         }
