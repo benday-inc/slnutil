@@ -10,21 +10,27 @@ class Program
 {
     static void Main(string[] args)
     {
-        var assembly = typeof(SampleCommand).Assembly;
-
-        var versionInfo =
-            FileVersionInfo.GetVersionInfo(
-                Assembly.GetExecutingAssembly().Location);
-
-        var options = new DefaultProgramOptions();
-
-        options.Version = $"v{versionInfo.FileVersion}";
-        options.ApplicationName = "[applicaiton friendly name here]";
-        options.Website = "[add your website url here]";
-        options.UsesConfiguration = false;
-
-        var program = new DefaultProgram(options, assembly);
-
-        program.Run(args);
+        CommandsApp
+            .Create<SampleAsyncCommand>(args)
+            .WithAppSettings()
+            .WithConfigFile("appsettings.development.json", optional: true)
+            .WithConfigFile("appsettings.unversioned.json", optional: true)
+            .WithAppInfo(
+                "Sample Tool using Commands Framework", 
+                "https://www.benday.com")
+            .WithVersionFromAssembly()
+            .UsesConfiguration(true)
+            .ConfigureOptions(options =>
+            {
+                // Additional options configuration if needed
+                options.StrictArgumentValidation = true;
+                options.ConfigurationFolderName = "SampleToolConfig";
+            })
+            .ConfigureServices(services =>
+            {
+                // Register your services for dependency injection
+                // services.AddSingleton<IGreetingService, GreetingService>();
+            })
+            .Run();
     }
 }

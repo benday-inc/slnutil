@@ -241,7 +241,7 @@ internal class CreateSolutionCommand : SynchronousCommand
         AddDefaultFile(solution, "install.ps1", "commands-install-ps1");
         AddDefaultFile(solution, "uninstall.ps1", "commands-uninstall-ps1");
         AddDefaultFile(consoleProject, "Program.cs", "commands-program-cs");
-        AddDefaultFile(apiProject, "SampleCommand.cs", "commands-sample-command-cs");
+        // AddDefaultFile(apiProject, "SampleCommand.cs", "commands-sample-command-cs");
         AddDefaultFile(apiProject, "SampleAsyncCommand.cs", "commands-sample-async-command-cs");
 
         consoleProject.AddProjectProperty("PackAsTool", "True");
