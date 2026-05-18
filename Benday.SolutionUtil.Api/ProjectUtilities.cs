@@ -111,29 +111,36 @@ public static class ProjectUtilities
             var root = XElement.Parse(projectFileContents);
 
             var projectReferences = GetElements(root, "ItemGroup", "ProjectReference");
-            var packageReferences = GetElements(root, "ItemGroup", "Reference");
+            var packageReferenceElements = GetElements(root, "ItemGroup", "PackageReference");
+            var oldStyleReferenceElements = GetElements(root, "ItemGroup", "Reference");
 
-            List<XElement> nugetPackageRefs = new List<XElement>();
-            List<XElement> binaryRefs = new List<XElement>();
+            var frameworkRefs = new List<XElement>();
+            var nugetViaPackagesConfigRefs = new List<XElement>();
+            var binaryRefs = new List<XElement>();
 
-            foreach (var packageRef in packageReferences)
+            foreach (var oldStyleRef in oldStyleReferenceElements)
             {
-                if (packageRef.HasElements == false)
+                var hintPathElement = oldStyleRef.ElementByLocalName("HintPath");
+
+                if (hintPathElement == null)
                 {
-                    nugetPackageRefs.Add(packageRef);
+                    // <Reference Include="System" /> style — GAC / framework assembly
+                    frameworkRefs.Add(oldStyleRef);
                 }
-                else if (packageRef.ElementByLocalName("HintPath") != null)
+                else if (HintPathPointsIntoPackagesFolder(hintPathElement.Value))
                 {
-                    binaryRefs.Add(packageRef);
+                    nugetViaPackagesConfigRefs.Add(oldStyleRef);
                 }
                 else
                 {
-                    nugetPackageRefs.Add(packageRef);
+                    binaryRefs.Add(oldStyleRef);
                 }
             }
 
             AddReferenceInfos(returnValues, "project-ref", projectReferences);
-            AddReferenceInfos(returnValues, "package-ref", nugetPackageRefs);
+            AddReferenceInfos(returnValues, "package-ref", packageReferenceElements);
+            AddReferenceInfos(returnValues, "framework-ref", frameworkRefs);
+            AddReferenceInfos(returnValues, "nuget-via-packages-config", nugetViaPackagesConfigRefs);
             AddReferenceInfos(returnValues, "binary-ref", binaryRefs);
 
             return returnValues;
@@ -141,7 +148,27 @@ public static class ProjectUtilities
         catch
         {
             return returnValues;
-        }        
+        }
+    }
+
+    public static bool HintPathPointsIntoPackagesFolder(string? hintPath)
+    {
+        if (string.IsNullOrWhiteSpace(hintPath))
+        {
+            return false;
+        }
+
+        var segments = hintPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var segment in segments)
+        {
+            if (string.Equals(segment, "packages", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void AddReferenceInfos(List<ReferenceInfo> returnValues, string referenceType,
@@ -315,6 +342,88 @@ public static class ProjectUtilities
 
             return null;
         }
+    }
+
+    public static bool ProjectUsesPackagesConfig(string projectFilePath)
+    {
+        var projectDir = Path.GetDirectoryName(projectFilePath);
+
+        if (string.IsNullOrEmpty(projectDir))
+        {
+            return false;
+        }
+
+        return File.Exists(Path.Combine(projectDir, "packages.config"));
+    }
+
+    public static string GetProjectTargetFrameworkShortForm(string projectFilePath)
+    {
+        if (File.Exists(projectFilePath) == false)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var doc = XDocument.Load(projectFilePath);
+            var root = doc.Root;
+
+            if (root == null || root.Name.LocalName != "Project")
+            {
+                return string.Empty;
+            }
+
+            var propertyGroups = root.ElementsByLocalName("PropertyGroup");
+
+            foreach (var propertyGroup in propertyGroups)
+            {
+                var sdkStyle = propertyGroup.ElementByLocalName("TargetFramework");
+
+                if (sdkStyle != null && string.IsNullOrWhiteSpace(sdkStyle.Value) == false)
+                {
+                    return sdkStyle.Value.Trim();
+                }
+
+                var sdkStyleMulti = propertyGroup.ElementByLocalName("TargetFrameworks");
+
+                if (sdkStyleMulti != null && string.IsNullOrWhiteSpace(sdkStyleMulti.Value) == false)
+                {
+                    return sdkStyleMulti.Value.Trim();
+                }
+
+                var oldStyle = propertyGroup.ElementByLocalName("TargetFrameworkVersion");
+
+                if (oldStyle != null && string.IsNullOrWhiteSpace(oldStyle.Value) == false)
+                {
+                    return NormalizeFrameworkVersionToShortForm(oldStyle.Value);
+                }
+            }
+
+            return string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    public static string NormalizeFrameworkVersionToShortForm(string version)
+    {
+        if (string.IsNullOrWhiteSpace(version))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = version.Trim();
+
+        if (trimmed.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+        {
+            // v4.8 → net48, v4.7.2 → net472
+            var digitsOnly = trimmed.Substring(1).Replace(".", string.Empty);
+            return $"net{digitsOnly}";
+        }
+
+        return trimmed;
     }
 
     public static string GetFrameworkVersion(string dir, string project)

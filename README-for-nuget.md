@@ -23,6 +23,8 @@ YouTube: https://www.youtube.com/@_benday
     * Commands Utility application using [Benday.CommandsFramework](https://www.nuget.org/packages/Benday.CommandsFramework). This helps you to quickly write CLI utilities that run as a [dotnet tool](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install). 
 * Create class diagrams for all or part of a project using [Mermaid](https://mermaid.js.org)
 * Update the .NET Framework version for all projects in a solution
+* Enable Roslyn code analysis (`Microsoft.CodeAnalysis.NetAnalyzers`) across a solution by creating or merging a `Directory.Build.props` at the solution root
+* Detect projects in a solution that still use `packages.config` (vs. modern `PackageReference`) for NuGet management
 * Set or increment the assembly version for a project
 * Set a project property value in a csproj file
 * Deploy [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) [Migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli) from a DLL (aka. deploy migrations without the source code)
@@ -56,6 +58,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | createsolution | Create a solution and projects |
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
+| enablecodeanalysis | Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root. |
 | findsolutions | Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis. |
 | formatjson | Formats JSON files |
 | formatxml | Formats XML files |
@@ -144,8 +147,41 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | rootdir | Optional | String | Starting directory. If not supplied, the tool uses the current directory. |
 | keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 | keepnodemodules | Optional | Boolean | If true, skips delete of node_modules folders. Default value is false. |
+## enablecodeanalysis
+**Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root.**
+
+Scans every project in the solution and decides what's needed in `Directory.Build.props`:
+
+* For solutions containing **.NET Framework** projects that use `PackageReference`, the command adds a `PackageReference` to `Microsoft.CodeAnalysis.NetAnalyzers` (Framework projects don't have the analyzers built in).
+* For solutions containing **only .NET 5+** projects, the analyzer `PackageReference` is omitted because the SDK ships those analyzers.
+
+In both cases the command sets `RunCodeAnalysis=false` (suppresses the deprecated FxCopCmd.exe post-build step), `EnableNETAnalyzers=true`, and `AnalysisLevel` (default `latest-Minimum`).
+
+If a `Directory.Build.props` already exists, the command merges into it via XML parsing rather than string manipulation: existing properties and existing `PackageReference` entries are preserved, and only missing entries are added. Re-runs are idempotent.
+
+Projects that still use `packages.config` are listed as warnings — they will not pick up the analyzer `PackageReference` from `Directory.Build.props` and need to be migrated to `PackageReference` to benefit (in Visual Studio: right-click `packages.config` → Migrate packages.config to PackageReference).
+
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| solutionpath | Optional | String | Solution to update. If omitted, searches the current directory for a .sln or .slnx file. |
+| analysis-level | Optional | String | Value for the `AnalysisLevel` MSBuild property. Default `latest-Minimum`. Other values: `latest-Default`, `latest-Recommended`, `latest-All`, `latest`. |
+| analyzer-version | Optional | String | Version of `Microsoft.CodeAnalysis.NetAnalyzers` to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
+| dry-run | Optional | Boolean | Preview what would change without writing any files. |
+| create-editorconfig | Optional | Boolean | Also create a starter `.editorconfig` at the solution root if one doesn't already exist. |
 ## findsolutions
 **Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis.**
+
+When `listprojects` and `csv` are both set, the output CSV includes per-project columns: `uses-packages-config` (True/False) and `target-framework` (TFM short form, e.g. `net48`, `net8.0`, `netstandard2.1`).
+
+The `reference-type` column distinguishes five kinds of references:
+
+* `project-ref` — `<ProjectReference>` entries.
+* `package-ref` — modern SDK-style `<PackageReference>` entries.
+* `framework-ref` — bare `<Reference Include="System.*" />` entries (GAC / framework assemblies).
+* `nuget-via-packages-config` — `<Reference>` entries whose `HintPath` points into a `packages\` folder (the NuGet folder used by `packages.config` projects).
+* `binary-ref` — `<Reference>` entries whose `HintPath` points elsewhere (direct DLL references to binaries checked into source control or referenced from an external location).
+
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |

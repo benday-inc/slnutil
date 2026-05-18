@@ -171,9 +171,13 @@ public class FindSolutionsCommand : SynchronousCommand
         returnValue.AddColumn("project-path-depth");
         
         returnValue.AddColumn("solution-dir");
-        
+
         returnValue.AddColumn("project-dir");
-        
+
+        returnValue.AddColumn("uses-packages-config");
+
+        returnValue.AddColumn("target-framework");
+
         foreach (var item in solutions)
         {
             AppendProjectInfo(returnValue, item, skipReferences);
@@ -205,13 +209,21 @@ public class FindSolutionsCommand : SynchronousCommand
         {
             projectFileInfo = new FileInfo(Path.Combine(solutionDir.FullName, item));
 
+            var usesPackagesConfig = projectFileInfo.Exists
+                ? ProjectUtilities.ProjectUsesPackagesConfig(projectFileInfo.FullName)
+                : false;
+
+            var targetFramework = projectFileInfo.Exists
+                ? ProjectUtilities.GetProjectTargetFrameworkShortForm(projectFileInfo.FullName)
+                : string.Empty;
+
             if (projectFileInfo.Exists == false)
             {
-                AppendInfoForProjectNotFound(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo);
+                AppendInfoForProjectNotFound(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo, usesPackagesConfig, targetFramework);
             }
             else if (skipReferences == true)
             {
-                AppendInfoForProjectWithoutReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo);
+                AppendInfoForProjectWithoutReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo, usesPackagesConfig, targetFramework);
             }
             else
             {
@@ -219,11 +231,11 @@ public class FindSolutionsCommand : SynchronousCommand
 
                 if (references == null || references.Count == 0)
                 {
-                    AppendInfoForProjectWithoutReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo);
+                    AppendInfoForProjectWithoutReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo, usesPackagesConfig, targetFramework);
                 }
                 else
                 {
-                    AppendInfoForProjectWithReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo, references);
+                    AppendInfoForProjectWithReferences(returnValue, solutionFileInfo, solutionDir, solutionPathDepth, projectFileInfo, references, usesPackagesConfig, targetFramework);
                 }
             }
         }
@@ -250,7 +262,9 @@ public class FindSolutionsCommand : SynchronousCommand
         DirectoryInfo solutionDir,
         int solutionPathDepth,
         FileInfo projectFileInfo,
-        List<ReferenceInfo> references)
+        List<ReferenceInfo> references,
+        bool usesPackagesConfig,
+        string targetFramework)
     {
         foreach (var reference in references)
         {
@@ -259,7 +273,7 @@ public class FindSolutionsCommand : SynchronousCommand
             rowValues.Add(solutionFileInfo.Name);
 
             rowValues.Add(projectFileInfo.Name);
-            
+
 
             // reference stuff
             rowValues.Add(reference.ReferenceType);
@@ -270,14 +284,9 @@ public class FindSolutionsCommand : SynchronousCommand
                 throw new InvalidOperationException($"projectFileInfo.Directory is null.");
             }
 
-            if (reference.ReferenceType == "project-ref")
-            {
-                rowValues.Add(IsReferenceOutsideOfSolutionRoot(
-                    reference.ReferenceTarget,
-                    solutionDir,
-                    projectFileInfo.Directory).ToString());
-            }
-            else if (reference.ReferenceType == "binary-ref")
+            if (reference.ReferenceType == "project-ref" ||
+                reference.ReferenceType == "binary-ref" ||
+                reference.ReferenceType == "nuget-via-packages-config")
             {
                 rowValues.Add(IsReferenceOutsideOfSolutionRoot(
                     reference.ReferenceTarget,
@@ -290,78 +299,93 @@ public class FindSolutionsCommand : SynchronousCommand
             }
 
             rowValues.Add(reference.ReferenceTarget);
-            
+
             // file structure stuff
             rowValues.Add(solutionPathDepth.ToString());
             rowValues.Add(GetPathDepth(projectFileInfo.Directory.FullName).ToString());
 
-            
+
             // solution stuff
             rowValues.Add(solutionDir.FullName);
 
             rowValues.Add(projectFileInfo.Directory.FullName);
 
+            // per-project metadata
+            rowValues.Add(usesPackagesConfig.ToString());
+
+            rowValues.Add(targetFramework);
+
             returnValue.AddRow(rowValues.ToArray());
         }
     }
 
-    private void AppendInfoForProjectNotFound(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
+    private void AppendInfoForProjectNotFound(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo, bool usesPackagesConfig, string targetFramework)
     {
         var rowValues = new List<string>();
 
         rowValues.Add(solutionFileInfo.Name);
-        
+
         rowValues.Add(projectFileInfo.Name);
-        
+
         // reference stuff
         rowValues.Add("project-not-found");
-        
+
         rowValues.Add("n/a");
-        
+
         rowValues.Add("n/a");
-        
+
         rowValues.Add("n/a");
-        
+
         // file structure stuff
         rowValues.Add(solutionPathDepth.ToString());
-        
+
         rowValues.Add(GetPathDepth(projectFileInfo.Directory!.FullName).ToString());
-        
+
         // solution stuff
         rowValues.Add(solutionDir.FullName);
-        
+
         rowValues.Add(projectFileInfo.Directory.FullName);
 
+        // per-project metadata
+        rowValues.Add(usesPackagesConfig.ToString());
+
+        rowValues.Add(targetFramework);
+
         returnValue.AddRow(rowValues.ToArray());
-        
+
     }
 
-    private void AppendInfoForProjectWithoutReferences(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo)
+    private void AppendInfoForProjectWithoutReferences(CsvWriter returnValue, FileInfo solutionFileInfo, DirectoryInfo solutionDir, int solutionPathDepth, FileInfo projectFileInfo, bool usesPackagesConfig, string targetFramework)
     {
         var rowValues = new List<string>();
 
         rowValues.Add(solutionFileInfo.Name);
-        
+
         rowValues.Add(projectFileInfo.Name);
-        
+
         // reference stuff
         rowValues.Add("n/a");
-        
+
         rowValues.Add("n/a");
-        
+
         rowValues.Add("n/a");
-        
+
         rowValues.Add("n/a");
-        
+
         // file structure stuff
         rowValues.Add(solutionPathDepth.ToString());
-        
+
         rowValues.Add(GetPathDepth(projectFileInfo.Directory!.FullName).ToString());
-        
+
         // solution stuff
         rowValues.Add(solutionDir.FullName);
-        
+
         rowValues.Add(projectFileInfo.Directory.FullName);
+
+        // per-project metadata
+        rowValues.Add(usesPackagesConfig.ToString());
+
+        rowValues.Add(targetFramework);
 
         returnValue.AddRow(rowValues.ToArray());
 

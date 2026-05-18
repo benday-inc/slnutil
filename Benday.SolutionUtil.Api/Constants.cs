@@ -97,4 +97,9 @@ public static class Constants
     public const string ArgumentNameSqlFile = "sqlfile";
     public const string ArgumentNameDisplayResults = "display";
 
+    public const string CommandArgumentNameEnableCodeAnalysis = "enablecodeanalysis";
+    public const string ArgumentNameAnalysisLevel = "analysis-level";
+    public const string ArgumentNameAnalyzerVersion = "analyzer-version";
+    public const string ArgumentNameDryRun = "dry-run";
+    public const string ArgumentNameCreateEditorConfig = "create-editorconfig";
 }

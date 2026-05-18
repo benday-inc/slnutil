@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" findsolutions /listprojects /csv)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" findsolutions /help)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\")",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" help findsolutions)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" findsolutions)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" findsolutions /listprojects:true /csv:true)",
+      "Bash(dotnet \"C:/code/benday-inc/slnutil/Benday.SolutionUtil.ConsoleUi/bin/Debug/net10.0/slnutil.dll\" findsolutions /rootdir:\"C:/code/temp/20260518_133710/DotnetFrameworkApp\" /listprojects:true /csv:true)",
+      "Bash(dotnet *)",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\" \"C:/code/temp/test-merge\")",
+      "Bash(rm \"C:/code/temp/test-merge/Directory.Build.props\")",
+      "Read(//c/code/temp/**)",
+      "Bash(rm -rf \"C:/code/temp/test-merge\")",
+      "Bash(mkdir -p \"C:/code/temp/test-merge\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-merge/\")",
+      "Bash(xxd)",
+      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" --filter-class Benday.SolutionUtil.UnitTests.ProjectUtilitiesFixture)",
+      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" --help)",
+      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" -filter \"/*/*/ProjectUtilitiesFixture/*\")",
+      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\")"
+    ]
+  }
+}
