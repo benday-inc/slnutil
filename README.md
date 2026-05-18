@@ -159,7 +159,19 @@ In both cases the command sets `RunCodeAnalysis=false` (suppresses the deprecate
 
 If a `Directory.Build.props` already exists, the command merges into it via XML parsing rather than string manipulation: existing properties and existing `PackageReference` entries are preserved, and only missing entries are added. Re-runs are idempotent.
 
-Projects that still use `packages.config` are listed as warnings — they will not pick up the analyzer `PackageReference` from `Directory.Build.props` and need to be migrated to `PackageReference` to benefit (in Visual Studio: right-click `packages.config` → Migrate packages.config to PackageReference).
+Projects that still use `packages.config` are listed as warnings — they will not pick up the analyzer `PackageReference` from `Directory.Build.props` and need to be migrated to `PackageReference` to benefit (in Visual Studio: right-click `packages.config` → Migrate packages.config to PackageReference). If you don't want to migrate, run with `/per-project:true` instead (see below).
+
+#### Per-project mode (`/per-project:true`)
+
+For solutions where you don't want to migrate packages.config projects to PackageReference, pass `/per-project:true`. Instead of writing a `Directory.Build.props`, slnutil edits each project individually:
+
+* **packages.config projects** get an entry added to `packages.config` (`<package id="Microsoft.CodeAnalysis.NetAnalyzers" ... developmentDependency="true" />`), plus `<Analyzer>` elements added to the `.csproj` pointing at the analyzer DLLs in the solution-level `packages\` folder.
+* **.NET Framework projects using PackageReference** get the analyzer `PackageReference` added directly to the `.csproj`.
+* **.NET 5+ projects** only get the MSBuild properties set (analyzers ship with the SDK).
+
+In every case the command force-sets `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, and `AnalysisLevel` in each `.csproj`'s `<PropertyGroup>`. Existing values for those three properties are overwritten so behavior is consistent across the solution. All other csproj content is preserved, including the old-style MSBuild xmlns. Re-runs are idempotent.
+
+After running in per-project mode against packages.config projects, run `nuget.exe restore <solution>` (or Visual Studio → Tools → NuGet Package Manager → Restore NuGet Packages) so the analyzer DLLs actually land in the `packages\` folder.
 
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
@@ -167,6 +179,7 @@ Projects that still use `packages.config` are listed as warnings — they will n
 | solutionpath | Optional | String | Solution to update. If omitted, searches the current directory for a .sln or .slnx file. |
 | analysis-level | Optional | String | Value for the `AnalysisLevel` MSBuild property. Default `latest-Minimum`. Other values: `latest-Default`, `latest-Recommended`, `latest-All`, `latest`. |
 | analyzer-version | Optional | String | Version of `Microsoft.CodeAnalysis.NetAnalyzers` to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
+| per-project | Optional | Boolean | Install analyzers into each project individually (modifies csproj + packages.config) instead of using `Directory.Build.props`. Required for solutions where projects use `packages.config`. |
 | dry-run | Optional | Boolean | Preview what would change without writing any files. |
 | create-editorconfig | Optional | Boolean | Also create a starter `.editorconfig` at the solution root if one doesn't already exist. |
 ## <a name="findsolutions"></a> findsolutions

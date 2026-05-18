@@ -20,7 +20,13 @@
       "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" --filter-class Benday.SolutionUtil.UnitTests.ProjectUtilitiesFixture)",
       "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" --help)",
       "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\" -filter \"/*/*/ProjectUtilitiesFixture/*\")",
-      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\")"
+      "Bash(\"C:/code/benday-inc/slnutil/Benday.SolutionUtil.UnitTests/bin/Debug/net10.0/Benday.SolutionUtil.UnitTests.exe\")",
+      "Bash(rm -rf \"C:/code/temp/test-perproject\")",
+      "Bash(mkdir -p \"C:/code/temp/test-perproject\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-perproject/\")",
+      "Bash(rm -rf \"C:/code/temp/test-perproject-sdk\")",
+      "Bash(mkdir -p \"C:/code/temp/test-perproject-sdk\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/Benday.Asdf123\"/* \"C:/code/temp/test-perproject-sdk/\")"
     ]
   }
 }

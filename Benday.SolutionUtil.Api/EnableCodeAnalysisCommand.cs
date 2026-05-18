@@ -11,7 +11,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameEnableCodeAnalysis,
     IsAsync = false,
-    Description = "Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root.")]
+    Description = "Enable Roslyn code analysis across a solution. Default mode creates/merges Directory.Build.props at the solution root. Use --per-project to install analyzers directly into each csproj (required for packages.config projects).")]
 public class EnableCodeAnalysisCommand : SynchronousCommand
 {
     private const string AnalyzerPackageId = "Microsoft.CodeAnalysis.NetAnalyzers";
@@ -47,6 +47,10 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             .AsNotRequired().AllowEmptyValue()
             .WithDescription("Also create a starter .editorconfig at the solution root if one doesn't already exist.");
 
+        args.AddBoolean(Constants.ArgumentNamePerProject)
+            .AsNotRequired().AllowEmptyValue()
+            .WithDescription("Install analyzers into each project individually (modifies csproj + packages.config) instead of using Directory.Build.props. Required for solutions where projects use packages.config.");
+
         return args;
     }
 
@@ -77,19 +81,27 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         var hasFrameworkProjects = projects.Any(p => p.IsNetFramework);
         var packagesConfigProjects = projects.Where(p => p.UsesPackagesConfig).ToList();
+        var perProject = Arguments.GetBooleanValue(Constants.ArgumentNamePerProject);
 
         var analysisLevel = Arguments.GetStringValue(Constants.ArgumentNameAnalysisLevel);
         var analyzerVersion = ResolveAnalyzerVersion(hasFrameworkProjects);
 
-        var propsPath = Path.Combine(solutionDir, "Directory.Build.props");
-        WriteDirectoryBuildProps(propsPath, hasFrameworkProjects, analyzerVersion, analysisLevel);
+        if (perProject)
+        {
+            ApplyPerProject(projects, analyzerVersion, analysisLevel, solutionDir);
+        }
+        else
+        {
+            var propsPath = Path.Combine(solutionDir, "Directory.Build.props");
+            WriteDirectoryBuildProps(propsPath, hasFrameworkProjects, analyzerVersion, analysisLevel);
+        }
 
         if (Arguments.GetBooleanValue(Constants.ArgumentNameCreateEditorConfig))
         {
             WriteStarterEditorConfig(Path.Combine(solutionDir, ".editorconfig"));
         }
 
-        if (packagesConfigProjects.Count > 0)
+        if (perProject == false && packagesConfigProjects.Count > 0)
         {
             WriteLine(string.Empty);
             WriteLine($"WARNING: {packagesConfigProjects.Count} project(s) use packages.config and will not pick up the analyzer:");
@@ -97,16 +109,28 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             {
                 WriteLine($"  - {project.FileName}");
             }
-            WriteLine("  Consider migrating these projects to PackageReference format.");
-            WriteLine("  In Visual Studio: right-click packages.config -> Migrate packages.config to PackageReference.");
+            WriteLine("  Consider migrating these projects to PackageReference format,");
+            WriteLine("  or re-run with /per-project:true to install the analyzer directly into each project.");
         }
 
         WriteLine(string.Empty);
         WriteLine("Next steps:");
-        WriteLine("  1. Restore NuGet packages (dotnet restore or VS -> Restore NuGet Packages)");
-        WriteLine("  2. Rebuild the solution");
-        WriteLine("  3. Check the Error List in VS (make sure Warnings and Messages are toggled on)");
-        WriteLine("  4. Adjust rule severities in .editorconfig as needed");
+        if (perProject && packagesConfigProjects.Count > 0)
+        {
+            WriteLine("  1. Run `nuget restore` on the solution to download the analyzer DLLs into the packages folder:");
+            WriteLine($"       nuget.exe restore \"{solutionPath}\"");
+            WriteLine("     (or Visual Studio: Tools -> NuGet Package Manager -> Restore NuGet Packages)");
+            WriteLine("  2. Rebuild the solution");
+            WriteLine("  3. Check the Error List in VS (make sure Warnings and Messages are toggled on)");
+            WriteLine("  4. Adjust rule severities in .editorconfig as needed");
+        }
+        else
+        {
+            WriteLine("  1. Restore NuGet packages (dotnet restore or VS -> Restore NuGet Packages)");
+            WriteLine("  2. Rebuild the solution");
+            WriteLine("  3. Check the Error List in VS (make sure Warnings and Messages are toggled on)");
+            WriteLine("  4. Adjust rule severities in .editorconfig as needed");
+        }
     }
 
     private string ResolveSolutionPath()
@@ -370,6 +394,310 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         propertyGroup.Add(new XElement(propertyName, propertyValue));
         changes.Add($"Set {propertyName} = {propertyValue}");
+    }
+
+    private void ApplyPerProject(List<ProjectScanResult> projects, string analyzerVersion, string analysisLevel, string solutionDir)
+    {
+        WriteLine(string.Empty);
+        var versionDescription = string.IsNullOrEmpty(analyzerVersion) ? "(SDK built-in analyzers)" : analyzerVersion;
+        WriteLine($"{_dryRunPrefix}Installing {AnalyzerPackageId} {versionDescription} per-project...");
+        WriteLine(string.Empty);
+
+        var packagesDir = Path.Combine(solutionDir, "packages");
+
+        foreach (var project in projects)
+        {
+            WriteLine($"  {project.FileName}:");
+
+            if (string.IsNullOrEmpty(project.TargetFramework))
+            {
+                WriteLine("    (skipped — could not determine target framework)");
+                continue;
+            }
+
+            try
+            {
+                if (project.UsesPackagesConfig)
+                {
+                    ApplyPackagesConfigProject(project, analyzerVersion, analysisLevel, packagesDir);
+                }
+                else if (project.IsNetFramework)
+                {
+                    ApplyFrameworkPackageReferenceProject(project, analyzerVersion, analysisLevel);
+                }
+                else
+                {
+                    ApplySdkProject(project, analysisLevel);
+                }
+            }
+            catch (Exception ex) when (ex is not KnownException)
+            {
+                throw new KnownException($"Failed to update '{project.FileName}': {ex.Message}");
+            }
+        }
+    }
+
+    private void ApplyPackagesConfigProject(ProjectScanResult project, string analyzerVersion, string analysisLevel, string packagesDir)
+    {
+        if (string.IsNullOrEmpty(analyzerVersion))
+        {
+            throw new KnownException($"Analyzer version is required for packages.config project '{project.FileName}'.");
+        }
+
+        var projectDir = Path.GetDirectoryName(project.FullPath)!;
+        var packagesConfigPath = Path.Combine(projectDir, "packages.config");
+
+        UpdatePackagesConfigFile(packagesConfigPath, analyzerVersion, project.TargetFramework);
+
+        var csprojChanges = new List<string>();
+        var doc = XDocument.Load(project.FullPath);
+        var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
+
+        AddAnalyzerEntriesToCsproj(root, projectDir, packagesDir, analyzerVersion, csprojChanges);
+        SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
+        SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
+
+        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
+    }
+
+    private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, string analyzerVersion, string analysisLevel)
+    {
+        if (string.IsNullOrEmpty(analyzerVersion))
+        {
+            throw new KnownException($"Analyzer version is required for framework project '{project.FileName}'.");
+        }
+
+        var csprojChanges = new List<string>();
+        var doc = XDocument.Load(project.FullPath);
+        var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
+
+        AddAnalyzerPackageReference(root, analyzerVersion, csprojChanges);
+        SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
+        SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
+
+        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
+    }
+
+    private void ApplySdkProject(ProjectScanResult project, string analysisLevel)
+    {
+        var csprojChanges = new List<string>();
+        var doc = XDocument.Load(project.FullPath);
+        var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
+
+        SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
+        SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
+
+        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
+    }
+
+    private void UpdatePackagesConfigFile(string packagesConfigPath, string analyzerVersion, string targetFramework)
+    {
+        XDocument doc;
+        if (File.Exists(packagesConfigPath))
+        {
+            doc = XDocument.Load(packagesConfigPath);
+            if (doc.Root == null || doc.Root.Name.LocalName != "packages")
+            {
+                throw new KnownException($"'{packagesConfigPath}' does not have a <packages> root element.");
+            }
+        }
+        else
+        {
+            doc = new XDocument(new XElement("packages"));
+        }
+
+        var root = doc.Root!;
+
+        var existing = root.Elements()
+            .Where(e => e.Name.LocalName == "package")
+            .FirstOrDefault(e => string.Equals(e.AttributeValue("id"), AnalyzerPackageId, StringComparison.OrdinalIgnoreCase));
+
+        if (existing != null)
+        {
+            var existingVersion = existing.AttributeValue("version");
+            if (string.Equals(existingVersion, analyzerVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                WriteLine($"    packages.config: {AnalyzerPackageId} {analyzerVersion} already installed");
+                return;
+            }
+
+            existing.SetAttributeValue("version", analyzerVersion);
+            existing.SetAttributeValue("targetFramework", targetFramework);
+            existing.SetAttributeValue("developmentDependency", "true");
+            WriteLine($"    {_dryRunPrefix}packages.config: updated {AnalyzerPackageId} {existingVersion} -> {analyzerVersion}");
+        }
+        else
+        {
+            root.Add(new XElement("package",
+                new XAttribute("id", AnalyzerPackageId),
+                new XAttribute("version", analyzerVersion),
+                new XAttribute("targetFramework", targetFramework),
+                new XAttribute("developmentDependency", "true")));
+            WriteLine($"    {_dryRunPrefix}packages.config: added {AnalyzerPackageId} {analyzerVersion}");
+        }
+
+        if (_dryRun == false)
+        {
+            var settings = new XmlWriterSettings
+            {
+                Indent = true,
+                OmitXmlDeclaration = false,
+                Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+            };
+
+            using var stream = new FileStream(packagesConfigPath, FileMode.Create, FileAccess.Write);
+            using var writer = XmlWriter.Create(stream, settings);
+            doc.Save(writer);
+        }
+    }
+
+    private void AddAnalyzerEntriesToCsproj(XElement projectRoot, string projectDir, string packagesDir, string analyzerVersion, List<string> changes)
+    {
+        var ns = projectRoot.GetDefaultNamespace();
+        var packageRoot = Path.Combine(packagesDir, $"{AnalyzerPackageId}.{analyzerVersion}");
+
+        var dllRelativePaths = new[]
+        {
+            Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
+            Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.NetAnalyzers.resources.dll"),
+            Path.Combine("analyzers", "dotnet", "Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+        };
+
+        XElement? targetItemGroup = null;
+        var addedCount = 0;
+
+        foreach (var dllRel in dllRelativePaths)
+        {
+            var absPath = Path.Combine(packageRoot, dllRel);
+            var relFromProject = Path.GetRelativePath(projectDir, absPath);
+
+            var alreadyExists = projectRoot.Descendants()
+                .Where(e => e.Name.LocalName == "Analyzer")
+                .Any(e => string.Equals(e.AttributeValue("Include"), relFromProject, StringComparison.OrdinalIgnoreCase));
+
+            if (alreadyExists)
+            {
+                continue;
+            }
+
+            if (targetItemGroup == null)
+            {
+                targetItemGroup = projectRoot.ElementsByLocalName("ItemGroup")
+                    .FirstOrDefault(g => g.Elements().Any(c => c.Name.LocalName == "Analyzer"));
+
+                if (targetItemGroup == null)
+                {
+                    targetItemGroup = new XElement(ns + "ItemGroup");
+                    projectRoot.Add(targetItemGroup);
+                }
+            }
+
+            targetItemGroup.Add(new XElement(ns + "Analyzer", new XAttribute("Include", relFromProject)));
+            addedCount++;
+        }
+
+        if (addedCount > 0)
+        {
+            changes.Add($"added {addedCount} <Analyzer> entries");
+        }
+    }
+
+    private static void AddAnalyzerPackageReference(XElement projectRoot, string version, List<string> changes)
+    {
+        var existing = projectRoot.Descendants()
+            .Where(e => e.Name.LocalName == "PackageReference"
+                && string.Equals(e.AttributeValue("Include"), AnalyzerPackageId, StringComparison.OrdinalIgnoreCase))
+            .FirstOrDefault();
+
+        if (existing != null)
+        {
+            return;
+        }
+
+        var ns = projectRoot.GetDefaultNamespace();
+
+        var targetItemGroup = projectRoot.ElementsByLocalName("ItemGroup")
+            .FirstOrDefault(g => g.Elements().Any(c => c.Name.LocalName == "PackageReference"));
+
+        if (targetItemGroup == null)
+        {
+            targetItemGroup = new XElement(ns + "ItemGroup");
+            projectRoot.Add(targetItemGroup);
+        }
+
+        targetItemGroup.Add(new XElement(ns + "PackageReference",
+            new XAttribute("Include", AnalyzerPackageId),
+            new XAttribute("Version", version),
+            new XElement(ns + "PrivateAssets", "all"),
+            new XElement(ns + "IncludeAssets", "runtime; build; native; contentfiles; analyzers")));
+
+        changes.Add($"added PackageReference: {AnalyzerPackageId} {version}");
+    }
+
+    private static void SetPropertyForce(XElement projectRoot, string name, string desiredValue, List<string> changes)
+    {
+        var existing = projectRoot.Descendants()
+            .Where(e => e.Name.LocalName == name
+                && e.Parent != null
+                && e.Parent.Name.LocalName == "PropertyGroup")
+            .FirstOrDefault();
+
+        if (existing != null)
+        {
+            if (string.Equals(existing.Value, desiredValue, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var oldValue = existing.Value;
+            existing.Value = desiredValue;
+            changes.Add($"{name}: {oldValue} -> {desiredValue}");
+            return;
+        }
+
+        var ns = projectRoot.GetDefaultNamespace();
+        var propertyGroup = projectRoot.ElementsByLocalName("PropertyGroup").FirstOrDefault();
+        if (propertyGroup == null)
+        {
+            propertyGroup = new XElement(ns + "PropertyGroup");
+            projectRoot.Add(propertyGroup);
+        }
+
+        propertyGroup.Add(new XElement(ns + name, desiredValue));
+        changes.Add($"set {name} = {desiredValue}");
+    }
+
+    private void WriteCsprojIfChanged(XDocument doc, string projectPath, string projectFileName, List<string> changes)
+    {
+        if (changes.Count == 0)
+        {
+            WriteLine("    csproj: no changes needed");
+            return;
+        }
+
+        foreach (var change in changes)
+        {
+            WriteLine($"    {_dryRunPrefix}csproj: {change}");
+        }
+
+        if (_dryRun)
+        {
+            return;
+        }
+
+        var settings = new XmlWriterSettings
+        {
+            Indent = true,
+            OmitXmlDeclaration = doc.Declaration == null,
+            Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+        };
+
+        using var stream = new FileStream(projectPath, FileMode.Create, FileAccess.Write);
+        using var writer = XmlWriter.Create(stream, settings);
+        doc.Save(writer);
     }
 
     private void WriteStarterEditorConfig(string editorConfigPath)

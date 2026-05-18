@@ -102,4 +102,5 @@ public static class Constants
     public const string ArgumentNameAnalyzerVersion = "analyzer-version";
     public const string ArgumentNameDryRun = "dry-run";
     public const string ArgumentNameCreateEditorConfig = "create-editorconfig";
+    public const string ArgumentNamePerProject = "per-project";
 }
