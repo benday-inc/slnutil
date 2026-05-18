@@ -26,7 +26,20 @@
       "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-perproject/\")",
       "Bash(rm -rf \"C:/code/temp/test-perproject-sdk\")",
       "Bash(mkdir -p \"C:/code/temp/test-perproject-sdk\")",
-      "Bash(cp -r \"C:/code/temp/20260518_133710/Benday.Asdf123\"/* \"C:/code/temp/test-perproject-sdk/\")"
+      "Bash(cp -r \"C:/code/temp/20260518_133710/Benday.Asdf123\"/* \"C:/code/temp/test-perproject-sdk/\")",
+      "Bash(curl -s \"https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.csharp.codestyle/index.json\")",
+      "Bash(rm -rf \"C:/code/temp/test-pj-cs\")",
+      "Bash(mkdir -p \"C:/code/temp/test-pj-cs\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-pj-cs/\")",
+      "Bash(rm -rf \"C:/code/temp/test-props-cs\")",
+      "Bash(mkdir -p \"C:/code/temp/test-props-cs\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-props-cs/\")",
+      "Bash(rm -rf \"C:/code/temp/test-sdk-cs\")",
+      "Bash(mkdir -p \"C:/code/temp/test-sdk-cs\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/Benday.Asdf123\"/* \"C:/code/temp/test-sdk-cs/\")",
+      "Bash(rm -rf \"C:/code/temp/test-nocs\")",
+      "Bash(mkdir -p \"C:/code/temp/test-nocs\")",
+      "Bash(cp -r \"C:/code/temp/20260518_133710/DotnetFrameworkApp\"/* \"C:/code/temp/test-nocs/\")"
     ]
   }
 }

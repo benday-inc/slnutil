@@ -150,12 +150,21 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 ## enablecodeanalysis
 **Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root.**
 
+Two distinct sets of Roslyn analyzers can be enabled:
+
+| Package | Rule prefix | What it covers |
+|---|---|---|
+| `Microsoft.CodeAnalysis.NetAnalyzers` | CA* | Code quality: null checks, performance, design, reliability |
+| `Microsoft.CodeAnalysis.CSharp.CodeStyle` | IDE* | Code style: readonly fields, `var` preferences, naming, formatting |
+
+Both are enabled by default. Use `/enforce-code-style:false` to skip the code style package and rely only on CA* rules.
+
 Scans every project in the solution and decides what's needed in `Directory.Build.props`:
 
-* For solutions containing **.NET Framework** projects that use `PackageReference`, the command adds a `PackageReference` to `Microsoft.CodeAnalysis.NetAnalyzers` (Framework projects don't have the analyzers built in).
-* For solutions containing **only .NET 5+** projects, the analyzer `PackageReference` is omitted because the SDK ships those analyzers.
+* For solutions containing **.NET Framework** projects that use `PackageReference`, the command adds a `PackageReference` to `Microsoft.CodeAnalysis.NetAnalyzers` (Framework projects don't have the analyzers built in). If `--enforce-code-style` is enabled (the default), `Microsoft.CodeAnalysis.CSharp.CodeStyle` is also added.
+* For solutions containing **only .NET 5+** projects, no `PackageReference` is added because the SDK ships both analyzer sets.
 
-In both cases the command sets `RunCodeAnalysis=false` (suppresses the deprecated FxCopCmd.exe post-build step), `EnableNETAnalyzers=true`, and `AnalysisLevel` (default `latest-Minimum`).
+In all cases the command sets `RunCodeAnalysis=false` (suppresses the deprecated FxCopCmd.exe post-build step), `EnableNETAnalyzers=true`, and `AnalysisLevel` (default `latest-Minimum`). When `--enforce-code-style` is enabled, `EnforceCodeStyleInBuild=true` is also set (which is what activates IDE* rules for SDK-style projects).
 
 If a `Directory.Build.props` already exists, the command merges into it via XML parsing rather than string manipulation: existing properties and existing `PackageReference` entries are preserved, and only missing entries are added. Re-runs are idempotent.
 
@@ -165,11 +174,11 @@ Projects that still use `packages.config` are listed as warnings — they will n
 
 For solutions where you don't want to migrate packages.config projects to PackageReference, pass `/per-project:true`. Instead of writing a `Directory.Build.props`, slnutil edits each project individually:
 
-* **packages.config projects** get an entry added to `packages.config` (`<package id="Microsoft.CodeAnalysis.NetAnalyzers" ... developmentDependency="true" />`), plus `<Analyzer>` elements added to the `.csproj` pointing at the analyzer DLLs in the solution-level `packages\` folder.
-* **.NET Framework projects using PackageReference** get the analyzer `PackageReference` added directly to the `.csproj`.
-* **.NET 5+ projects** only get the MSBuild properties set (analyzers ship with the SDK).
+* **packages.config projects** get a `<package>` entry added to `packages.config` (`developmentDependency="true"`) plus `<Analyzer>` elements added to the `.csproj` pointing at the analyzer DLLs in the solution-level `packages\` folder. Both `Microsoft.CodeAnalysis.NetAnalyzers` and (if `--enforce-code-style` is on) `Microsoft.CodeAnalysis.CSharp.CodeStyle` are handled this way. Only `RunCodeAnalysis=false` is set as a property — the other MSBuild properties are inert in old-style csproj because analysis is driven directly by the `<Analyzer>` entries.
+* **.NET Framework projects using PackageReference** get the analyzer `PackageReference`(s) added directly to the `.csproj`, plus `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, and `AnalysisLevel` properties.
+* **.NET 5+ projects** only get MSBuild properties set (analyzers ship with the SDK): `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, `AnalysisLevel`, and `EnforceCodeStyleInBuild=true` (when `--enforce-code-style` is on).
 
-In every case the command force-sets `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, and `AnalysisLevel` in each `.csproj`'s `<PropertyGroup>`. Existing values for those three properties are overwritten so behavior is consistent across the solution. All other csproj content is preserved, including the old-style MSBuild xmlns. Re-runs are idempotent.
+Existing values for the MSBuild properties owned by this command are overwritten so behavior is consistent across the solution. Existing `PackageReference` entries are left alone (no version churn). All other csproj content is preserved, including the old-style MSBuild xmlns. Re-runs are idempotent.
 
 After running in per-project mode against packages.config projects, run `nuget.exe restore <solution>` (or Visual Studio → Tools → NuGet Package Manager → Restore NuGet Packages) so the analyzer DLLs actually land in the `packages\` folder.
 
@@ -179,6 +188,8 @@ After running in per-project mode against packages.config projects, run `nuget.e
 | solutionpath | Optional | String | Solution to update. If omitted, searches the current directory for a .sln or .slnx file. |
 | analysis-level | Optional | String | Value for the `AnalysisLevel` MSBuild property. Default `latest-Minimum`. Other values: `latest-Default`, `latest-Recommended`, `latest-All`, `latest`. |
 | analyzer-version | Optional | String | Version of `Microsoft.CodeAnalysis.NetAnalyzers` to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
+| codestyle-version | Optional | String | Version of `Microsoft.CodeAnalysis.CSharp.CodeStyle` to reference for .NET Framework projects (when `--enforce-code-style` is on). If omitted, queries nuget.org for the latest stable version. |
+| enforce-code-style | Optional | Boolean | Enable code style enforcement (IDE* rules) during build. For .NET 5+ sets `EnforceCodeStyleInBuild=true`. For .NET Framework installs `Microsoft.CodeAnalysis.CSharp.CodeStyle`. Default: `true`. |
 | per-project | Optional | Boolean | Install analyzers into each project individually (modifies csproj + packages.config) instead of using `Directory.Build.props`. Required for solutions where projects use `packages.config`. |
 | dry-run | Optional | Boolean | Preview what would change without writing any files. |
 | create-editorconfig | Optional | Boolean | Also create a starter `.editorconfig` at the solution root if one doesn't already exist. |

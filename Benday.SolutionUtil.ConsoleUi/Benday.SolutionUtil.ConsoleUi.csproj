@@ -17,13 +17,14 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <TheVersion>2.39.0</TheVersion>
+    <TheVersion>2.40.0</TheVersion>
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageTags>dotnet;cli;tool;solution;project;csproj;sln;slnx;nuget;utility;developer-tools</PackageTags>
     <ToolCommandName>slnutil</ToolCommandName>
     <PackageReleaseNotes>
+v2.40 - enablecodeanalysis: also installs Microsoft.CodeAnalysis.CSharp.CodeStyle for IDE* rule enforcement (default on; opt out with /enforce-code-style:false); added /codestyle-version to pin the package version;
 v2.39 - findsolutions: added target-framework and uses-packages-config columns plus finer-grained reference-type classification (framework-ref, nuget-via-packages-config, fixed PackageReference detection); Added enablecodeanalysis command to streamline VS2026 code
    analysis across a solution, with a per-project mode for packages.config solutions;
 v2.38 - Fixing bugs in findsolutions command; Updating createsolution to create modern xunit projects;

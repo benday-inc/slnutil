@@ -14,8 +14,24 @@ namespace Benday.SolutionUtil.Api;
     Description = "Enable Roslyn code analysis across a solution. Default mode creates/merges Directory.Build.props at the solution root. Use --per-project to install analyzers directly into each csproj (required for packages.config projects).")]
 public class EnableCodeAnalysisCommand : SynchronousCommand
 {
-    private const string AnalyzerPackageId = "Microsoft.CodeAnalysis.NetAnalyzers";
+    private const string NetAnalyzersPackageId = "Microsoft.CodeAnalysis.NetAnalyzers";
+    private const string CodeStylePackageId = "Microsoft.CodeAnalysis.CSharp.CodeStyle";
     private const string DefaultAnalysisLevel = "latest-Minimum";
+
+    private static readonly IReadOnlyList<string> NetAnalyzersDllPaths = new[]
+    {
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.NetAnalyzers.resources.dll"),
+        Path.Combine("analyzers", "dotnet", "Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+    };
+
+    private static readonly IReadOnlyList<string> CodeStyleDllPaths = new[]
+    {
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"),
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"),
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CodeStyle.dll"),
+        Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"),
+    };
 
     public EnableCodeAnalysisCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -38,6 +54,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         args.AddString(Constants.ArgumentNameAnalyzerVersion)
             .AsNotRequired()
             .WithDescription("Version of Microsoft.CodeAnalysis.NetAnalyzers to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version.");
+
+        args.AddString(Constants.ArgumentNameCodeStyleVersion)
+            .AsNotRequired()
+            .WithDescription("Version of Microsoft.CodeAnalysis.CSharp.CodeStyle to reference for .NET Framework projects (when --enforce-code-style is enabled). If omitted, queries nuget.org for the latest stable version.");
+
+        args.AddBoolean(Constants.ArgumentNameEnforceCodeStyle)
+            .AsNotRequired().AllowEmptyValue()
+            .WithDefaultValue(true)
+            .WithDescription("Enable code style enforcement (IDE* rules) during build. For .NET 5+ sets EnforceCodeStyleInBuild=true. For .NET Framework installs Microsoft.CodeAnalysis.CSharp.CodeStyle. Default: true.");
 
         args.AddBoolean(Constants.ArgumentNameDryRun)
             .AsNotRequired().AllowEmptyValue()
@@ -82,18 +107,22 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         var hasFrameworkProjects = projects.Any(p => p.IsNetFramework);
         var packagesConfigProjects = projects.Where(p => p.UsesPackagesConfig).ToList();
         var perProject = Arguments.GetBooleanValue(Constants.ArgumentNamePerProject);
+        var enforceCodeStyle = Arguments.GetBooleanValue(Constants.ArgumentNameEnforceCodeStyle);
 
         var analysisLevel = Arguments.GetStringValue(Constants.ArgumentNameAnalysisLevel);
-        var analyzerVersion = ResolveAnalyzerVersion(hasFrameworkProjects);
+        var analyzerVersion = ResolveNetAnalyzersVersion(hasFrameworkProjects);
+        var codeStyleVersion = ResolveCodeStyleVersion(hasFrameworkProjects, enforceCodeStyle);
+
+        var packages = BuildPackagesToInstall(hasFrameworkProjects, analyzerVersion, codeStyleVersion, enforceCodeStyle);
 
         if (perProject)
         {
-            ApplyPerProject(projects, analyzerVersion, analysisLevel, solutionDir);
+            ApplyPerProject(projects, packages, analysisLevel, enforceCodeStyle, solutionDir);
         }
         else
         {
             var propsPath = Path.Combine(solutionDir, "Directory.Build.props");
-            WriteDirectoryBuildProps(propsPath, hasFrameworkProjects, analyzerVersion, analysisLevel);
+            WriteDirectoryBuildProps(propsPath, packages, analysisLevel, enforceCodeStyle);
         }
 
         if (Arguments.GetBooleanValue(Constants.ArgumentNameCreateEditorConfig))
@@ -224,27 +253,42 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         return false;
     }
 
-    private string ResolveAnalyzerVersion(bool hasFrameworkProjects)
+    private string ResolveNetAnalyzersVersion(bool hasFrameworkProjects)
     {
-        if (Arguments.HasValue(Constants.ArgumentNameAnalyzerVersion))
+        return ResolvePackageVersion(
+            NetAnalyzersPackageId,
+            Constants.ArgumentNameAnalyzerVersion,
+            needed: hasFrameworkProjects);
+    }
+
+    private string ResolveCodeStyleVersion(bool hasFrameworkProjects, bool enforceCodeStyle)
+    {
+        return ResolvePackageVersion(
+            CodeStylePackageId,
+            Constants.ArgumentNameCodeStyleVersion,
+            needed: hasFrameworkProjects && enforceCodeStyle);
+    }
+
+    private string ResolvePackageVersion(string packageId, string versionArgName, bool needed)
+    {
+        if (Arguments.HasValue(versionArgName))
         {
-            return Arguments.GetStringValue(Constants.ArgumentNameAnalyzerVersion);
+            return Arguments.GetStringValue(versionArgName);
         }
 
-        if (hasFrameworkProjects == false)
+        if (needed == false)
         {
-            // not needed — SDK ships analyzers built-in
             return string.Empty;
         }
 
-        WriteLine($"Looking up latest stable version of {AnalyzerPackageId} on nuget.org...");
+        WriteLine($"Looking up latest stable version of {packageId} on nuget.org...");
 
         try
         {
             using var client = new HttpClient();
             client.Timeout = TimeSpan.FromSeconds(10);
 
-            var url = $"https://api.nuget.org/v3-flatcontainer/{AnalyzerPackageId.ToLowerInvariant()}/index.json";
+            var url = $"https://api.nuget.org/v3-flatcontainer/{packageId.ToLowerInvariant()}/index.json";
             var json = client.GetStringAsync(url).GetAwaiter().GetResult();
 
             using var doc = JsonDocument.Parse(json);
@@ -255,13 +299,13 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             {
                 var version = versionElement.GetString();
                 if (string.IsNullOrEmpty(version)) continue;
-                if (version.Contains('-')) continue; // skip prerelease (e.g., 9.0.0-preview1)
+                if (version.Contains('-')) continue; // skip prerelease
                 latestStable = version;
             }
 
             if (string.IsNullOrEmpty(latestStable))
             {
-                throw new KnownException($"Could not find a stable version of {AnalyzerPackageId} on nuget.org.");
+                throw new KnownException($"Could not find a stable version of {packageId} on nuget.org.");
             }
 
             WriteLine($"Latest stable version: {latestStable}");
@@ -270,12 +314,32 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         catch (Exception ex) when (ex is not KnownException)
         {
             throw new KnownException(
-                $"Failed to query nuget.org for {AnalyzerPackageId} version: {ex.Message}. " +
-                $"Specify a version explicitly with /{Constants.ArgumentNameAnalyzerVersion}:<version>.");
+                $"Failed to query nuget.org for {packageId} version: {ex.Message}. " +
+                $"Specify a version explicitly with /{versionArgName}:<version>.");
         }
     }
 
-    private void WriteDirectoryBuildProps(string propsPath, bool includeAnalyzerPackage, string analyzerVersion, string analysisLevel)
+    private static List<AnalyzerPackageInfo> BuildPackagesToInstall(
+        bool hasFrameworkProjects, string analyzerVersion, string codeStyleVersion, bool enforceCodeStyle)
+    {
+        var packages = new List<AnalyzerPackageInfo>();
+
+        if (hasFrameworkProjects == false)
+        {
+            return packages; // SDK ships both analyzer packages built-in
+        }
+
+        packages.Add(new AnalyzerPackageInfo(NetAnalyzersPackageId, analyzerVersion, NetAnalyzersDllPaths));
+
+        if (enforceCodeStyle)
+        {
+            packages.Add(new AnalyzerPackageInfo(CodeStylePackageId, codeStyleVersion, CodeStyleDllPaths));
+        }
+
+        return packages;
+    }
+
+    private void WriteDirectoryBuildProps(string propsPath, List<AnalyzerPackageInfo> packages, string analysisLevel, bool enforceCodeStyle)
     {
         var existed = File.Exists(propsPath);
         XDocument doc;
@@ -304,14 +368,21 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         var root = doc.Root!;
         var changes = new List<string>();
 
-        if (includeAnalyzerPackage)
+        foreach (var package in packages)
         {
-            EnsureAnalyzerPackageReference(root, analyzerVersion, changes);
+            EnsurePropsPackageReference(root, package, changes);
         }
 
         EnsureProperty(root, "RunCodeAnalysis", "false", changes);
         EnsureProperty(root, "EnableNETAnalyzers", "true", changes);
         EnsureProperty(root, "AnalysisLevel", analysisLevel, changes);
+
+        if (enforceCodeStyle)
+        {
+            // For SDK-style projects this turns on IDE* rule enforcement during build.
+            // For old-style/Framework projects it's inert — the CSharp.CodeStyle package handles enforcement directly.
+            EnsureProperty(root, "EnforceCodeStyleInBuild", "true", changes);
+        }
 
         var verb = existed ? "Updated" : "Created";
         WriteLine($"{_dryRunPrefix}{verb}: {propsPath}");
@@ -343,11 +414,11 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
     }
 
-    private static void EnsureAnalyzerPackageReference(XElement projectRoot, string version, List<string> changes)
+    private static void EnsurePropsPackageReference(XElement projectRoot, AnalyzerPackageInfo package, List<string> changes)
     {
         var existing = projectRoot.Descendants()
             .Where(e => e.Name.LocalName == "PackageReference"
-                && string.Equals(e.AttributeValue("Include"), AnalyzerPackageId, StringComparison.OrdinalIgnoreCase))
+                && string.Equals(e.AttributeValue("Include"), package.PackageId, StringComparison.OrdinalIgnoreCase))
             .FirstOrDefault();
 
         if (existing != null)
@@ -363,13 +434,13 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
 
         var packageRef = new XElement("PackageReference",
-            new XAttribute("Include", AnalyzerPackageId),
-            new XAttribute("Version", version),
+            new XAttribute("Include", package.PackageId),
+            new XAttribute("Version", package.Version),
             new XElement("PrivateAssets", "all"),
             new XElement("IncludeAssets", "runtime; build; native; contentfiles; analyzers"));
 
         itemGroup.Add(packageRef);
-        changes.Add($"Added PackageReference: {AnalyzerPackageId} {version}");
+        changes.Add($"Added PackageReference: {package.PackageId} {package.Version}");
     }
 
     private static void EnsureProperty(XElement projectRoot, string propertyName, string propertyValue, List<string> changes)
@@ -396,11 +467,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         changes.Add($"Set {propertyName} = {propertyValue}");
     }
 
-    private void ApplyPerProject(List<ProjectScanResult> projects, string analyzerVersion, string analysisLevel, string solutionDir)
+    private void ApplyPerProject(List<ProjectScanResult> projects, List<AnalyzerPackageInfo> packages, string analysisLevel, bool enforceCodeStyle, string solutionDir)
     {
         WriteLine(string.Empty);
-        var versionDescription = string.IsNullOrEmpty(analyzerVersion) ? "(SDK built-in analyzers)" : analyzerVersion;
-        WriteLine($"{_dryRunPrefix}Installing {AnalyzerPackageId} {versionDescription} per-project...");
+        var packageSummary = packages.Count == 0
+            ? "(SDK built-in analyzers)"
+            : string.Join(", ", packages.Select(p => $"{p.PackageId} {p.Version}"));
+        var styleNote = enforceCodeStyle ? " (--enforce-code-style enabled)" : " (--enforce-code-style disabled)";
+        WriteLine($"{_dryRunPrefix}Installing analyzers per-project{styleNote}...");
+        WriteLine($"    Packages: {packageSummary}");
         WriteLine(string.Empty);
 
         var packagesDir = Path.Combine(solutionDir, "packages");
@@ -419,15 +494,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             {
                 if (project.UsesPackagesConfig)
                 {
-                    ApplyPackagesConfigProject(project, analyzerVersion, analysisLevel, packagesDir);
+                    ApplyPackagesConfigProject(project, packages, packagesDir);
                 }
                 else if (project.IsNetFramework)
                 {
-                    ApplyFrameworkPackageReferenceProject(project, analyzerVersion, analysisLevel);
+                    ApplyFrameworkPackageReferenceProject(project, packages, analysisLevel);
                 }
                 else
                 {
-                    ApplySdkProject(project, analysisLevel);
+                    ApplySdkProject(project, analysisLevel, enforceCodeStyle);
                 }
             }
             catch (Exception ex) when (ex is not KnownException)
@@ -437,50 +512,64 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
     }
 
-    private void ApplyPackagesConfigProject(ProjectScanResult project, string analyzerVersion, string analysisLevel, string packagesDir)
+    private void ApplyPackagesConfigProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, string packagesDir)
     {
-        if (string.IsNullOrEmpty(analyzerVersion))
+        if (packages.Count == 0)
         {
-            throw new KnownException($"Analyzer version is required for packages.config project '{project.FileName}'.");
+            throw new KnownException($"Internal error: no packages to install for packages.config project '{project.FileName}'.");
         }
 
         var projectDir = Path.GetDirectoryName(project.FullPath)!;
         var packagesConfigPath = Path.Combine(projectDir, "packages.config");
 
-        UpdatePackagesConfigFile(packagesConfigPath, analyzerVersion, project.TargetFramework);
-
-        var csprojChanges = new List<string>();
-        var doc = XDocument.Load(project.FullPath);
-        var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
-
-        AddAnalyzerEntriesToCsproj(root, projectDir, packagesDir, analyzerVersion, csprojChanges);
-        SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
-        SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
-
-        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
-    }
-
-    private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, string analyzerVersion, string analysisLevel)
-    {
-        if (string.IsNullOrEmpty(analyzerVersion))
+        foreach (var package in packages)
         {
-            throw new KnownException($"Analyzer version is required for framework project '{project.FileName}'.");
+            UpdatePackagesConfigFile(packagesConfigPath, package, project.TargetFramework);
         }
 
         var csprojChanges = new List<string>();
         var doc = XDocument.Load(project.FullPath);
         var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
 
-        AddAnalyzerPackageReference(root, analyzerVersion, csprojChanges);
+        foreach (var package in packages)
+        {
+            AddAnalyzerEntriesToCsproj(root, projectDir, packagesDir, package, csprojChanges);
+        }
+
+        // Old-style csproj only reacts to RunCodeAnalysis (suppresses deprecated FxCopCmd).
+        // EnableNETAnalyzers / AnalysisLevel / EnforceCodeStyleInBuild are inert here —
+        // the package's own <Analyzer> entries drive analysis.
+        SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
+
+        WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
+    }
+
+    private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, string analysisLevel)
+    {
+        if (packages.Count == 0)
+        {
+            throw new KnownException($"Internal error: no packages to install for framework project '{project.FileName}'.");
+        }
+
+        var csprojChanges = new List<string>();
+        var doc = XDocument.Load(project.FullPath);
+        var root = doc.Root ?? throw new KnownException($"'{project.FileName}' has no root element.");
+
+        foreach (var package in packages)
+        {
+            AddCsprojPackageReference(root, package, csprojChanges);
+        }
+
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
         SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
+        // EnforceCodeStyleInBuild deliberately skipped for Framework projects —
+        // the CSharp.CodeStyle package handles enforcement directly (per spec).
 
-        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
+        WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
     }
 
-    private void ApplySdkProject(ProjectScanResult project, string analysisLevel)
+    private void ApplySdkProject(ProjectScanResult project, string analysisLevel, bool enforceCodeStyle)
     {
         var csprojChanges = new List<string>();
         var doc = XDocument.Load(project.FullPath);
@@ -490,10 +579,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
         SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
 
-        WriteCsprojIfChanged(doc, project.FullPath, project.FileName, csprojChanges);
+        if (enforceCodeStyle)
+        {
+            SetPropertyForce(root, "EnforceCodeStyleInBuild", "true", csprojChanges);
+        }
+
+        WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
     }
 
-    private void UpdatePackagesConfigFile(string packagesConfigPath, string analyzerVersion, string targetFramework)
+    private void UpdatePackagesConfigFile(string packagesConfigPath, AnalyzerPackageInfo package, string targetFramework)
     {
         XDocument doc;
         if (File.Exists(packagesConfigPath))
@@ -513,33 +607,38 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         var existing = root.Elements()
             .Where(e => e.Name.LocalName == "package")
-            .FirstOrDefault(e => string.Equals(e.AttributeValue("id"), AnalyzerPackageId, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(e => string.Equals(e.AttributeValue("id"), package.PackageId, StringComparison.OrdinalIgnoreCase));
+
+        var changed = false;
 
         if (existing != null)
         {
             var existingVersion = existing.AttributeValue("version");
-            if (string.Equals(existingVersion, analyzerVersion, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(existingVersion, package.Version, StringComparison.OrdinalIgnoreCase))
             {
-                WriteLine($"    packages.config: {AnalyzerPackageId} {analyzerVersion} already installed");
-                return;
+                WriteLine($"    packages.config: {package.PackageId} {package.Version} already installed");
             }
-
-            existing.SetAttributeValue("version", analyzerVersion);
-            existing.SetAttributeValue("targetFramework", targetFramework);
-            existing.SetAttributeValue("developmentDependency", "true");
-            WriteLine($"    {_dryRunPrefix}packages.config: updated {AnalyzerPackageId} {existingVersion} -> {analyzerVersion}");
+            else
+            {
+                existing.SetAttributeValue("version", package.Version);
+                existing.SetAttributeValue("targetFramework", targetFramework);
+                existing.SetAttributeValue("developmentDependency", "true");
+                WriteLine($"    {_dryRunPrefix}packages.config: updated {package.PackageId} {existingVersion} -> {package.Version}");
+                changed = true;
+            }
         }
         else
         {
             root.Add(new XElement("package",
-                new XAttribute("id", AnalyzerPackageId),
-                new XAttribute("version", analyzerVersion),
+                new XAttribute("id", package.PackageId),
+                new XAttribute("version", package.Version),
                 new XAttribute("targetFramework", targetFramework),
                 new XAttribute("developmentDependency", "true")));
-            WriteLine($"    {_dryRunPrefix}packages.config: added {AnalyzerPackageId} {analyzerVersion}");
+            WriteLine($"    {_dryRunPrefix}packages.config: added {package.PackageId} {package.Version}");
+            changed = true;
         }
 
-        if (_dryRun == false)
+        if (changed && _dryRun == false)
         {
             var settings = new XmlWriterSettings
             {
@@ -554,22 +653,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
     }
 
-    private void AddAnalyzerEntriesToCsproj(XElement projectRoot, string projectDir, string packagesDir, string analyzerVersion, List<string> changes)
+    private void AddAnalyzerEntriesToCsproj(XElement projectRoot, string projectDir, string packagesDir, AnalyzerPackageInfo package, List<string> changes)
     {
         var ns = projectRoot.GetDefaultNamespace();
-        var packageRoot = Path.Combine(packagesDir, $"{AnalyzerPackageId}.{analyzerVersion}");
-
-        var dllRelativePaths = new[]
-        {
-            Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
-            Path.Combine("analyzers", "dotnet", "cs", "Microsoft.CodeAnalysis.NetAnalyzers.resources.dll"),
-            Path.Combine("analyzers", "dotnet", "Microsoft.CodeAnalysis.NetAnalyzers.dll"),
-        };
+        var packageRoot = Path.Combine(packagesDir, $"{package.PackageId}.{package.Version}");
 
         XElement? targetItemGroup = null;
         var addedCount = 0;
 
-        foreach (var dllRel in dllRelativePaths)
+        foreach (var dllRel in package.AnalyzerDllRelativePaths)
         {
             var absPath = Path.Combine(packageRoot, dllRel);
             var relFromProject = Path.GetRelativePath(projectDir, absPath);
@@ -601,19 +693,24 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         if (addedCount > 0)
         {
-            changes.Add($"added {addedCount} <Analyzer> entries");
+            changes.Add($"added {addedCount} <Analyzer> entries for {package.PackageId}");
+        }
+        else
+        {
+            WriteLine($"    csproj: <Analyzer> entries for {package.PackageId} already present");
         }
     }
 
-    private static void AddAnalyzerPackageReference(XElement projectRoot, string version, List<string> changes)
+    private void AddCsprojPackageReference(XElement projectRoot, AnalyzerPackageInfo package, List<string> changes)
     {
         var existing = projectRoot.Descendants()
             .Where(e => e.Name.LocalName == "PackageReference"
-                && string.Equals(e.AttributeValue("Include"), AnalyzerPackageId, StringComparison.OrdinalIgnoreCase))
+                && string.Equals(e.AttributeValue("Include"), package.PackageId, StringComparison.OrdinalIgnoreCase))
             .FirstOrDefault();
 
         if (existing != null)
         {
+            WriteLine($"    csproj: PackageReference {package.PackageId} already installed");
             return;
         }
 
@@ -629,12 +726,12 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
 
         targetItemGroup.Add(new XElement(ns + "PackageReference",
-            new XAttribute("Include", AnalyzerPackageId),
-            new XAttribute("Version", version),
+            new XAttribute("Include", package.PackageId),
+            new XAttribute("Version", package.Version),
             new XElement(ns + "PrivateAssets", "all"),
             new XElement(ns + "IncludeAssets", "runtime; build; native; contentfiles; analyzers")));
 
-        changes.Add($"added PackageReference: {AnalyzerPackageId} {version}");
+        changes.Add($"added PackageReference: {package.PackageId} {package.Version}");
     }
 
     private static void SetPropertyForce(XElement projectRoot, string name, string desiredValue, List<string> changes)
@@ -670,7 +767,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         changes.Add($"set {name} = {desiredValue}");
     }
 
-    private void WriteCsprojIfChanged(XDocument doc, string projectPath, string projectFileName, List<string> changes)
+    private void WriteCsprojIfChanged(XDocument doc, string projectPath, List<string> changes)
     {
         if (changes.Count == 0)
         {
@@ -782,5 +879,19 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         public string TargetFramework { get; set; } = string.Empty;
         public bool UsesPackagesConfig { get; set; }
         public bool IsNetFramework { get; set; }
+    }
+
+    private sealed class AnalyzerPackageInfo
+    {
+        public string PackageId { get; }
+        public string Version { get; }
+        public IReadOnlyList<string> AnalyzerDllRelativePaths { get; }
+
+        public AnalyzerPackageInfo(string packageId, string version, IReadOnlyList<string> analyzerDllRelativePaths)
+        {
+            PackageId = packageId;
+            Version = version;
+            AnalyzerDllRelativePaths = analyzerDllRelativePaths;
+        }
     }
 }

@@ -103,4 +103,6 @@ public static class Constants
     public const string ArgumentNameDryRun = "dry-run";
     public const string ArgumentNameCreateEditorConfig = "create-editorconfig";
     public const string ArgumentNamePerProject = "per-project";
+    public const string ArgumentNameEnforceCodeStyle = "enforce-code-style";
+    public const string ArgumentNameCodeStyleVersion = "codestyle-version";
 }
