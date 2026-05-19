@@ -16,7 +16,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 {
     private const string NetAnalyzersPackageId = "Microsoft.CodeAnalysis.NetAnalyzers";
     private const string CodeStylePackageId = "Microsoft.CodeAnalysis.CSharp.CodeStyle";
-    private const string DefaultAnalysisLevel = "latest-Minimum";
+    private const string DefaultAnalysisLevel = "latest-Recommended";
 
     private static readonly IReadOnlyList<string> NetAnalyzersDllPaths = new[]
     {
@@ -49,7 +49,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         args.AddString(Constants.ArgumentNameAnalysisLevel)
             .AsNotRequired()
             .WithDefaultValue(DefaultAnalysisLevel)
-            .WithDescription("Value for the AnalysisLevel MSBuild property. Safe default 'latest-Minimum'. Other values: latest-Default, latest-Recommended, latest-All, latest.");
+            .WithDescription("Value for the AnalysisLevel MSBuild property. Default 'latest-Recommended' surfaces meaningful diagnostics out-of-the-box. Use 'latest-Minimum' to start very quiet, or 'latest-All' / 'latest' for maximum coverage.");
 
         args.AddString(Constants.ArgumentNameAnalyzerVersion)
             .AsNotRequired()
@@ -75,6 +75,14 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         args.AddBoolean(Constants.ArgumentNamePerProject)
             .AsNotRequired().AllowEmptyValue()
             .WithDescription("Install analyzers into each project individually (modifies csproj + packages.config) instead of using Directory.Build.props. Required for solutions where projects use packages.config.");
+
+        args.AddString(Constants.ArgumentNameLangVersion)
+            .AsNotRequired()
+            .WithDescription("If set, writes <LangVersion> to each project (e.g. '9.0', 'latest'). Unblocks IDE rules whose remedy needs newer C# syntax (e.g. IDE0062 needs C# 8+). Leave unset to keep the compiler default.");
+
+        args.AddBoolean(Constants.ArgumentNameKeepExistingRulesets)
+            .AsNotRequired().AllowEmptyValue()
+            .WithDescription("By default this command removes any <CodeAnalysisRuleSet> elements from each csproj because they typically silence Roslyn analyzers (e.g. the VS-scaffolded MinimumRecommendedRules.ruleset). Pass this flag to leave them in place.");
 
         return args;
     }
@@ -110,19 +118,29 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         var enforceCodeStyle = Arguments.GetBooleanValue(Constants.ArgumentNameEnforceCodeStyle);
 
         var analysisLevel = Arguments.GetStringValue(Constants.ArgumentNameAnalysisLevel);
+        var langVersion = Arguments.HasValue(Constants.ArgumentNameLangVersion)
+            ? Arguments.GetStringValue(Constants.ArgumentNameLangVersion)
+            : string.Empty;
+        var keepExistingRulesets = Arguments.GetBooleanValue(Constants.ArgumentNameKeepExistingRulesets);
         var analyzerVersion = ResolveNetAnalyzersVersion(hasFrameworkProjects);
         var codeStyleVersion = ResolveCodeStyleVersion(hasFrameworkProjects, enforceCodeStyle);
 
         var packages = BuildPackagesToInstall(hasFrameworkProjects, analyzerVersion, codeStyleVersion, enforceCodeStyle);
 
+        var options = new ApplyOptions(
+            analysisLevel,
+            langVersion,
+            enforceCodeStyle,
+            keepExistingRulesets);
+
         if (perProject)
         {
-            ApplyPerProject(projects, packages, analysisLevel, enforceCodeStyle, solutionDir);
+            ApplyPerProject(projects, packages, options, solutionDir);
         }
         else
         {
             var propsPath = Path.Combine(solutionDir, "Directory.Build.props");
-            WriteDirectoryBuildProps(propsPath, packages, analysisLevel, enforceCodeStyle);
+            WriteDirectoryBuildProps(propsPath, packages, options);
         }
 
         if (Arguments.GetBooleanValue(Constants.ArgumentNameCreateEditorConfig))
@@ -339,7 +357,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         return packages;
     }
 
-    private void WriteDirectoryBuildProps(string propsPath, List<AnalyzerPackageInfo> packages, string analysisLevel, bool enforceCodeStyle)
+    private void WriteDirectoryBuildProps(string propsPath, List<AnalyzerPackageInfo> packages, ApplyOptions options)
     {
         var existed = File.Exists(propsPath);
         XDocument doc;
@@ -375,13 +393,16 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         EnsureProperty(root, "RunCodeAnalysis", "false", changes);
         EnsureProperty(root, "EnableNETAnalyzers", "true", changes);
-        EnsureProperty(root, "AnalysisLevel", analysisLevel, changes);
+        EnsureProperty(root, "AnalysisLevel", options.AnalysisLevel, changes);
 
-        if (enforceCodeStyle)
+        if (options.EnforceCodeStyle)
         {
-            // For SDK-style projects this turns on IDE* rule enforcement during build.
-            // For old-style/Framework projects it's inert — the CSharp.CodeStyle package handles enforcement directly.
             EnsureProperty(root, "EnforceCodeStyleInBuild", "true", changes);
+        }
+
+        if (string.IsNullOrEmpty(options.LangVersion) == false)
+        {
+            EnsureProperty(root, "LangVersion", options.LangVersion, changes);
         }
 
         var verb = existed ? "Updated" : "Created";
@@ -467,13 +488,13 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         changes.Add($"Set {propertyName} = {propertyValue}");
     }
 
-    private void ApplyPerProject(List<ProjectScanResult> projects, List<AnalyzerPackageInfo> packages, string analysisLevel, bool enforceCodeStyle, string solutionDir)
+    private void ApplyPerProject(List<ProjectScanResult> projects, List<AnalyzerPackageInfo> packages, ApplyOptions options, string solutionDir)
     {
         WriteLine(string.Empty);
         var packageSummary = packages.Count == 0
             ? "(SDK built-in analyzers)"
             : string.Join(", ", packages.Select(p => $"{p.PackageId} {p.Version}"));
-        var styleNote = enforceCodeStyle ? " (--enforce-code-style enabled)" : " (--enforce-code-style disabled)";
+        var styleNote = options.EnforceCodeStyle ? " (--enforce-code-style enabled)" : " (--enforce-code-style disabled)";
         WriteLine($"{_dryRunPrefix}Installing analyzers per-project{styleNote}...");
         WriteLine($"    Packages: {packageSummary}");
         WriteLine(string.Empty);
@@ -494,15 +515,15 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             {
                 if (project.UsesPackagesConfig)
                 {
-                    ApplyPackagesConfigProject(project, packages, packagesDir);
+                    ApplyPackagesConfigProject(project, packages, packagesDir, options);
                 }
                 else if (project.IsNetFramework)
                 {
-                    ApplyFrameworkPackageReferenceProject(project, packages, analysisLevel);
+                    ApplyFrameworkPackageReferenceProject(project, packages, options);
                 }
                 else
                 {
-                    ApplySdkProject(project, analysisLevel, enforceCodeStyle);
+                    ApplySdkProject(project, options);
                 }
             }
             catch (Exception ex) when (ex is not KnownException)
@@ -512,7 +533,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         }
     }
 
-    private void ApplyPackagesConfigProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, string packagesDir)
+    private void ApplyPackagesConfigProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, string packagesDir, ApplyOptions options)
     {
         if (packages.Count == 0)
         {
@@ -536,15 +557,28 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             AddAnalyzerEntriesToCsproj(root, projectDir, packagesDir, package, csprojChanges);
         }
 
-        // Old-style csproj only reacts to RunCodeAnalysis (suppresses deprecated FxCopCmd).
-        // EnableNETAnalyzers / AnalysisLevel / EnforceCodeStyleInBuild are inert here —
-        // the package's own <Analyzer> entries drive analysis.
+        // Modern VS honors these properties even on old-style csproj + packages.config:
+        // they're read by the CodeAnalysis targets to select the right globalconfig.
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
+        SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
+
+        if (options.EnforceCodeStyle)
+        {
+            SetPropertyForce(root, "EnforceCodeStyleInBuild", "true", csprojChanges);
+        }
+
+        if (string.IsNullOrEmpty(options.LangVersion) == false)
+        {
+            SetPropertyForce(root, "LangVersion", options.LangVersion, csprojChanges);
+        }
+
+        RemoveLegacyCodeAnalysisRuleSet(root, csprojChanges, options.KeepExistingRulesets);
 
         WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
     }
 
-    private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, string analysisLevel)
+    private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, ApplyOptions options)
     {
         if (packages.Count == 0)
         {
@@ -562,14 +596,24 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
-        // EnforceCodeStyleInBuild deliberately skipped for Framework projects —
-        // the CSharp.CodeStyle package handles enforcement directly (per spec).
+        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
+
+        if (options.EnforceCodeStyle)
+        {
+            SetPropertyForce(root, "EnforceCodeStyleInBuild", "true", csprojChanges);
+        }
+
+        if (string.IsNullOrEmpty(options.LangVersion) == false)
+        {
+            SetPropertyForce(root, "LangVersion", options.LangVersion, csprojChanges);
+        }
+
+        RemoveLegacyCodeAnalysisRuleSet(root, csprojChanges, options.KeepExistingRulesets);
 
         WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
     }
 
-    private void ApplySdkProject(ProjectScanResult project, string analysisLevel, bool enforceCodeStyle)
+    private void ApplySdkProject(ProjectScanResult project, ApplyOptions options)
     {
         var csprojChanges = new List<string>();
         var doc = XDocument.Load(project.FullPath);
@@ -577,12 +621,19 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", analysisLevel, csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
 
-        if (enforceCodeStyle)
+        if (options.EnforceCodeStyle)
         {
             SetPropertyForce(root, "EnforceCodeStyleInBuild", "true", csprojChanges);
         }
+
+        if (string.IsNullOrEmpty(options.LangVersion) == false)
+        {
+            SetPropertyForce(root, "LangVersion", options.LangVersion, csprojChanges);
+        }
+
+        RemoveLegacyCodeAnalysisRuleSet(root, csprojChanges, options.KeepExistingRulesets);
 
         WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
     }
@@ -734,6 +785,45 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         changes.Add($"added PackageReference: {package.PackageId} {package.Version}");
     }
 
+    private void RemoveLegacyCodeAnalysisRuleSet(XElement projectRoot, List<string> changes, bool keepExistingRulesets)
+    {
+        // <CodeAnalysisRuleSet> is the legacy FxCop-era gate that overrides editorconfig severities
+        // and silently suppresses most Roslyn analyzer output. The VS scaffolded
+        // 'MinimumRecommendedRules.ruleset' is the worst offender — it's an allow-list that
+        // effectively reports nothing. Remove unless the caller opted out.
+        // Also clear the companion <CodeAnalysisRuleSetDirectories> property when present.
+        var targets = new[] { "CodeAnalysisRuleSet", "CodeAnalysisRuleSetDirectories" };
+
+        foreach (var localName in targets)
+        {
+            var elements = projectRoot.Descendants()
+                .Where(e => e.Name.LocalName == localName
+                    && e.Parent != null
+                    && e.Parent.Name.LocalName == "PropertyGroup")
+                .ToList();
+
+            if (elements.Count == 0)
+            {
+                continue;
+            }
+
+            if (keepExistingRulesets)
+            {
+                foreach (var element in elements)
+                {
+                    WriteLine($"    csproj: kept existing <{localName}>{element.Value}</{localName}> (per --keep-existing-rulesets)");
+                }
+                continue;
+            }
+
+            foreach (var element in elements)
+            {
+                changes.Add($"removed legacy <{localName}>{element.Value}</{localName}>");
+                element.Remove();
+            }
+        }
+    }
+
     private static void SetPropertyForce(XElement projectRoot, string name, string desiredValue, List<string> changes)
     {
         var existing = projectRoot.Descendants()
@@ -814,29 +904,83 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             return;
         }
 
+        File.WriteAllText(editorConfigPath, BuildStarterEditorConfigContent());
+    }
+
+    internal static string BuildStarterEditorConfigContent()
+    {
         var content = new StringBuilder();
-        content.AppendLine("# Code analysis severity configuration");
+
+        content.AppendLine("root = true");
+        content.AppendLine();
         content.AppendLine("[*.cs]");
+        content.AppendLine("indent_size = 4");
+        content.AppendLine("insert_final_newline = true");
         content.AppendLine();
-        content.AppendLine("# Start with most rules as suggestions rather than warnings");
-        content.AppendLine("# to avoid breaking CI on existing codebases.");
-        content.AppendLine("# Ratchet up severity over time as violations are addressed.");
+        content.AppendLine("# ---------------------------------------------------------------------------");
+        content.AppendLine("# IDE-prefix rules (style + naming)");
+        content.AppendLine("# ---------------------------------------------------------------------------");
+        content.AppendLine("# IMPORTANT: For an IDE-prefix rule (IDE0044, IDE1006, etc.) to fire as a");
+        content.AppendLine("# build-time warning, you MUST use the explicit form below:");
+        content.AppendLine("#     dotnet_diagnostic.IDExxxx.severity = warning");
+        content.AppendLine("# The shorthand 'dotnet_style_xxx = true:warning' only drives IDE squiggles");
+        content.AppendLine("# in Visual Studio's editor; the build compiler does not always map shorthand");
+        content.AppendLine("# back to the underlying rule ID. If a build is producing fewer warnings");
+        content.AppendLine("# than you expect, this is almost always the reason.");
+        content.AppendLine("# ---------------------------------------------------------------------------");
         content.AppendLine();
-        content.AppendLine("# Design rules");
+        content.AppendLine("# IDE0011 - Add braces to single-line control statements");
+        content.AppendLine("dotnet_diagnostic.IDE0011.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0040 - Add accessibility modifiers");
+        content.AppendLine("dotnet_diagnostic.IDE0040.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0044 - Make field readonly");
+        content.AppendLine("dotnet_diagnostic.IDE0044.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0051 - Remove unused private members");
+        content.AppendLine("dotnet_diagnostic.IDE0051.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0052 - Remove unread private members");
+        content.AppendLine("dotnet_diagnostic.IDE0052.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0062 - Make local function static (requires C# 8 or later)");
+        content.AppendLine("dotnet_diagnostic.IDE0062.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE1006 - Naming rule violation (catch-all rule ID for all dotnet_naming_rule");
+        content.AppendLine("#           entries you define below; without this line naming rules will not");
+        content.AppendLine("#           surface in build output)");
+        content.AppendLine("dotnet_diagnostic.IDE1006.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# IDE0005 - Remove unnecessary using directives");
+        content.AppendLine("# NOTE: IDE0005 only fires at build time when the project has");
+        content.AppendLine("#       <GenerateDocumentationFile>true</GenerateDocumentationFile>.");
+        content.AppendLine("#       This is a Roslyn limitation; severity alone is not enough.");
+        content.AppendLine("dotnet_diagnostic.IDE0005.severity = warning");
+        content.AppendLine();
+        content.AppendLine("# ---------------------------------------------------------------------------");
+        content.AppendLine("# CA-prefix rules (correctness / performance)");
+        content.AppendLine("# ---------------------------------------------------------------------------");
+        content.AppendLine("# These start as 'suggestion' to avoid flooding CI on legacy codebases.");
+        content.AppendLine("# Ratchet up to 'warning' as the team addresses violations. To disable a rule,");
+        content.AppendLine("# set its severity to 'none' or 'silent'.");
+        content.AppendLine("# ---------------------------------------------------------------------------");
+        content.AppendLine();
+        content.AppendLine("# Design");
         content.AppendLine("dotnet_diagnostic.CA1002.severity = suggestion");
         content.AppendLine("dotnet_diagnostic.CA1051.severity = suggestion");
         content.AppendLine();
-        content.AppendLine("# Performance rules");
+        content.AppendLine("# Performance");
         content.AppendLine("dotnet_diagnostic.CA1822.severity = suggestion");
         content.AppendLine("dotnet_diagnostic.CA1860.severity = suggestion");
         content.AppendLine();
-        content.AppendLine("# Reliability rules");
+        content.AppendLine("# Reliability");
         content.AppendLine("dotnet_diagnostic.CA2007.severity = suggestion");
         content.AppendLine();
-        content.AppendLine("# Usage rules");
+        content.AppendLine("# Usage");
         content.AppendLine("dotnet_diagnostic.CA2211.severity = suggestion");
 
-        File.WriteAllText(editorConfigPath, content.ToString());
+        return content.ToString();
     }
 
     private static List<string> GetProjects(string solutionPath)
@@ -894,4 +1038,10 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             AnalyzerDllRelativePaths = analyzerDllRelativePaths;
         }
     }
+
+    private sealed record ApplyOptions(
+        string AnalysisLevel,
+        string LangVersion,
+        bool EnforceCodeStyle,
+        bool KeepExistingRulesets);
 }
