@@ -209,7 +209,8 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         {
             var nugetStyle = project.UsesPackagesConfig ? "packages.config" : "PackageReference";
             var tfm = string.IsNullOrEmpty(project.TargetFramework) ? "(unknown)" : project.TargetFramework;
-            WriteLine($"  {project.FileName.PadRight(nameWidth)}{tfm.PadRight(tfmWidth)}{nugetStyle}");
+            
+            WriteLine($"  {project.FileName.PadRight(nameWidth)}{tfm.PadRight(tfmWidth)}{nugetStyle}\t{(project.IsNetFramework ? "Framework" : "Modern .NET")}");
         }
 
         WriteLine(string.Empty);
@@ -561,7 +562,8 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         // they're read by the CodeAnalysis targets to select the right globalconfig.
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", 
+            GetAnalysisLevel(project, options), csprojChanges);
 
         if (options.EnforceCodeStyle)
         {
@@ -576,6 +578,18 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         RemoveLegacyCodeAnalysisRuleSet(root, csprojChanges, options.KeepExistingRulesets);
 
         WriteCsprojIfChanged(doc, project.FullPath, csprojChanges);
+    }
+
+    private string GetAnalysisLevel(ProjectScanResult project, ApplyOptions options)
+    {
+        if (project.IsNetFramework == true)
+        {
+            return options.AnalysisLevel.Replace("latest", "9.0");
+        }
+        else
+        {
+            return options.AnalysisLevel;
+        }
     }
 
     private void ApplyFrameworkPackageReferenceProject(ProjectScanResult project, List<AnalyzerPackageInfo> packages, ApplyOptions options)
@@ -596,7 +610,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", GetAnalysisLevel(project, options), csprojChanges);
 
         if (options.EnforceCodeStyle)
         {
@@ -621,7 +635,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
 
         SetPropertyForce(root, "RunCodeAnalysis", "false", csprojChanges);
         SetPropertyForce(root, "EnableNETAnalyzers", "true", csprojChanges);
-        SetPropertyForce(root, "AnalysisLevel", options.AnalysisLevel, csprojChanges);
+        SetPropertyForce(root, "AnalysisLevel", GetAnalysisLevel(project, options), csprojChanges);
 
         if (options.EnforceCodeStyle)
         {
@@ -984,7 +998,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
     }
 
     private static List<string> GetProjects(string solutionPath)
-    {
+    {        
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
