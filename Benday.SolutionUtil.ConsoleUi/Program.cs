@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 
 using Benday.CommandsFramework;
+using Benday.SolutionUtil.Api;
 
 class Program
 {
@@ -24,5 +25,26 @@ class Program
         var program = new DefaultProgram(options, assembly);
 
         program.Run(args);
+
+        WriteAttributionFooter(args);
+    }
+
+    /// <summary>
+    /// Prints a one-line attribution footer after every command runs. Skipped
+    /// for the MCP server, whose stdout is the JSON-RPC transport and must not
+    /// contain any non-protocol text.
+    /// </summary>
+    private static void WriteAttributionFooter(string[] args)
+    {
+        var isMcpServer = args.Length > 0 &&
+            string.Equals(args[0], Constants.CommandArgumentNameMcpServer, StringComparison.OrdinalIgnoreCase);
+
+        if (isMcpServer == true)
+        {
+            return;
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Benjamin Day Consulting, Inc. — benday.com — info@benday.com");
     }
 }

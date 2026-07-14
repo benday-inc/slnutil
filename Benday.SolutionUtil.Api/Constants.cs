@@ -97,6 +97,12 @@ public static class Constants
     public const string ArgumentNameSqlFile = "sqlfile";
     public const string ArgumentNameDisplayResults = "display";
 
+    public const string CommandArgumentNameMcpServer = "mcp-server";
+    public const string CommandArgumentNameMcpConfig = "mcp-config";
+    public const string ArgumentNameClientType = "client";
+    public const string ArgumentNameInstall = "install";
+    public const string ArgumentNameUninstall = "uninstall";
+
     public const string CommandArgumentNameEnableCodeAnalysis = "enablecodeanalysis";
     public const string ArgumentNameAnalysisLevel = "analysis-level";
     public const string ArgumentNameAnalyzerVersion = "analyzer-version";

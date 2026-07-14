@@ -6,9 +6,9 @@ A collection of utilities for working with .NET Solutions and Projects (.sln and
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Written by Benjamin Day  
-Pluralsight Author | Microsoft MVP | Scrum.org Professional Scrum Trainer  
+Pluralsight Author | Microsoft MVP
 https://www.benday.com  
-https://www.slidespeaker.ai  
+https://www.honestcheetah.com  
 info@benday.com  
 YouTube: https://www.youtube.com/@_benday  
 
@@ -23,8 +23,6 @@ YouTube: https://www.youtube.com/@_benday
     * Commands Utility application using [Benday.CommandsFramework](https://www.nuget.org/packages/Benday.CommandsFramework). This helps you to quickly write CLI utilities that run as a [dotnet tool](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install). 
 * Create class diagrams for all or part of a project using [Mermaid](https://mermaid.js.org)
 * Update the .NET Framework version for all projects in a solution
-* Enable Roslyn code analysis (`Microsoft.CodeAnalysis.NetAnalyzers`) across a solution by creating or merging a `Directory.Build.props` at the solution root
-* Detect projects in a solution that still use `packages.config` (vs. modern `PackageReference`) for NuGet management
 * Set or increment the assembly version for a project
 * Set a project property value in a csproj file
 * Deploy [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) [Migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli) from a DLL (aka. deploy migrations without the source code)
@@ -37,7 +35,59 @@ YouTube: https://www.youtube.com/@_benday
 * Check and update versions in Bicep files
 * Format XML files (single file or recursive)
 * View assembly information
+* Run as an [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server so AI assistants can inspect your solutions, projects, and files
 * And lots more...
+
+## MCP Server (AI assistant integration)
+
+slnutil can run as an [MCP (Model Context Protocol)](https://modelcontextprotocol.io)
+server so that AI assistants — Claude Code, Claude Desktop, VS Code, Visual Studio,
+Cursor — can call its read-only inspection tools directly.
+
+### What's exposed
+
+All MCP tools are **read-only** and require explicit **absolute paths** (there is no
+current-directory default and no stored configuration). Tools that write to files or
+a database are intentionally *not* exposed; use the command line for those.
+
+| MCP tool | What it does |
+| --- | --- |
+| `list_solution_projects` | List the projects in a solution with their target frameworks |
+| `find_solutions` | Find `.sln`/`.slnx` files under a directory (optionally list projects) |
+| `list_packages_config` | Find legacy `packages.config` NuGet references under a directory |
+| `get_assembly_info` | Show assembly metadata for a compiled `.dll` |
+| `get_connection_string` | Read a named connection string from a config file |
+| `validate_connection_string` | Test that a connection string can connect to SQL Server |
+| `base64_encode` | Encode a string as base64 |
+| `format_json` | Pretty-print a JSON file (preview only) |
+| `format_xml` | Pretty-print an XML file (preview only) |
+| `print_file` | Print a file character-by-character for encoding diagnosis |
+| `classes_from_json` | Generate C# classes from a JSON document |
+| `discover_cli_commands` | List every slnutil command line command (the fallback for anything not exposed as a tool, including write/destructive commands) |
+| `get_learning_resources` | Look up video tutorials and articles for a topic |
+
+### Setup
+
+Print ready-to-paste configuration for your client:
+
+```
+slnutil mcp-config
+```
+
+Or target a single client (`claudecode`, `claudedesktop`, `vscode`, `visualstudio`, `cursor`):
+
+```
+slnutil mcp-config /client:claudecode
+```
+
+For Claude Code and VS Code you can register the server at user scope automatically:
+
+```
+slnutil mcp-config /client:claudecode /install
+```
+
+Under the hood, clients launch `slnutil mcp-server`, which speaks JSON-RPC over stdio.
+You normally don't run `mcp-server` yourself — the MCP client starts it for you.
 
 ## Suggestions, Problems, or Bugs?
 
@@ -58,7 +108,7 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | createsolution | Create a solution and projects |
 | deployefmigrations | Deploy EF Core Migrations from DLL binaries. |
 | devtreeclean | Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders. |
-| enablecodeanalysis | Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root. |
+| enablecodeanalysis | Enable Roslyn code analysis across a solution. Default mode creates/merges Directory.Build.props at the solution root. Use --per-project to install analyzers directly into each csproj (required for packages.config projects). |
 | findsolutions | Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis. |
 | formatjson | Formats JSON files |
 | formatxml | Formats XML files |
@@ -84,6 +134,8 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | validateconnectionstring | Validate that specified connection string can connect to SQL Server. |
 | wildcardreference | Changes package references in a C# project file to use wildcard version rather than fixed version number. |
 | snippetize | Reads a block of text from the clipboard and formats it for use in a VSCode snippet. |
+| mcp-config | Print MCP client configuration for the slnutil server (Claude Code, Claude Desktop, VS Code, Visual Studio, Cursor), or install/uninstall it at user scope. Run with no arguments to print config for every supported client. |
+| mcp-server | Run slnutil as an MCP (Model Context Protocol) server over stdio. Exposes read-only solution, project, and file inspection tools to AI clients. This command runs until the client disconnects; it is normally launched by the MCP client, not by hand. See 'mcp-config' to register it with a client. |
 ## assemblyinfo
 **View assembly info for a DLL.**
 ### Arguments
@@ -148,64 +200,22 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | keepgit | Optional | Boolean | If true, skips delete of .git folders and preserves any git repositories. Default value is true. Set this value to false to delete .git folders. |
 | keepnodemodules | Optional | Boolean | If true, skips delete of node_modules folders. Default value is false. |
 ## enablecodeanalysis
-**Enable Roslyn code analysis across a solution by creating/merging a Directory.Build.props at the solution root.**
-
-Two distinct sets of Roslyn analyzers can be enabled:
-
-| Package | Rule prefix | What it covers |
-|---|---|---|
-| `Microsoft.CodeAnalysis.NetAnalyzers` | CA* | Code quality: null checks, performance, design, reliability |
-| `Microsoft.CodeAnalysis.CSharp.CodeStyle` | IDE* | Code style: readonly fields, `var` preferences, naming, formatting |
-
-Both are enabled by default. Use `/enforce-code-style:false` to skip the code style package and rely only on CA* rules.
-
-Scans every project in the solution and decides what's needed in `Directory.Build.props`:
-
-* For solutions containing **.NET Framework** projects that use `PackageReference`, the command adds a `PackageReference` to `Microsoft.CodeAnalysis.NetAnalyzers` (Framework projects don't have the analyzers built in). If `--enforce-code-style` is enabled (the default), `Microsoft.CodeAnalysis.CSharp.CodeStyle` is also added.
-* For solutions containing **only .NET 5+** projects, no `PackageReference` is added because the SDK ships both analyzer sets.
-
-In all cases the command sets `RunCodeAnalysis=false` (suppresses the deprecated FxCopCmd.exe post-build step), `EnableNETAnalyzers=true`, and `AnalysisLevel` (default `latest-Minimum`). When `--enforce-code-style` is enabled, `EnforceCodeStyleInBuild=true` is also set (which is what activates IDE* rules for SDK-style projects).
-
-If a `Directory.Build.props` already exists, the command merges into it via XML parsing rather than string manipulation: existing properties and existing `PackageReference` entries are preserved, and only missing entries are added. Re-runs are idempotent.
-
-Projects that still use `packages.config` are listed as warnings — they will not pick up the analyzer `PackageReference` from `Directory.Build.props` and need to be migrated to `PackageReference` to benefit (in Visual Studio: right-click `packages.config` → Migrate packages.config to PackageReference). If you don't want to migrate, run with `/per-project:true` instead (see below).
-
-#### Per-project mode (`/per-project:true`)
-
-For solutions where you don't want to migrate packages.config projects to PackageReference, pass `/per-project:true`. Instead of writing a `Directory.Build.props`, slnutil edits each project individually:
-
-* **packages.config projects** get a `<package>` entry added to `packages.config` (`developmentDependency="true"`) plus `<Analyzer>` elements added to the `.csproj` pointing at the analyzer DLLs in the solution-level `packages\` folder. Both `Microsoft.CodeAnalysis.NetAnalyzers` and (if `--enforce-code-style` is on) `Microsoft.CodeAnalysis.CSharp.CodeStyle` are handled this way. Only `RunCodeAnalysis=false` is set as a property — the other MSBuild properties are inert in old-style csproj because analysis is driven directly by the `<Analyzer>` entries.
-* **.NET Framework projects using PackageReference** get the analyzer `PackageReference`(s) added directly to the `.csproj`, plus `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, and `AnalysisLevel` properties.
-* **.NET 5+ projects** only get MSBuild properties set (analyzers ship with the SDK): `RunCodeAnalysis=false`, `EnableNETAnalyzers=true`, `AnalysisLevel`, and `EnforceCodeStyleInBuild=true` (when `--enforce-code-style` is on).
-
-Existing values for the MSBuild properties owned by this command are overwritten so behavior is consistent across the solution. Existing `PackageReference` entries are left alone (no version churn). All other csproj content is preserved, including the old-style MSBuild xmlns. Re-runs are idempotent.
-
-After running in per-project mode against packages.config projects, run `nuget.exe restore <solution>` (or Visual Studio → Tools → NuGet Package Manager → Restore NuGet Packages) so the analyzer DLLs actually land in the `packages\` folder.
-
+**Enable Roslyn code analysis across a solution. Default mode creates/merges Directory.Build.props at the solution root. Use --per-project to install analyzers directly into each csproj (required for packages.config projects).**
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution to update. If omitted, searches the current directory for a .sln or .slnx file. |
-| analysis-level | Optional | String | Value for the `AnalysisLevel` MSBuild property. Default `latest-Minimum`. Other values: `latest-Default`, `latest-Recommended`, `latest-All`, `latest`. |
-| analyzer-version | Optional | String | Version of `Microsoft.CodeAnalysis.NetAnalyzers` to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
-| codestyle-version | Optional | String | Version of `Microsoft.CodeAnalysis.CSharp.CodeStyle` to reference for .NET Framework projects (when `--enforce-code-style` is on). If omitted, queries nuget.org for the latest stable version. |
-| enforce-code-style | Optional | Boolean | Enable code style enforcement (IDE* rules) during build. For .NET 5+ sets `EnforceCodeStyleInBuild=true`. For .NET Framework installs `Microsoft.CodeAnalysis.CSharp.CodeStyle`. Default: `true`. |
-| per-project | Optional | Boolean | Install analyzers into each project individually (modifies csproj + packages.config) instead of using `Directory.Build.props`. Required for solutions where projects use `packages.config`. |
+| analysis-level | Optional | String | Value for the AnalysisLevel MSBuild property. Default 'latest-Recommended' surfaces meaningful diagnostics out-of-the-box. Use 'latest-Minimum' to start very quiet, or 'latest-All' / 'latest' for maximum coverage. |
+| analyzer-version | Optional | String | Version of Microsoft.CodeAnalysis.NetAnalyzers to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
+| codestyle-version | Optional | String | Version of Microsoft.CodeAnalysis.CSharp.CodeStyle to reference for .NET Framework projects (when --enforce-code-style is enabled). If omitted, queries nuget.org for the latest stable version. |
+| enforce-code-style | Optional | Boolean | Enable code style enforcement (IDE* rules) during build. For .NET 5+ sets EnforceCodeStyleInBuild=true. For .NET Framework installs Microsoft.CodeAnalysis.CSharp.CodeStyle. Default: true. |
 | dry-run | Optional | Boolean | Preview what would change without writing any files. |
-| create-editorconfig | Optional | Boolean | Also create a starter `.editorconfig` at the solution root if one doesn't already exist. |
+| create-editorconfig | Optional | Boolean | Also create a starter .editorconfig at the solution root if one doesn't already exist. |
+| per-project | Optional | Boolean | Install analyzers into each project individually (modifies csproj + packages.config) instead of using Directory.Build.props. Required for solutions where projects use packages.config. |
+| lang-version | Optional | String | If set, writes <LangVersion> to each project (e.g. '9.0', 'latest'). Unblocks IDE rules whose remedy needs newer C# syntax (e.g. IDE0062 needs C# 8+). Leave unset to keep the compiler default. |
+| keep-existing-rulesets | Optional | Boolean | By default this command removes any <CodeAnalysisRuleSet> elements from each csproj because they typically silence Roslyn analyzers (e.g. the VS-scaffolded MinimumRecommendedRules.ruleset). Pass this flag to leave them in place. |
 ## findsolutions
 **Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis.**
-
-When `listprojects` and `csv` are both set, the output CSV includes per-project columns: `uses-packages-config` (True/False) and `target-framework` (TFM short form, e.g. `net48`, `net8.0`, `netstandard2.1`).
-
-The `reference-type` column distinguishes five kinds of references:
-
-* `project-ref` — `<ProjectReference>` entries.
-* `package-ref` — modern SDK-style `<PackageReference>` entries.
-* `framework-ref` — bare `<Reference Include="System.*" />` entries (GAC / framework assemblies).
-* `nuget-via-packages-config` — `<Reference>` entries whose `HintPath` points into a `packages\` folder (the NuGet folder used by `packages.config` projects).
-* `binary-ref` — `<Reference>` entries whose `HintPath` points elsewhere (direct DLL references to binaries checked into source control or referenced from an external location).
-
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
@@ -391,6 +401,19 @@ The `reference-type` column distinguishes five kinds of references:
 | filter | Required | String | Filter package by name. If package name starts with this value, it gets updated. |
 ## snippetize
 **Reads a block of text from the clipboard and formats it for use in a VSCode snippet.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+## mcp-config
+**Print MCP client configuration for the slnutil server (Claude Code, Claude Desktop, VS Code, Visual Studio, Cursor), or install/uninstall it at user scope. Run with no arguments to print config for every supported client.**
+### Arguments
+| Argument | Is Optional | Data Type | Description |
+| --- | --- | --- | --- |
+| client | Optional | String | Target client: claudecode, claudedesktop, vscode, visualstudio, or cursor. Omit to print configuration for all clients. |
+| install | Optional | Boolean | Register the server at user scope (Claude Code / VS Code only) instead of just printing config. |
+| uninstall | Optional | Boolean | Remove the user-scope registration (Claude Code only). |
+## mcp-server
+**Run slnutil as an MCP (Model Context Protocol) server over stdio. Exposes read-only solution, project, and file inspection tools to AI clients. This command runs until the client disconnects; it is normally launched by the MCP client, not by hand. See 'mcp-config' to register it with a client.**
 ### Arguments
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
