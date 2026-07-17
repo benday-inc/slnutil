@@ -155,7 +155,7 @@ public class FindSolutionsCommand : SynchronousCommand
 
     private const string NotApplicable = "n/a";
 
-    private static readonly string[] _ProjectInfoColumnNames = new[]
+    private static readonly string[] _ProjectInfoColumnNamesForCsv = new[]
     {
         "solution-filename",
         "project",
@@ -170,17 +170,27 @@ public class FindSolutionsCommand : SynchronousCommand
         "uses-packages-config",
         "target-framework"
     };
+    
+    private static readonly string[] _ProjectInfoColumnNamesForTable = new[]
+    {
+        "solution-filename",
+        "project",
+        "reference-type",
+        "reference-target",
+        "target-framework"
+    };
 
-    private string ListSolutionProjectsForCsv(List<SolutionAnalysis> analyses)
+    private string ListSolutionProjectsForCsv(
+        List<SolutionAnalysis> analyses)
     {
         var returnValue = new CsvWriter();
 
-        foreach (var columnName in _ProjectInfoColumnNames)
+        foreach (var columnName in _ProjectInfoColumnNamesForCsv)
         {
             returnValue.AddColumn(columnName);
         }
 
-        foreach (var row in GetProjectInfoRows(analyses))
+        foreach (var row in GetProjectInfoRows(analyses, OutputFormat.Csv))
         {
             returnValue.AddRow(row);
         }
@@ -192,12 +202,12 @@ public class FindSolutionsCommand : SynchronousCommand
     {
         var returnValue = new TableFormatter();
 
-        foreach (var columnName in _ProjectInfoColumnNames)
+        foreach (var columnName in _ProjectInfoColumnNamesForTable)
         {
             returnValue.AddColumn(columnName);
         }
 
-        foreach (var row in GetProjectInfoRows(analyses))
+        foreach (var row in GetProjectInfoRows(analyses, OutputFormat.Table))
         {
             returnValue.AddData(row);
         }
@@ -205,7 +215,7 @@ public class FindSolutionsCommand : SynchronousCommand
         return returnValue.FormatTable();
     }
 
-    private List<string[]> GetProjectInfoRows(List<SolutionAnalysis> analyses)
+    private List<string[]> GetProjectInfoRows(List<SolutionAnalysis> analyses, OutputFormat outputFormat)
     {
         var returnValues = new List<string[]>();
 
@@ -221,7 +231,7 @@ public class FindSolutionsCommand : SynchronousCommand
                 {
                     foreach (var reference in project.References)
                     {
-                        returnValues.Add(GetRowForReference(solution, project, reference));
+                        returnValues.Add(GetRowForReference(solution, project, reference, outputFormat));
                     }
                 }
             }
@@ -257,31 +267,49 @@ public class FindSolutionsCommand : SynchronousCommand
         };
     }
 
-    private string[] GetRowForReference(
-        SolutionAnalysis solution, ProjectAnalysis project, ReferenceAnalysis reference)
+    private enum OutputFormat
     {
-        return new[]
+        Csv,
+        Table
+    }
+    
+    private string[] GetRowForReference(
+        SolutionAnalysis solution, ProjectAnalysis project, 
+        ReferenceAnalysis reference, OutputFormat outputFormat)
+    {
+        if (outputFormat == OutputFormat.Csv)
         {
-            solution.SolutionFileName,
-            project.ProjectFileName,
+            return new[]
+            {
+                solution.SolutionFileName, project.ProjectFileName,
 
-            // reference stuff
-            reference.ReferenceType,
-            reference.ReferenceTargetName,
-            reference.IsOutsideOfSolutionRoot.ToString(),
-            reference.ReferenceTarget,
+                // reference stuff
+                reference.ReferenceType, reference.ReferenceTargetName, reference.IsOutsideOfSolutionRoot.ToString(),
+                reference.ReferenceTarget,
 
-            // file structure stuff
-            solution.SolutionPathDepth.ToString(),
-            project.ProjectPathDepth.ToString(),
+                // file structure stuff
+                solution.SolutionPathDepth.ToString(), project.ProjectPathDepth.ToString(),
 
-            // solution stuff
-            solution.SolutionDirectory.FullName,
-            project.ProjectDirectory.FullName,
+                // solution stuff
+                solution.SolutionDirectory.FullName, project.ProjectDirectory.FullName,
 
-            // per-project metadata
-            project.UsesPackagesConfig.ToString(),
-            project.TargetFramework
-        };
+                // per-project metadata
+                project.UsesPackagesConfig.ToString(), project.TargetFramework
+            };
+        }
+        else if (outputFormat == OutputFormat.Table)
+        {
+            return new[]
+            {
+                solution.SolutionFileName, project.ProjectFileName,
+
+                // reference stuff
+                reference.ReferenceType, reference.ReferenceTargetName, project.TargetFramework
+            };
+        }
+        else
+        {
+            throw new ArgumentException("Invalid output format.");
+        }
     }
 }
