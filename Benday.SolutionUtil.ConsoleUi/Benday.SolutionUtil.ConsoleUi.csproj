@@ -17,13 +17,14 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README-for-nuget.md</PackageReadmeFile>
     <PackageIcon>bdc_mark_128_128.png</PackageIcon>
-    <TheVersion>2.41.0</TheVersion>
+    <TheVersion>2.41.1</TheVersion>
     <AssemblyVersion>$(TheVersion)</AssemblyVersion>
     <Version>$(TheVersion)</Version>
     <Description>A collection of useful command line utilities for .NET Core Solutions &amp; Projects</Description>
     <PackageTags>dotnet;cli;tool;solution;project;csproj;sln;slnx;nuget;utility;developer-tools</PackageTags>
     <ToolCommandName>slnutil</ToolCommandName>
     <PackageReleaseNotes>
+v2.41.1 - findsolutions: fixed cross-solution reference detection. Relative paths written with backslashes were not resolved when running on macOS or Linux, and containment was compared without a directory boundary so a sibling folder sharing a name prefix read as being inside its neighbour. Both made outside-of-solution-root report false when it should have reported true;
 v2.41 - Refactored FindSolutions command to default to table formatted output when list projects is requested;
 v2.40 - enablecodeanalysis: also installs Microsoft.CodeAnalysis.CSharp.CodeStyle for IDE rule enforcement (default on; opt out with /enforce-code-style:false); added /codestyle-version to pin the package version;
 v2.39 - findsolutions: added target-framework and uses-packages-config columns plus finer-grained reference-type classification (framework-ref, nuget-via-packages-config, fixed PackageReference detection); Added enablecodeanalysis command to streamline VS2026 code

@@ -100,18 +100,61 @@ public class SolutionAnalyzer
     private bool IsReferenceOutsideOfSolutionRoot(
         string referenceTarget, DirectoryInfo solutionDir, DirectoryInfo directory)
     {
-        var referencePath = Path.Combine(directory.FullName, referenceTarget);
+        var referencePath = ResolveReferencePath(directory.FullName, referenceTarget);
 
-        var referenceDir = new DirectoryInfo(referencePath);
+        return IsInsideDirectory(referencePath, solutionDir.FullName) == false;
+    }
 
-        if (referenceDir.FullName.ToLower().StartsWith(solutionDir.FullName.ToLower()) == true)
-        {
-            return false;
-        }
-        else
+    /// <summary>
+    /// Resolves a reference target against the folder holding the project.
+    ///
+    /// Project files are written on Windows and use backslashes, but this tool
+    /// also runs on macOS and Linux where a backslash is an ordinary filename
+    /// character.  Without converting first, Path.GetFullPath leaves the ".."
+    /// segments in place and every comparison made afterwards is wrong.
+    /// </summary>
+    public static string ResolveReferencePath(string baseDirectory, string referenceTarget)
+    {
+        var target = (referenceTarget ?? string.Empty)
+            .Trim()
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
+
+        return Path.GetFullPath(Path.Combine(baseDirectory, target));
+    }
+
+    /// <summary>
+    /// True when the path sits inside the directory.  The comparison is made on
+    /// a directory boundary rather than on the raw string, so a sibling that
+    /// merely starts the same way -- "/src/App.Tests" next to "/src/App" --
+    /// does not read as being inside it.
+    /// </summary>
+    public static bool IsInsideDirectory(string path, string directory)
+    {
+        var comparison = GetPathComparison();
+
+        var root = directory.TrimEnd(
+            Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        if (string.Equals(path, root, comparison) == true)
         {
             return true;
         }
+
+        return path.StartsWith(root + Path.DirectorySeparatorChar, comparison);
+    }
+
+    /// <summary>
+    /// Windows and macOS treat paths as case-insensitive; Linux does not.
+    /// </summary>
+    private static StringComparison GetPathComparison()
+    {
+        if (OperatingSystem.IsLinux() == true)
+        {
+            return StringComparison.Ordinal;
+        }
+
+        return StringComparison.OrdinalIgnoreCase;
     }
 
     private int GetPathDepth(string dirPath)
