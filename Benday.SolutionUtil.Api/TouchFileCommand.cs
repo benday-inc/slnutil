@@ -10,9 +10,8 @@ using Benday.XmlUtilities;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameTouchFile,
-    IsAsync = false,
     Description = "Modifies a file's date to current date time or creates a new empty file if it doesn't exist.")]
-public class TouchFileCommand : SynchronousCommand
+public class TouchFileCommand : Command
 {
     public TouchFileCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -32,7 +31,7 @@ public class TouchFileCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var filepath = Arguments.GetStringValue(Constants.ArgumentNameFilename);
 
@@ -53,5 +52,7 @@ public class TouchFileCommand : SynchronousCommand
         {
             File.SetLastWriteTimeUtc(filepath, DateTime.UtcNow);
         }
+
+        return Task.CompletedTask;
     }
 }

@@ -10,9 +10,8 @@ using Benday.XmlUtilities;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameMakeReferenceUseWildcard,
-    IsAsync = false,
     Description = "Changes package references in a C# project file to use wildcard version rather than fixed version number.")]
-public class WildcardReferencesCommand : SynchronousCommand
+public class WildcardReferencesCommand : Command
 {
     public WildcardReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -42,7 +41,7 @@ public class WildcardReferencesCommand : SynchronousCommand
     private string _SolutionPath = string.Empty;
     private string _SolutionFolder = string.Empty;
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
@@ -85,6 +84,8 @@ public class WildcardReferencesCommand : SynchronousCommand
                 UpdateReferences(projects);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private void UpdateReferences(List<string> projectPaths)

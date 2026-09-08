@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Benday.SolutionUtil.Api;
 [Command(Name = Constants.CommandArgumentNameDeployEfMigrations, Description = "Deploy EF Core Migrations from DLL binaries.")]
-public class DeployEfMigrationsFromDllCommand : SynchronousCommand
+public class DeployEfMigrationsFromDllCommand : Command
 {
 
     public DeployEfMigrationsFromDllCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -52,7 +52,7 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var verbose = Arguments.GetBooleanValue(Constants.ArgumentNameVerbose);
 
@@ -162,6 +162,8 @@ public class DeployEfMigrationsFromDllCommand : SynchronousCommand
 
             DeployMigrations(binariesDir, pathToEfDll, pathToEfRuntimeConfigJson, proposedStartupDll, dbContextType, depsJsonPath, runtimeConfigJsonPath);
         }
+
+        return Task.CompletedTask;
     }
 
     private void DeployMigrationsWithCustomValues(bool verbose, string binariesDir, 

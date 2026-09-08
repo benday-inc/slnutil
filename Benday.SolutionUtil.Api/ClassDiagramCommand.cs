@@ -9,7 +9,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameClassDiagram,
     Description = "Generate a class diagram for an assembly.")]
-public class ClassDiagramCommand : SynchronousCommand
+public class ClassDiagramCommand : Command
 {
     public ClassDiagramCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -224,7 +224,7 @@ public class ClassDiagramCommand : SynchronousCommand
         return null;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var filename = Arguments.GetPathToFile(Constants.ArgumentNameFilename, true);
 
@@ -305,6 +305,8 @@ public class ClassDiagramCommand : SynchronousCommand
         WriteDiagramToFile(builder, outputFilename, assemblyName, filterByNamespace);
 
         OpenFileInBrowser(outputFilename);
+
+        return Task.CompletedTask;
     }
 
     private bool MatchesFilter(Type type, string filterByNamespace, string[] filterByTypeNames, bool typeNameExactMatch)

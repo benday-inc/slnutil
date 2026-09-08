@@ -5,9 +5,8 @@ using Benday.SolutionUtil.Api.GitHubActions;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameUpdateGitHubActionsVersions,
-    IsAsync = true,
     Description = "Reads a GitHub Actions YAML file and updates the action versions to latest.")]
-public class UpdateGitHubActionsVersionsCommand : AsynchronousCommand
+public class UpdateGitHubActionsVersionsCommand : Command
 {
     public UpdateGitHubActionsVersionsCommand(
         CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -26,7 +25,7 @@ public class UpdateGitHubActionsVersionsCommand : AsynchronousCommand
         return args;
     }
 
-    protected override async Task OnExecute()
+    protected override async Task OnExecute(CancellationToken cancellationToken)
     {
         string filename;
 
@@ -46,7 +45,7 @@ public class UpdateGitHubActionsVersionsCommand : AsynchronousCommand
 
         WriteLine($"Updating GitHub Actions versions in '{filename}'...");
 
-        var yaml = await File.ReadAllTextAsync(filename);
+        var yaml = await File.ReadAllTextAsync(filename, cancellationToken);
 
         using var httpClient = new HttpClient();
 
@@ -59,7 +58,7 @@ public class UpdateGitHubActionsVersionsCommand : AsynchronousCommand
 
         var updatedYaml = await parser.UpdateYamlAsync(_OutputProvider);
 
-        await File.WriteAllTextAsync(filename, updatedYaml);
+        await File.WriteAllTextAsync(filename, updatedYaml, cancellationToken);
 
         WriteLine("Done.");
     }

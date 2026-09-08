@@ -46,6 +46,26 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 `dotnet tool install slnutil -g`
 
 
+## Command line syntax
+
+Arguments are typed in the POSIX long option form that git, docker and the dotnet CLI use:
+
+```bash
+slnutil setprojectproperty --propertyname Nullable --propertyvalue enable
+slnutil setprojectproperty --propertyname=Nullable --propertyvalue=enable
+slnutil formatxml --filename app.config --write
+```
+
+A boolean argument is a flag and takes no value. The older `/name:value` form still works but
+is deprecated -- it prints a warning on stderr and will be removed in a future version.
+
+Run `slnutil` for the command list, `slnutil <command> --help` for a command's arguments, or
+`slnutil tui` for a terminal interface that lets you browse the commands, fill in a form, and
+run it.
+
+A command that fails exits with a non-zero exit code, so slnutil can be used in a script or a
+build pipeline step.
+
 ## Commands
 | Command Name | Description |
 | --- | --- |
@@ -151,11 +171,15 @@ The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to th
 | Argument | Is Optional | Data Type | Description |
 | --- | --- | --- | --- |
 | solutionpath | Optional | String | Solution to update. If omitted, searches the current directory for a .sln or .slnx file. |
-| analysis-level | Optional | String | Value for the AnalysisLevel MSBuild property. Safe default 'latest-Minimum'. Other values: latest-Default, latest-Recommended, latest-All, latest. |
+| analysis-level | Optional | String | Value for the AnalysisLevel MSBuild property. Default 'latest-Recommended' surfaces meaningful diagnostics out-of-the-box. Use 'latest-Minimum' to start very quiet, or 'latest-All' / 'latest' for maximum coverage. |
 | analyzer-version | Optional | String | Version of Microsoft.CodeAnalysis.NetAnalyzers to reference for .NET Framework projects. If omitted, queries nuget.org for the latest stable version. |
+| codestyle-version | Optional | String | Version of Microsoft.CodeAnalysis.CSharp.CodeStyle to reference for .NET Framework projects (when --enforce-code-style is enabled). If omitted, queries nuget.org for the latest stable version. |
+| enforce-code-style | Optional | Boolean | Enable code style enforcement (IDE* rules) during build. For .NET 5+ sets EnforceCodeStyleInBuild=true. For .NET Framework installs Microsoft.CodeAnalysis.CSharp.CodeStyle. Default: true. |
 | dry-run | Optional | Boolean | Preview what would change without writing any files. |
 | create-editorconfig | Optional | Boolean | Also create a starter .editorconfig at the solution root if one doesn't already exist. |
 | per-project | Optional | Boolean | Install analyzers into each project individually (modifies csproj + packages.config) instead of using Directory.Build.props. Required for solutions where projects use packages.config. |
+| lang-version | Optional | String | If set, writes <LangVersion> to each project (e.g. '9.0', 'latest'). Unblocks IDE rules whose remedy needs newer C# syntax (e.g. IDE0062 needs C# 8+). Leave unset to keep the compiler default. |
+| keep-existing-rulesets | Optional | Boolean | By default this command removes any <CodeAnalysisRuleSet> elements from each csproj because they typically silence Roslyn analyzers (e.g. the VS-scaffolded MinimumRecommendedRules.ruleset). Pass this flag to leave them in place. |
 ## <a name="findsolutions"></a> findsolutions
 **Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis.**
 ### Arguments

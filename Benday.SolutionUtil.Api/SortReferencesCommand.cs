@@ -12,9 +12,8 @@ namespace Benday.SolutionUtil.Api;
 
 
 [Command(Name = Constants.CommandArgumentNameSortReferences,
-    IsAsync = false,
     Description = "Sorts the references in an item group for a csproj file.")]
-public class SortReferencesCommand : SynchronousCommand
+public class SortReferencesCommand : Command
 {
 
     public SortReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,7 +35,7 @@ public class SortReferencesCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string projectPath;
 
@@ -68,6 +67,8 @@ public class SortReferencesCommand : SynchronousCommand
         SortItemGroupItems(projectPath);
 
         WriteLine("Done.");
+
+        return Task.CompletedTask;
     }
 
     private void SortItemGroupItems(string projectPath)

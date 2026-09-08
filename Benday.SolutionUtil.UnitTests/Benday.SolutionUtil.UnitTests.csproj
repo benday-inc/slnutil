@@ -13,7 +13,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Benday.CommandsFramework" Version="4.*" />
+    <PackageReference Include="Benday.CommandsFramework" Version="5.*" />
     <PackageReference Include="Benday.Common.Testing" Version="3.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageReference Include="coverlet.collector" Version="10.0.1">

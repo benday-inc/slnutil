@@ -3,7 +3,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameReplaceToken,
     Description = "Replace token in file.")]
-public class ReplaceTokenCommand : SynchronousCommand
+public class ReplaceTokenCommand : Command
 {
     public ReplaceTokenCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -30,7 +30,7 @@ public class ReplaceTokenCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var configFilename = Arguments.GetStringValue(Constants.ArgumentNameConfigFilename);
         Utilities.AssertFileExists(configFilename, Constants.ArgumentNameConfigFilename);
@@ -46,6 +46,8 @@ public class ReplaceTokenCommand : SynchronousCommand
 
             File.WriteAllText(configFilename, text);
         }
+
+        return Task.CompletedTask;
     }
 
     protected void AssertFileExists(string path, string argumentName)

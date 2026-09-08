@@ -12,7 +12,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameRename,
     Description = "Bulk rename for files and folders.")]
-public class BulkRenameCommand : SynchronousCommand
+public class BulkRenameCommand : Command
 {
     public BulkRenameCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -53,7 +53,7 @@ public class BulkRenameCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string sourceDir = Environment.CurrentDirectory;
 
@@ -92,6 +92,8 @@ public class BulkRenameCommand : SynchronousCommand
         {
             Rename(sourceDir, fromValue, toValue, preview, recursive);
         }
+
+        return Task.CompletedTask;
     }
 
     private void Rename(string sourceDir, string fromValue, string toValue, bool preview, bool recursive, 

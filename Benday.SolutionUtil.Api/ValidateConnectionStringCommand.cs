@@ -8,7 +8,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameValidateConnectionString,
     Description = "Validate that specified connection string can connect to SQL Server.")]
-public class ValidateConnectionStringCommand : SynchronousCommand
+public class ValidateConnectionStringCommand : Command
 {
     public ValidateConnectionStringCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -31,7 +31,7 @@ public class ValidateConnectionStringCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? configFilename;
 
@@ -75,6 +75,8 @@ public class ValidateConnectionStringCommand : SynchronousCommand
         WriteLine(value.SafeToString());
 
         ValidateConnection(value);
+
+        return Task.CompletedTask;
     }
 
     private void ValidateConnection(string value)

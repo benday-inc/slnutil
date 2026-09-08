@@ -4,7 +4,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameDevTreeClean,
     Description = "Clean development folder tree. Removes node_modules, .git, bin, obj, and TestResults folders.")]
-public class DevTreeCleanCommand : SynchronousCommand
+public class DevTreeCleanCommand : Command
 {
 
     public DevTreeCleanCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,7 +36,7 @@ public class DevTreeCleanCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var rootDir = Environment.CurrentDirectory;
 
@@ -61,6 +61,8 @@ public class DevTreeCleanCommand : SynchronousCommand
         }
 
         CleanDirectory(rootDir, keepGit, keepNodeModules);
+
+        return Task.CompletedTask;
     }
 
     public void CleanDirectory(string fromDir, bool keepGit, bool keepNodeModules)

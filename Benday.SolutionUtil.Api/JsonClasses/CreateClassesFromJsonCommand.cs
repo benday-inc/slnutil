@@ -13,7 +13,7 @@ namespace Benday.SolutionUtil.Api;
 [Command(
     Name = Constants.CommandArgumentNameClassesFromJson,
     Description = "Create C# classes from JSON with serialization attributes for System.Text.Json.")]
-public class CreateClassesFromJsonCommand : SynchronousCommand
+public class CreateClassesFromJsonCommand : Command
 {
     public CreateClassesFromJsonCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
             base(info, outputProvider)
@@ -47,7 +47,7 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string json;
 
@@ -138,6 +138,8 @@ public class CreateClassesFromJsonCommand : SynchronousCommand
                 WriteClassesAndOpen(code.ToString());
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private string Indent(string classCode)

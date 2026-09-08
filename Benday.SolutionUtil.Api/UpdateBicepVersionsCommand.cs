@@ -8,9 +8,8 @@ using Benday.CommandsFramework;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameUpdateBicepVersions,
-    IsAsync = true,
     Description = "Reads bicep file or files and updates the api versions to latest.")]
-public class UpdateBicepVersionsCommand : AsynchronousCommand
+public class UpdateBicepVersionsCommand : Command
 {
     public UpdateBicepVersionsCommand(
         CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -42,7 +41,7 @@ public class UpdateBicepVersionsCommand : AsynchronousCommand
         return args;
     }
 
-    protected override async Task OnExecute()
+    protected override async Task OnExecute(CancellationToken cancellationToken)
     {
         var preview = Arguments.GetBooleanValue(Constants.ArgumentNamePreview);
         var allowPreviewVersions = Arguments.GetBooleanValue(Constants.ArgumentNameAllowPreviewVersions);

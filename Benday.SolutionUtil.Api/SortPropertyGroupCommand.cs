@@ -12,9 +12,8 @@ namespace Benday.SolutionUtil.Api;
 
 
 [Command(Name = Constants.CommandArgumentNameSortProjectGroup,
-    IsAsync = false,
     Description = "Sorts the elements in a property group for a csproj file.")]
-public class SortPropertyGroupCommand : SynchronousCommand
+public class SortPropertyGroupCommand : Command
 {
 
     public SortPropertyGroupCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,7 +35,7 @@ public class SortPropertyGroupCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string projectPath;
 
@@ -68,6 +67,8 @@ public class SortPropertyGroupCommand : SynchronousCommand
         SortPropertGroupElements(projectPath);
 
         WriteLine("Done.");
+
+        return Task.CompletedTask;
     }
 
     private void SortPropertGroupElements(string projectPath)

@@ -6,7 +6,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameGetConnectionString,
     Description = "Get database connection string in appsettings.json.")]
-public class GetConnectionStringCommand : SynchronousCommand
+public class GetConnectionStringCommand : Command
 {
     public GetConnectionStringCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -29,7 +29,7 @@ public class GetConnectionStringCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? configFilename;
 
@@ -66,6 +66,8 @@ public class GetConnectionStringCommand : SynchronousCommand
                 "ConnectionStrings", configKeyname).SafeToString();
 
         WriteLine(value);
+
+        return Task.CompletedTask;
     }
 
     protected void AssertFileExists(string path, string argumentName)

@@ -10,9 +10,8 @@ using Benday.XmlUtilities;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameEnableCodeAnalysis,
-    IsAsync = false,
     Description = "Enable Roslyn code analysis across a solution. Default mode creates/merges Directory.Build.props at the solution root. Use --per-project to install analyzers directly into each csproj (required for packages.config projects).")]
-public class EnableCodeAnalysisCommand : SynchronousCommand
+public class EnableCodeAnalysisCommand : Command
 {
     private const string NetAnalyzersPackageId = "Microsoft.CodeAnalysis.NetAnalyzers";
     private const string CodeStylePackageId = "Microsoft.CodeAnalysis.CSharp.CodeStyle";
@@ -90,7 +89,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
     private bool _dryRun;
     private string _dryRunPrefix = string.Empty;
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         _dryRun = Arguments.GetBooleanValue(Constants.ArgumentNameDryRun);
         _dryRunPrefix = _dryRun ? "[DRY RUN] " : string.Empty;
@@ -107,7 +106,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
         if (projects.Count == 0)
         {
             WriteLine("No projects found in solution.");
-            return;
+            return Task.CompletedTask;
         }
 
         PrintProjectSummary(projects);
@@ -157,7 +156,7 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
                 WriteLine($"  - {project.FileName}");
             }
             WriteLine("  Consider migrating these projects to PackageReference format,");
-            WriteLine("  or re-run with /per-project:true to install the analyzer directly into each project.");
+            WriteLine("  or re-run with --per-project true to install the analyzer directly into each project.");
         }
 
         WriteLine(string.Empty);
@@ -178,6 +177,8 @@ public class EnableCodeAnalysisCommand : SynchronousCommand
             WriteLine("  3. Check the Error List in VS (make sure Warnings and Messages are toggled on)");
             WriteLine("  4. Adjust rule severities in .editorconfig as needed");
         }
+
+        return Task.CompletedTask;
     }
 
     private string ResolveSolutionPath()

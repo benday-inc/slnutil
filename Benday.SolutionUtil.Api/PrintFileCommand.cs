@@ -4,9 +4,8 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(
     Name = "printfile",
-    Description = "Reads a text file and prints it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues.",
-    IsAsync = true)]
-public class PrintFileCommand : AsynchronousCommand
+    Description = "Reads a text file and prints it to the console character by character. This is helpful for diagnosing encoding issues and weird text issues.")]
+public class PrintFileCommand : Command
 {
     public PrintFileCommand(
         CommandExecutionInfo info, ITextOutputProvider outputProvider) : base(info, outputProvider)
@@ -26,7 +25,7 @@ public class PrintFileCommand : AsynchronousCommand
         return arguments;
     }
 
-    protected override Task OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var inputFilePath = Arguments.GetPathToFile("input", true, true);
 

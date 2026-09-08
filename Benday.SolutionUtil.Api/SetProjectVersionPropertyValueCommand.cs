@@ -11,7 +11,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetVersion,
         Description = "Set the assembly and nuget package version property value on a project.")]
-public class SetProjectVersionPropertyValueCommand : SynchronousCommand
+public class SetProjectVersionPropertyValueCommand : Command
 {
 
     public SetProjectVersionPropertyValueCommand(
@@ -45,7 +45,7 @@ public class SetProjectVersionPropertyValueCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? solutionPath;
 
@@ -82,7 +82,7 @@ public class SetProjectVersionPropertyValueCommand : SynchronousCommand
             if (hasPropertyValue == false &&
                 increment == false)
             {
-                throw new KnownException("You must specify a value to set or specify the /increment flag.");
+                throw new KnownException("You must specify a value to set or specify the --increment flag.");
             }
 
             var projectName = Arguments.GetStringValue(Constants.ArgumentNameProjectName);
@@ -128,6 +128,8 @@ public class SetProjectVersionPropertyValueCommand : SynchronousCommand
                     propertyValue);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private string GetProjectPath(string solutionPath, string projectName)

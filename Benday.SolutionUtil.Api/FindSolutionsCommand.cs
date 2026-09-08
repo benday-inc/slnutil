@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 
 using Benday.CommandsFramework;
 using Benday.CommandsFramework.DataFormatting;
@@ -8,7 +9,7 @@ namespace Benday.SolutionUtil.Api;
 [Command(Name = Constants.CommandArgumentNameFindSolutions,
     Description = "Find solution files (sln and slnx) in a folder tree and optionally list projects with reference analysis."
 )]
-public class FindSolutionsCommand : SynchronousCommand
+public class FindSolutionsCommand : Command
 {
 
     public FindSolutionsCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,6 +37,8 @@ public class FindSolutionsCommand : SynchronousCommand
             .AsNotRequired()
             .AllowEmptyValue()
             .WithDescription("Output results as comma-separated values");
+        
+        args.AddBoolean("json").AsNotRequired().AllowEmptyValue().WithDescription("Output results as JSON");
 
         args.AddBoolean(Constants.ArgumentNameSkipReferences)
             .AsNotRequired()
@@ -46,7 +49,7 @@ public class FindSolutionsCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var rootDirPath = Arguments.GetStringValue(Constants.ArgumentNameRootDirectory);
 
@@ -65,6 +68,7 @@ public class FindSolutionsCommand : SynchronousCommand
         {
             var listProjects = Arguments.GetBooleanValue(Constants.ArgumentNameListProjects);
             var formatAsCsv = Arguments.GetBooleanValue(Constants.ArgumentNameCommaSeparatedValues);
+            var formatAsJson = Arguments.GetBooleanValue("json");
             var skipReferences = Arguments.GetBooleanValue(Constants.ArgumentNameSkipReferences);
 
             if (listProjects == false)
@@ -86,12 +90,21 @@ public class FindSolutionsCommand : SynchronousCommand
                 {
                     WriteLine(ListSolutionProjectsForCsv(analyses));
                 }
+                else if (formatAsJson == true)
+                {
+                    var formattedAsJson = JsonSerializer.Serialize(analyses, 
+                        new JsonSerializerOptions { WriteIndented = true });
+                    
+                    WriteLine(formattedAsJson);
+                }
                 else
                 {
                     WriteLine(ListSolutionProjectsForTableOutput(analyses));
                 }
             }
         }
+
+        return Task.CompletedTask;
     }
 
     internal string[] GetResults(string rootDir)
@@ -99,8 +112,21 @@ public class FindSolutionsCommand : SynchronousCommand
         var solutions = Directory.GetFiles(rootDir, "*.sln", SearchOption.AllDirectories)
             .Concat(Directory.GetFiles(rootDir, "*.slnx", SearchOption.AllDirectories))
             .ToArray();
+        
+        var returnValues = new List<string>();
+        
+        // remove any zero length solutions
+        foreach (var sln in solutions)
+        {
+            var slnFileInfo = new FileInfo(sln);
 
-        return solutions;
+            if (slnFileInfo.Length > 0)
+            {
+                returnValues.Add(sln);
+            }
+        }
+
+        return returnValues.ToArray();
     }
 
     private string FormatAsCsv(IEnumerable<string> items)
@@ -270,7 +296,8 @@ public class FindSolutionsCommand : SynchronousCommand
     private enum OutputFormat
     {
         Csv,
-        Table
+        Table,
+        Json
     }
     
     private string[] GetRowForReference(

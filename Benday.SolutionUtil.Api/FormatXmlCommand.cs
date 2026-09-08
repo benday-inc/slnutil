@@ -10,9 +10,8 @@ using Benday.XmlUtilities;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameFormatXml,
-    IsAsync = false,
     Description = "Formats XML files")]
-public class FormatXmlCommand : SynchronousCommand
+public class FormatXmlCommand : Command
 {
     public FormatXmlCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -45,7 +44,7 @@ public class FormatXmlCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         WriteLine("Starting...");
 
@@ -104,6 +103,8 @@ public class FormatXmlCommand : SynchronousCommand
 
             FormatFile(filepath, writeToFile);
         }
+
+        return Task.CompletedTask;
     }
 
     private void FormatFile(string file, bool writeToFile)

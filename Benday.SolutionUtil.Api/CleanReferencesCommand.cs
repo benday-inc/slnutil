@@ -12,9 +12,8 @@ namespace Benday.SolutionUtil.Api;
 
 
 [Command(Name = Constants.CommandArgumentNameCleanReferences,
-    IsAsync = false,
     Description = "Simplifies package references in a C# project file. Mostly this fixes stuff in the EF Core references that breaks Azure DevOps & GitHub builds like PrivateAssets and IncludeAssets directives.")]
-public class CleanReferencesCommand : SynchronousCommand
+public class CleanReferencesCommand : Command
 {
 
     public CleanReferencesCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -41,7 +40,7 @@ public class CleanReferencesCommand : SynchronousCommand
     private string _SolutionPath = string.Empty;
     private string _SolutionFolder = string.Empty;
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
@@ -84,6 +83,8 @@ public class CleanReferencesCommand : SynchronousCommand
                 CleanProjects(projects);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private void CleanProjects(List<string> projectPaths)

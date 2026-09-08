@@ -10,7 +10,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameListSolutionProjects,
         Description = "Gets list of projects in a solution.")]
-public class ListSolutionProjectsCommand : SynchronousCommand
+public class ListSolutionProjectsCommand : Command
 {
 
     public ListSolutionProjectsCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -35,7 +35,7 @@ public class ListSolutionProjectsCommand : SynchronousCommand
     }
     private string _SolutionPath = string.Empty;
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         if (Arguments.HasValue(Constants.ArgumentNameSolutionPath) == true)
         {
@@ -72,6 +72,8 @@ public class ListSolutionProjectsCommand : SynchronousCommand
                 WriteLine(projects);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     internal string GetResult()

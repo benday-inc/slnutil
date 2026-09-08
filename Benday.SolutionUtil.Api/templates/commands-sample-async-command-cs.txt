@@ -3,10 +3,9 @@ using Benday.CommandsFramework;
 namespace %%PROJECT_NAMESPACE%%;
 
 [Command(
-    IsAsync = true,
     Name = "sampleasync",
     Description = "This is a sample command that runs asynchronously.")]
-public class SampleAsyncCommand : AsynchronousCommand
+public class SampleAsyncCommand : Command
 {
     public SampleAsyncCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -32,32 +31,32 @@ public class SampleAsyncCommand : AsynchronousCommand
         return args;
     }
 
-    protected override async Task OnExecute()
+    protected override async Task OnExecute(CancellationToken cancellationToken)
     {        
         var message = Arguments.GetStringValue("message");
         var printTime = Arguments.GetBooleanValue("time");
 
         if (printTime == true)
         {
-            await PrintTimeAsync();
+            await PrintTimeAsync(cancellationToken);
         }
 
-        await PrintMessageAsync(message);
+        await PrintMessageAsync(message, cancellationToken);
     }
 
-    private async Task PrintTimeAsync()
+    private async Task PrintTimeAsync(CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
             WriteLine($"The time is {DateTime.Now.ToString()}");
-        });
+        }, cancellationToken);
     }
 
-    private async Task PrintMessageAsync(string message)
+    private async Task PrintMessageAsync(string message, CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
             WriteLine(message);
-        });
+        }, cancellationToken);
     }
 }

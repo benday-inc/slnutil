@@ -14,7 +14,7 @@ namespace Benday.SolutionUtil.Api.Snippets;
 [Command(
     Name = "snippetize",
     Description = "Reads a block of text from the clipboard and formats it for use in a VSCode snippet.")]
-public class SnippetizeCommand : SynchronousCommand
+public class SnippetizeCommand : Command
 {
     public SnippetizeCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
             base(info, outputProvider)
@@ -30,7 +30,7 @@ public class SnippetizeCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var text = GetTextFromClipboard();
 
@@ -52,6 +52,8 @@ public class SnippetizeCommand : SynchronousCommand
         });
         
         WriteLine("\"snippet description\": " + json);
+
+        return Task.CompletedTask;
     }
     private string[] GetAllLines(StringReader reader)
     {

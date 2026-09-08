@@ -10,7 +10,7 @@ namespace Benday.SolutionUtil.Api;
 [Command(Name = Constants.CommandArgumentNameListPackagesLegacy, 
     Description = "Lists packages referenced in legacy style packages.config files.")]
 public class ListPackagesLegacyStyleCommand
-    : SynchronousCommand
+    : Command
 {
 
     public ListPackagesLegacyStyleCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -30,7 +30,7 @@ public class ListPackagesLegacyStyleCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string rootDirPath;
 
@@ -59,6 +59,7 @@ public class ListPackagesLegacyStyleCommand
             DisplayPackages(packagesConfigFiles);
         }
 
+        return Task.CompletedTask;
     }
 
     private void DisplayPackages(string[] packagesConfigFiles)

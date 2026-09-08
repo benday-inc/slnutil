@@ -5,7 +5,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetJsonValue,
     Description = "Set a string value in a json file.")]
-public class SetJsonValueCommand : SynchronousCommand
+public class SetJsonValueCommand : Command
 {
     public SetJsonValueCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -69,7 +69,7 @@ public class SetJsonValueCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? configFilename;
 
@@ -156,6 +156,8 @@ public class SetJsonValueCommand : SynchronousCommand
         File.WriteAllText(configFilename, json);
 
         WriteLine($"Updated '{configFilename}'.");
+
+        return Task.CompletedTask;
     }
 
     private void SetValue(JsonEditor editor, bool setAsBoolean,

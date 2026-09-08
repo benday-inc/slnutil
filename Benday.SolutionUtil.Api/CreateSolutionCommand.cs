@@ -12,7 +12,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameCreate,
     Description = "Create a solution and projects")]
-internal class CreateSolutionCommand : SynchronousCommand
+internal class CreateSolutionCommand : Command
 {
     public const string PackageName_Benday_Common_Testing = "Benday.Common.Testing";
     public const string PackageName_Xunit = "xunit.v3";
@@ -107,7 +107,7 @@ internal class CreateSolutionCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var rootDir = Environment.CurrentDirectory;
 
@@ -131,6 +131,8 @@ internal class CreateSolutionCommand : SynchronousCommand
         WriteLine($"Creating solution of type '{solutionTypeValue}' ({solutionTypeDescription}) in directory '{rootDir}' with root namespace '{rootNamespace}'.");
 
         Create(solutionTypeValue, rootDir, rootNamespace);
+
+        return Task.CompletedTask;
     }
 
     private void Create(string solutionType, string rootDir, string rootNamespace)

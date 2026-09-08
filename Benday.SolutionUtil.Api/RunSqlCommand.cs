@@ -8,7 +8,7 @@ namespace Benday.SolutionUtil.Api;
 [Command(
     Name = Constants.CommandArgumentNameRunSql,
     Description = "Execute SQL command or SQL script file against a database.")]
-public class RunSqlCommand : SynchronousCommand
+public class RunSqlCommand : Command
 {
     public RunSqlCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -38,26 +38,18 @@ public class RunSqlCommand : SynchronousCommand
             .AllowEmptyValue()
             .WithDescription("Display results of query (for SELECT statements)");
 
+        args.ExactlyOneOf(
+            Constants.ArgumentNameSqlQuery, Constants.ArgumentNameSqlFile);
+
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var connectionString = Arguments.GetStringValue(Constants.ArgumentNameConnectionString);
         var displayResults = Arguments.GetBooleanValue(Constants.ArgumentNameDisplayResults);
         
         var hasSqlCommand = Arguments.HasValue(Constants.ArgumentNameSqlQuery);
-        var hasSqlFile = Arguments.HasValue(Constants.ArgumentNameSqlFile);
-
-        if (!hasSqlCommand && !hasSqlFile)
-        {
-            throw new KnownException("You must provide either a SQL command or a SQL file path.");
-        }
-
-        if (hasSqlCommand && hasSqlFile)
-        {
-            throw new KnownException("You cannot provide both a SQL command and a SQL file path. Choose one.");
-        }
 
         string sqlToExecute;
 
@@ -77,6 +69,8 @@ public class RunSqlCommand : SynchronousCommand
         }
 
         ExecuteSql(connectionString, sqlToExecute, displayResults);
+
+        return Task.CompletedTask;
     }
 
     private void ExecuteSql(

@@ -7,9 +7,8 @@ using Benday.Common;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameFormatJson,
-    IsAsync = false,
     Description = "Formats JSON files")]
-public class FormatJsonCommand : SynchronousCommand
+public class FormatJsonCommand : Command
 {
     public FormatJsonCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -42,7 +41,7 @@ public class FormatJsonCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         WriteLine("Starting...");
 
@@ -101,6 +100,8 @@ public class FormatJsonCommand : SynchronousCommand
 
             FormatFile(filepath, writeToFile);
         }
+
+        return Task.CompletedTask;
     }
 
     private void FormatFile(string file, bool writeToFile)

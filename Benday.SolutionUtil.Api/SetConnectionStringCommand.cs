@@ -5,7 +5,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetConnectionString,
     Description = "Set database connection string in appsettings.json.")]
-public class SetConnectionStringCommand : SynchronousCommand
+public class SetConnectionStringCommand : Command
 {
     public SetConnectionStringCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -32,7 +32,7 @@ public class SetConnectionStringCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? configFilename;
 
@@ -71,6 +71,8 @@ public class SetConnectionStringCommand : SynchronousCommand
         File.WriteAllText(configFilename, json);
 
         WriteLine($"Updated '{configFilename}'.");
+
+        return Task.CompletedTask;
     }
 
 

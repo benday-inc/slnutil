@@ -10,7 +10,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetProjectProperty,
         Description = "Set a project property value on all projects.")]
-public class SetProjectPropertyValueCommand : SynchronousCommand
+public class SetProjectPropertyValueCommand : Command
 {
 
     public SetProjectPropertyValueCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -36,7 +36,7 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? solutionPath;
 
@@ -69,6 +69,8 @@ public class SetProjectPropertyValueCommand : SynchronousCommand
 
             SetPropertyValueInProjects(solutionPath, propertyName, propertyValue);
         }
+
+        return Task.CompletedTask;
     }
 
     private void SetPropertyValueInProjects(string solutionPath, string propertyName, string propertyValue)

@@ -10,7 +10,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetFrameworkVersion,
         Description = "Set the target framework version on all projects.")]
-public class SetFrameworkVersionCommand : SynchronousCommand
+public class SetFrameworkVersionCommand : Command
 {
 
     public SetFrameworkVersionCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -33,7 +33,7 @@ public class SetFrameworkVersionCommand : SynchronousCommand
     }
 
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         string? solutionPath;
 
@@ -65,6 +65,8 @@ public class SetFrameworkVersionCommand : SynchronousCommand
 
             UpdateFrameworkVersions(solutionPath, frameworkVersion);
         }
+
+        return Task.CompletedTask;
     }
 
     private void UpdateFrameworkVersions(string solutionPath, string frameworkVersion)

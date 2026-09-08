@@ -45,3 +45,23 @@ YouTube: https://www.youtube.com/@_benday
 The slnutil is distributed as a .NET Core Tool via NuGet. To install it go to the command prompt and type  
 `dotnet tool install slnutil -g`
 
+
+## Command line syntax
+
+Arguments are typed in the POSIX long option form that git, docker and the dotnet CLI use:
+
+```bash
+slnutil setprojectproperty --propertyname Nullable --propertyvalue enable
+slnutil setprojectproperty --propertyname=Nullable --propertyvalue=enable
+slnutil formatxml --filename app.config --write
+```
+
+A boolean argument is a flag and takes no value. The older `/name:value` form still works but
+is deprecated -- it prints a warning on stderr and will be removed in a future version.
+
+Run `slnutil` for the command list, `slnutil <command> --help` for a command's arguments, or
+`slnutil tui` for a terminal interface that lets you browse the commands, fill in a form, and
+run it.
+
+A command that fails exits with a non-zero exit code, so slnutil can be used in a script or a
+build pipeline step.

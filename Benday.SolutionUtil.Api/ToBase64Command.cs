@@ -6,7 +6,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameToBase64String,
     Description = "Encodes a string value as a base 64 string.")]
-public class ToBase64Command : SynchronousCommand
+public class ToBase64Command : Command
 {
 
     public ToBase64Command(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
@@ -25,13 +25,15 @@ public class ToBase64Command : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var token = Arguments[Constants.ArgumentNameValue].Value;
 
         var asBase64String = GetTokenAsBase64String(token);
 
         WriteLine(asBase64String);
+
+        return Task.CompletedTask;
     }
 
     public static string GetTokenAsBase64String(string token)

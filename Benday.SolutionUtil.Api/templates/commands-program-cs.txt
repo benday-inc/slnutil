@@ -8,9 +8,9 @@ namespace %%PROJECT_NAMESPACE%%;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task<int> Main(string[] args)
     {
-        CommandsApp
+        return await CommandsApp
             .Create<SampleAsyncCommand>(args)
             .WithAppSettings()
             .WithConfigFile("appsettings.development.json", optional: true)
@@ -31,6 +31,6 @@ class Program
                 // Register your services for dependency injection
                 // services.AddSingleton<IGreetingService, GreetingService>();
             })
-            .Run();
+            .RunAsync();
     }
 }

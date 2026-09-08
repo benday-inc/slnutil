@@ -10,9 +10,8 @@ using Benday.XmlUtilities;
 namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameSetPackageVersion,
-    IsAsync = false,
     Description = "Changes NuGet package references in a C# project file to a new value.")]
-public class SetPackageVersionCommand : SynchronousCommand
+public class SetPackageVersionCommand : Command
 {
     public SetPackageVersionCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -46,7 +45,7 @@ public class SetPackageVersionCommand : SynchronousCommand
     private string _SolutionPath = string.Empty;
     private string _SolutionFolder = string.Empty;
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var targetVersionValue = Arguments.GetStringValue(Constants.ArgumentNamePackageVersion);
 
@@ -95,6 +94,8 @@ public class SetPackageVersionCommand : SynchronousCommand
                 UpdateReferences(projects, targetVersionValue);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private void UpdateReferences(List<string> projectPaths, string targetVersionValue)

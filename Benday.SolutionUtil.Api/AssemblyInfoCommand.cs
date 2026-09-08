@@ -9,7 +9,7 @@ namespace Benday.SolutionUtil.Api;
 
 [Command(Name = Constants.CommandArgumentNameAssemblyInfo,
     Description = "View assembly info for a DLL.")]
-public class AssemblyInfoCommand : SynchronousCommand
+public class AssemblyInfoCommand : Command
 {
     public AssemblyInfoCommand(CommandExecutionInfo info, ITextOutputProvider outputProvider) :
         base(info, outputProvider)
@@ -29,12 +29,14 @@ public class AssemblyInfoCommand : SynchronousCommand
         return args;
     }
 
-    protected override void OnExecute()
+    protected override Task OnExecute(CancellationToken cancellationToken)
     {
         var filename = Arguments.GetPathToFile(
             Constants.ArgumentNameFilename, true);
 
         ViewAssemblyInfo(filename);
+
+        return Task.CompletedTask;
     }
 
     private void ViewAssemblyInfo(string filename)
