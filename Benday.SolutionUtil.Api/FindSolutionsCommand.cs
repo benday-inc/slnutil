@@ -38,7 +38,10 @@ public class FindSolutionsCommand : Command
             .AllowEmptyValue()
             .WithDescription("Output results as comma-separated values");
         
-        args.AddBoolean("json").AsNotRequired().AllowEmptyValue().WithDescription("Output results as JSON");
+        args.AddBoolean(Constants.ArgumentNameJson)
+            .AsNotRequired()
+            .AllowEmptyValue()
+            .WithDescription("Output results as JSON");
 
         args.AddBoolean(Constants.ArgumentNameSkipReferences)
             .AsNotRequired()
@@ -68,7 +71,7 @@ public class FindSolutionsCommand : Command
         {
             var listProjects = Arguments.GetBooleanValue(Constants.ArgumentNameListProjects);
             var formatAsCsv = Arguments.GetBooleanValue(Constants.ArgumentNameCommaSeparatedValues);
-            var formatAsJson = Arguments.GetBooleanValue("json");
+            var formatAsJson = Arguments.GetBooleanValue(Constants.ArgumentNameJson);
             var skipReferences = Arguments.GetBooleanValue(Constants.ArgumentNameSkipReferences);
 
             if (listProjects == false)
@@ -76,6 +79,10 @@ public class FindSolutionsCommand : Command
                 if (formatAsCsv == true)
                 {
                     WriteLine(FormatAsCsv(solutions));
+                }
+                else if (formatAsJson == true)
+                {
+                    WriteLine(FormatAsJson(SolutionFileJson.FromPaths(solutions)));
                 }
                 else
                 {
@@ -92,10 +99,7 @@ public class FindSolutionsCommand : Command
                 }
                 else if (formatAsJson == true)
                 {
-                    var formattedAsJson = JsonSerializer.Serialize(analyses, 
-                        new JsonSerializerOptions { WriteIndented = true });
-                    
-                    WriteLine(formattedAsJson);
+                    WriteLine(FormatAsJson(SolutionAnalysisJson.FromAnalyses(analyses)));
                 }
                 else
                 {
@@ -167,6 +171,21 @@ public class FindSolutionsCommand : Command
         return returnValue.ToString();
     }
 
+    private static readonly JsonSerializerOptions _JsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
+    /// <summary>
+    /// Serializes one of the JSON view classes.  Don't pass the analysis
+    /// classes to this: they hold FileInfo and DirectoryInfo values that the
+    /// serializer can't walk.  See <see cref="SolutionAnalysisJson"/>.
+    /// </summary>
+    internal string FormatAsJson<T>(List<T> items)
+    {
+        return JsonSerializer.Serialize(items, _JsonOptions);
+    }
+
     private string FormatAsList(IEnumerable<string> items)
     {
         var returnValue = new StringBuilder();
@@ -206,7 +225,7 @@ public class FindSolutionsCommand : Command
         "target-framework"
     };
 
-    private string ListSolutionProjectsForCsv(
+    internal string ListSolutionProjectsForCsv(
         List<SolutionAnalysis> analyses)
     {
         var returnValue = new CsvWriter();
@@ -224,7 +243,7 @@ public class FindSolutionsCommand : Command
         return returnValue.ToCsvString();
     }
 
-    private string ListSolutionProjectsForTableOutput(List<SolutionAnalysis> analyses)
+    internal string ListSolutionProjectsForTableOutput(List<SolutionAnalysis> analyses)
     {
         var returnValue = new TableFormatter();
 
@@ -251,7 +270,8 @@ public class FindSolutionsCommand : Command
             {
                 if (project.References.Count == 0)
                 {
-                    returnValues.Add(GetRowForProjectWithoutReferences(solution, project));
+                    returnValues.Add(
+                        GetRowForProjectWithoutReferences(solution, project, outputFormat));
                 }
                 else
                 {
@@ -266,15 +286,38 @@ public class FindSolutionsCommand : Command
         return returnValues;
     }
 
-    private string[] GetRowForProjectWithoutReferences(SolutionAnalysis solution, ProjectAnalysis project)
+    private string[] GetRowForProjectWithoutReferences(
+        SolutionAnalysis solution, ProjectAnalysis project, OutputFormat outputFormat)
     {
+        var referenceType = project.Exists == false ? "project-not-found" : NotApplicable;
+
+        if (outputFormat == OutputFormat.Table)
+        {
+            return new[]
+            {
+                solution.SolutionFileName,
+                project.ProjectFileName,
+
+                // reference stuff
+                referenceType,
+                NotApplicable,
+
+                // per-project metadata
+                project.TargetFramework
+            };
+        }
+        else if (outputFormat != OutputFormat.Csv)
+        {
+            throw new ArgumentException("Invalid output format.", nameof(outputFormat));
+        }
+
         return new[]
         {
             solution.SolutionFileName,
             project.ProjectFileName,
 
             // reference stuff
-            project.Exists == false ? "project-not-found" : NotApplicable,
+            referenceType,
             NotApplicable,
             NotApplicable,
             NotApplicable,

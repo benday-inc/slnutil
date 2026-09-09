@@ -27,6 +27,7 @@ public static class Constants
     public const string ArgumentNameKeepNodeModules = "keepnodemodules";
     public const string ArgumentNameBinariesDirectory = "binariesdir";
     public const string ArgumentNameCommaSeparatedValues = "csv";
+    public const string ArgumentNameJson = "json";
     public const string ArgumentNameSkipReferences = "skipreferences";
     public const string ArgumentNameListProjects = "listprojects";
     public const string ArgumentNameWriteToClipboard = "toclipboard";

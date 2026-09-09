@@ -188,6 +188,7 @@ build pipeline step.
 | rootdir | Optional | String | Path to start search from.  Defaults to current directory. |
 | listprojects | Optional | Boolean | List projects in solutions |
 | csv | Optional | Boolean | Output results as comma-separated values |
+| json | Optional | Boolean | Output results as JSON |
 | skipreferences | Optional | Boolean | Skip checking project references when listing projects in solutions |
 ## <a name="formatjson"></a> formatjson
 **Formats JSON files**
